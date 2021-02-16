@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 13/02/2021 12:00AM - Version 83
+//Last Update: 16/02/2021 02:30AM - Version 84
 //==================//
 
 using System;
@@ -61,7 +61,9 @@ public class DiscordScript: FaucetScript
 
 				new FaucetSetting(){Name="Discordtip_Zero_Airdrop_1_OnOff",Display="Zero - AirDrop 1 - 'zero-tip-💸' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
 
-                new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_OnOff",Display="FreeCryptoWorld - Faucet 1 - 'grid_grc' channel - OnOff",Type=EditorType.CheckBox,Default=false},		
+                new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_1_OnOff",Display="Discordtip_FreeCryptoWorld_1 - 'grc-giveaways' channel - OnOff",Type=EditorType.CheckBox,Default=false},		
+                //new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_2_OnOff",Display="Discordtip_FreeCryptoWorld_2 - 'random-giveaways' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
+                //new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_3_OnOff",Display="Discordtip_FreeCryptoWorld_3 - 'get-token' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
 
                 new FaucetSetting(){Name="Discordtip_GridCoin_OnOff",Display="GridCoin - Faucet - 'wallet-bot' channel - OnOff",Type=EditorType.CheckBox,Default=false},		
  
@@ -579,26 +581,24 @@ public class DiscordScript: FaucetScript
         //================//
         if (GetBoolSetting("Discordtip_Main_vote_OnOff"))
         {
+			
            DiscordTipCC_Vote_Check_Function(); //call
         
 		} //end Discordtip_Main_vote_OnOff
         //================//
+
 
         //================//
         //Discordtip_LaccsFaucet_vote_OnOff//
         //================//
         if (GetBoolSetting("Discordtip_LaccsFaucet_vote_OnOff"))
         {
-           Title = "Discordtip";
-           //ADFunction_String_URL_Discordtip_LaccsFaucet(); //call to Discordtip_LaccsFaucet 
-		   GoToUrl("https://discordbots.org/bot/719287586849423420/vote"); //LaccsFaucet           
-		   Wait();
-		
- 	       Log("Discordtip_LaccsFaucet - do vote first");			
-           Tasks_Function(); //call
-        
+			
+           LaccsFaucet_Vote_Check_Function(); //call
+		   
 		} //end Discordtip_LaccsFaucet_vote_OnOff
         //================//
+
 
         //================//
         //Discordtip_Tippi_vote_OnOff//
@@ -1059,16 +1059,16 @@ public class DiscordScript: FaucetScript
 
 
         //================//
-        //Discordtip_FreeCryptoWorld_OnOff//
+        //Discordtip_FreeCryptoWorld_1_OnOff//
         //================//
-        if (GetBoolSetting("Discordtip_FreeCryptoWorld_OnOff"))
+        if (GetBoolSetting("Discordtip_FreeCryptoWorld_1_OnOff"))
         {
 			
           //TopSite_Function(); //call
 		  
 		  Title = "Discord";		
           GoToUrl("https://discord.gg/v2dWa4E"); // my link never expire
-		  Log("Discordtip_FreeCryptoWorld");
+		  Log("Discordtip_FreeCryptoWorld_1");
           Wait(2);
           inviteServer_Elements_Function(); //call
           Wait(2);
@@ -1078,7 +1078,7 @@ public class DiscordScript: FaucetScript
 	      {
 			Title = "#unverified";		
             GoToUrl("https://discord.com/channels/503152242409340930/448301760730234880");
-			Log("Discordtip_FreeCryptoWorld - do verify in your account in 'unverified' channel ");
+			Log("Discordtip_FreeCryptoWorld_1 - do verify in your account in 'unverified' channel ");
 			Wait(6);
 			SetText_GridCoin_1_SendKeys_Way_Function();  //call to set text !agree
 			Wait(2);
@@ -1086,9 +1086,9 @@ public class DiscordScript: FaucetScript
 		    Wait(3);
           }
 		  
-		  Title = "#grid_grc";		
+		  Title = "#grc-giveaways";		
           GoToUrl("https://discord.com/channels/503152242409340930/584473130353950760");
-		  Log("Discordtip_FreeCryptoWorld - go to 'wallet-bot' channel ");	  
+		  Log("Discordtip_FreeCryptoWorld_1 - go to 'wallet-bot' channel ");	  
 		  Wait(6);
 		  SetText_GridCoin_3_SendKeys_Way_Function();  //call to set text %get
 		  Wait(2);
@@ -1098,7 +1098,7 @@ public class DiscordScript: FaucetScript
           var NeedToRegister = ElementByXPath("//div[contains(text(),'You do not have an account') and last() ]");
           if (IsVisible(NeedToRegister))
 	      {
-		    Log("Discordtip_FreeCryptoWorld - need to register ");	 
+		    Log("Discordtip_FreeCryptoWorld_1 - need to register ");	 
 		  	Wait(6);
 		    SetText_GridCoin_2_SendKeys_Way_Function();  //call to set text %new	  
 		    Wait(2);
@@ -1110,9 +1110,12 @@ public class DiscordScript: FaucetScript
 		    Wait(3);
           }
 		  
-        } //end Discordtip_FreeCryptoWorld_OnOff	
+        } //end Discordtip_FreeCryptoWorld_1_OnOff	
      //========================//
-	 
+	
+	
+
+
 
         //================//
         //Discordtip_GridCoin_OnOff//
@@ -1767,8 +1770,50 @@ public class DiscordScript: FaucetScript
       } //end NoThanks_Function
     //====================//
 	
+	
 
+  //=================//
+  //LaccsFaucet_Vote_Check_Function
+  //=================//
+  public int LaccsFaucet_Vote_Check_Function()
+  {
+		  Title = "#commands";	
+		  GoToUrl("https://discord.com/channels/749393412238868571/749397869202505858"); //channel
+		  Wait();	
+		  Wait(4);
+		  
+          Scroll_Function(); //call to scroll down
+		  
+		  Wait(3);	
+		  
+   		  var LaccsFaucet_Vote_Check_VAR = ElementByXPath(" //div[contains(@class, 'scrollerInner-') ]//div[contains(@class,'mentioned') and contains(., 'Today at') and contains(., 'vote') ] [last()] ");      
+	      if (LaccsFaucet_Vote_Check_VAR !=null) //Visible
+          {
+			  Log("LaccsFaucet - Vote - you Already Vote Today - try Tomorrow");	  
+		  }
+		  
+		  if (LaccsFaucet_Vote_Check_VAR ==null) //NOT Visible
+          {
+			  Log("LaccsFaucet - Vote - go to claim ");
+			  
+              Title = "Discordtip";
+              //ADFunction_String_URL_Discordtip_LaccsFaucet(); //call to Discordtip_LaccsFaucet 
+		      GoToUrl("https://discordbots.org/bot/719287586849423420/vote"); //LaccsFaucet           
+		      Wait();
+		      
+ 	          Log("Discordtip_LaccsFaucet - do vote first");			
+              Tasks_Function(); //call
+		  }	  
+		  
+		  
+        return 0;
+		
+  } //end LaccsFaucet_Vote_Check_Function
    //=================//
+
+
+
+  //=================//
   //Tippi_Vote_Check_Function
   //=================//
   public int Tippi_Vote_Check_Function()
@@ -1782,7 +1827,7 @@ public class DiscordScript: FaucetScript
 		  
 		  Wait(3);	
 		  
-   		  var Tippi_Vote_Check_VAR = ElementByXPath(" //div[contains(@class,'mentioned') and contains(., 'Today') ] [last()] ");      
+   		  var Tippi_Vote_Check_VAR = ElementByXPath(" //div[contains(@class, 'scrollerInner-') ]//div[contains(@class,'mentioned') and contains(., 'Today at') ] [last()] ");      
 	      if (Tippi_Vote_Check_VAR !=null) //Visible
           {
 			  Log("Tippi - Vote - you Already Vote Today - try Tomorrow");	  
@@ -1807,7 +1852,7 @@ public class DiscordScript: FaucetScript
   } //end Tippi_Vote_Check_Function
    //=================//
    
-   
+	
   //=================//
   //DiscordTipCC_Vote_Check_Function
   //=================//
@@ -1846,6 +1891,11 @@ public class DiscordScript: FaucetScript
 		
   } //end DiscordTipCC_Vote_Check_Function
    //=================//  
+
+
+
+   
+
 
 
 
