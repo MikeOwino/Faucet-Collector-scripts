@@ -121,6 +121,17 @@ public class LbtceScript : FaucetScript
         Click(modalButton);
         Wait(1);
 
+        if (!IsVisible(ElementByXPath("//div[@id='captchaModal']")) && IsVisible(modalButton))
+        {
+            ExecuteScript("arguments[0].click()", modalButton);
+            Wait(1);
+        }
+
+        if (!IsVisible(ElementByXPath("//div[@id='captchaModal']")))
+        {
+            return Fail("Captcha modal is not visible or not found");
+        }
+
         var result = DoSolveCaptcha();
         if (result > 0)
         {
