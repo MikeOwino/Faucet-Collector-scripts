@@ -213,9 +213,15 @@ public class CointiplyPtc : FaucetScript
                     }
                     CheckForPopupsEnabled=false;
                     Click(Ads[n] , false);
-                    Wait(2);
+                    Wait(3,4);
                     Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
                     Wait(1);
+                    DateTime timeout = DateTime.Now.AddSeconds(10);
+                    while(IsVisible(ElementByXPath("//span[contains(text(),'View the ad in the new window then come back here ')]")) && DateTime.Now<timeout)
+                    {
+                        Wait(1, 2);
+                    }
+
                     Driver.SwitchTo( ).Window(Driver.WindowHandles.Last( ));
                     Wait(2);
                     Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
