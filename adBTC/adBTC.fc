@@ -38,11 +38,11 @@ namespace Adbtc
         }
 
 
-        SymbolsCaptchaSolver SymbolsCaptchaSolver;
         public override void Start()
         {
-            SymbolsCaptchaSolver = new SymbolsCaptchaSolver(this);
+
             Title = "adbtc.top|DO|YOUH|You|Please solve the|satoshi|Сатоши|Bitcoin|Just a moment|adbtc|YES!|Active Window";
+
 
             SuccessXPath = "//p[@class='white-text flow-text']";
             FailXPath = "//a[@class='btn-large light-blue darken-4']";
@@ -55,6 +55,8 @@ namespace Adbtc
         {
             return base.DoInit();
         }
+
+      
         public override bool IsLoggedIn()
         {
 
@@ -135,11 +137,18 @@ namespace Adbtc
 
         private void CheckCloudFlare()
         {
+
             FaucetCollector.Utilities.CloudFlareUtilities cloudUtils = new FaucetCollector.Utilities.CloudFlareUtilities(this);
-            cloudUtils.DoSolve();
+
+            if (cloudUtils.IsVisibleCloudflare())
+            {
+                cloudUtils.TryGetCloudflareCookieUsingChrome(Driver.Url);
+
+            }
         }
         public override int DoLogin()
         {
+            CheckCloudFlare();
 
             var AddressBox = ElementsByXPath("//input[@type='text' and @required]|//label[contains(text(), 'Email')]//..//input").FirstOrDefault(X => IsVisible(X));
             if (AddressBox == null)
