@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
-//Last Update: 03/12/2020 20:15PM - Version 2
+//Last Update: 11/02/2021 05:00AM - Version 15
 //==================//
 
 using System;
@@ -11,12 +11,15 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 //css_ref FaucetCollector.Utilities
 //css_inc RecaptchaUtilities
 
 
-public class doge_4miner : FaucetScript
+
+
+public class Doge_4miner : FaucetScript
 {
     /// <summary>
     /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
@@ -27,14 +30,15 @@ public class doge_4miner : FaucetScript
     {
         get
         {
-            return new FaucetSettings("https://doge.4miner.me")
+            return new FaucetSettings("https://Doge.4miner.me/#faucet")
             {
                 //new FaucetSetting(){Name="Email",Display="UserName",Type=EditorType.TextBox,Required=true},
                 //new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
-                new FaucetSetting(){Name="DogeAddress",Display="DogeAddress",Type=EditorType.TextBox,Required=true},				
+                new FaucetSetting(){Name="DogeAddress",Display="DogeAddress - to any wallet address",Type=EditorType.TextBox,Required=true},				
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim",Type=EditorType.CheckBox,Default=true},		
                 new FaucetSetting(){Name="AutoWithdraw",Display="AutoWithdraw",Type=EditorType.CheckBox,Default=true},		
-        
+                new FaucetSetting(){Name="AffWithdraw",Display="AffWithdraw",Type=EditorType.CheckBox,Default=false},		
+       
 			
                 //insert user settings here
                 //new FaucetSetting { 
@@ -222,37 +226,61 @@ public class doge_4miner : FaucetScript
 //=============//
     public override int DoSolveFaucet()
     {
+		
 
+      SolveManualCaptcha(); //call to check
+
+
+      //=============//
+      //AffWithdraw
+      //=============//
+      if (GetBoolSetting("AffWithdraw"))
+      {
+        Log("AffWithdraw");			  
+		
+		Wait(2);
+		
+        Set_Function(); //call
+
+        var BalanceVAR = ElementByXPath("//span[@id='ref_balance']");
+        string BalanceSTRING = BalanceVAR.Text.Trim().Split('.')[0];
+        int BalanceINT = Convert.ToInt32(BalanceSTRING);
+
+        if (IsVisible(BalanceVAR) && BalanceINT == 0) // under 0
+        {
+           Log("AffWithdraw - the balance under = 0 - not good");
+           //do all stuff
+        }
+
+        if (IsVisible(BalanceVAR) && BalanceINT > 0) // above 0
+        {
+            Log("AffWithdraw - the balance above > 0 - good");
+            Wait(2);
+            var WithdrawStartVAR = ElementByXPath("//button[@onclick='show_withdraw_options_ref();']");  //("//button[contains(text(),'Unlock') or contains(text(),'unlock')]")
+			Click(WithdrawStartVAR);
+            Wait(5);
+            Alert_Function(); //call
+        }		  
+		  
+	  } //end AffWithdraw
+	  
+	  
+	  
       //=============//
       //AutoWithdraw
       //=============//
       if (GetBoolSetting("AutoWithdraw"))
       {
-        Log("AutoWithdraw");			  
-        GoToUrl("https://doge.4miner.me/freedogecoin/#ref");
-        Wait(2);
-
-        var Email_VAR = ElementByXPath("//input[contains(@id,'coin_address')]");  
-        if (IsVisible(Email_VAR))
-        {
-		 Log("FaucetClaim - set DogeAddress");  
-         SetText(Email_VAR, GetSetting("DogeAddress"));
-        }
+        Log("AutoWithdraw");
 		
 		Wait(2);
 		
-        var LoginVAR = ElementByXPath("//button[@type='submit']");  
-        if (IsVisible(LoginVAR))
-		{
-		 Log("FaucetClaim - LoginVAR");  
-         Click(LoginVAR);	
-		}	
+        Set_Function(); //call
 
-		Wait(8);
-		
         var BalanceVAR = ElementByXPath("//span[@id='normal_balance']");
         string BalanceSTRING = BalanceVAR.Text.Trim().Split('.')[0];
         int BalanceINT = Convert.ToInt32(BalanceSTRING);
+
 
         if (IsVisible(BalanceVAR) && BalanceINT == 0) // under 0
         {
@@ -264,18 +292,31 @@ public class doge_4miner : FaucetScript
         {
             Log("AutoWithdraw - the balance above > 0 - good");
             Wait(2);
-            var WithdrawStartVAR = ElementByXPath("//button[contains(text(),'Withdraw')]");
+            var WithdrawStartVAR = ElementByXPath("//button[contains(@onclick,'show_withdraw_options(')]");  //("//button[contains(text(),'Withdraw')]")
 			Click(WithdrawStartVAR);
             Wait(3);
+			
             var WalletVAR = ElementByXPath("//button[contains(text(),'Wallet') or contains(text(),'wallet')]");
-			Click(WalletVAR);
-            Wait(2);
-            Driver.SwitchTo().Alert().Accept(); // To click on the 'OK' button of the alert.	
-            Wait(2);
-            Driver.SwitchTo().Alert().Accept(); // To click on the 'OK' button of the alert.
+            if (IsVisible(WalletVAR) )
+            {
+               Log("AutoWithdraw - normal Wallet");
+		       Click(WalletVAR);
+			}
+            var MicroWalletVAR = ElementByXPath("//div[@class='modal-body']//img[contains(@src,'microwallet.co')]");				
+            if (IsVisible(MicroWalletVAR) )
+            {
+              Log("AutoWithdraw - MicroWallet");
+		      Click(MicroWalletVAR);
+			}
+			
+            Wait(5);
+			
+            Alert_Function(); //call
         }		  
 		  
 	  } //end AutoWithdraw
+
+
 
 	  
       //=============//
@@ -284,11 +325,32 @@ public class doge_4miner : FaucetScript
       if (GetBoolSetting("FaucetClaim"))
       {
 
-		GoToUrl("https://doge.4miner.me"); 
+		GoToUrl("https://Doge.4miner.me/#faucet"); 
 	    Wait();
-	    Wait(4);
+	    Wait(5);
+
+        var Maintenance_Message = ElementByXPath("//div[contains(@class,'alert-info') or contains(@class,'alert-warning') and contains(text(),'aintenance')]");  
+		if (IsVisible(Maintenance_Message))
+        {
+		  Log("FaucetClaim - Maintenance_Message"); 
+		  return Time_Function(); //call to function time
+		}	
 		
-        var Email_VAR = ElementByXPath("//input[contains(@id,'yourStatsInput')]");  
+        var TimerCounterInputAddress = ElementByXPath("//div[contains(@id,'countsec') and contains(@style,'display: block')]");  
+        
+		if (IsVisible(TimerCounterInputAddress))
+        {
+		 Log("FaucetClaim - TimerCounterInputAddress - visible - Waiting 17 sec to appear");  
+		 Wait(17);
+        }
+        if (!IsVisible(TimerCounterInputAddress))
+        {
+		 Log("FaucetClaim - TimerCounterInputAddress - NOT visible - all good");  
+        }
+
+	    Wait(2);
+		
+        var Email_VAR = ElementByXPath("//div[contains(@class,'input-group')]/input");  
         if (IsVisible(Email_VAR))
         {
 		 Log("FaucetClaim - set DogeAddress");  
@@ -297,7 +359,7 @@ public class doge_4miner : FaucetScript
 		
 		Wait(2);
 		
-        var GetVAR = ElementByXPath("//button[contains(@id,'lookUp')]");  
+        var GetVAR = ElementByXPath("//span[contains(@class,'input-group-btn')]/button");  
         if (IsVisible(GetVAR))
 		{
 		 Log("FaucetClaim - GetVAR");  
@@ -364,6 +426,70 @@ public class doge_4miner : FaucetScript
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.CheckFaucetResult();
     }
+
+
+        //=================//
+       //Alert_Function
+        //=================//
+        public int Alert_Function()
+        {			
+			try
+			{		
+			Log("Alert - Here");
+            Driver.SwitchTo().Alert().Accept();
+			}			
+			catch
+            {
+			Log("Alert - not Here");
+            }
+					
+			Wait(3);
+			Driver.SwitchTo().DefaultContent(); //go back to default content in <html>
+			Wait(3);
+			Driver.Navigate().Refresh(); //Refresh
+		   		   
+		return 0;
+        }//end Alert_Function
+        //=================//	
+		
+
+        //=================//
+       //Set_Function
+        //=================//
+        public int Set_Function()
+        {
+	
+           var RefTab = ElementByXPath("//li//a[@href='#ref']");  
+           if (IsVisible(RefTab))
+		   {
+		    Log("RefTab");  
+            Click(RefTab);	
+		   }
+		   
+           //GoToUrl("https://Doge.4miner.me/#ref");
+           Wait();		
+           Wait(6);
+		   
+           var Email_VAR = ElementByXPath("//div[contains(@class,'referral')]/input[contains(@placeholder,'address')]");  
+           if (IsVisible(Email_VAR))
+           {
+		    Log("set DogeAddress");  
+            SetText(Email_VAR, GetSetting("DogeAddress"));
+           }
+		   
+		   Wait(2);
+		   
+           var LoginVAR = ElementByXPath("//span[contains(text(),'Login')] | //button[contains(text(),'Login')] | //button[contains(@type,'submit')] ");  
+           if (IsVisible(LoginVAR))
+		   {
+		    Log("LoginVAR");  
+            Click(LoginVAR);	
+	        Wait(8);
+		   }	
+		   		   
+		return 0;
+        }//end Set_Function
+        //=================//	
 	
 	
         //=================//
@@ -486,6 +612,173 @@ public class doge_4miner : FaucetScript
 		return 0;
         }//end Recaptcha_Function
         //=================//	
+	
+
+	
+ public int SolveManualCaptcha()
+ {	
+
+		var GeetestVAR = ElementByXPath("//div[contains(@class,'geetest_btn')]");
+		if (IsVisible(GeetestVAR))
+        {	
+          Log("Geetest - here - we can't solve Geetest captcha for now - Sorry");
+		  Disable(); //Disable script
+          Log("Disable script");
+          return 1;
+		}
+
+		var ImgIconBalk = ElementByXPath("//img[contains(@src,'4miner.me')]"); //Balk image |+| between 2 + 2       
+		
+		if (!IsVisible(ImgIconBalk))
+        {
+			Log("Solve Aritmetic Captcha - Trying to see if available");
+			SolveAritmeticCaptcha(); //call
+		} //end ImgIconBalk - NOT visible
+
+		
+		if (IsVisible(ImgIconBalk))
+        {	
+           Log("Solve ImgIconBalk - manually - try");
+
+		   var AnswerButton = ElementByXPath("//button[starts-with(@onclick,'d') and last()-1 ]");
+		   if (IsVisible(AnswerButton))
+           {		
+           Log("Solve ImgIconBalk - Answer - success");
+		   Click(AnswerButton); 	
+		   }
+
+
+		   var AnswerReCp = ElementByXPath("//button[starts-with(@data-callback,'on')]");
+		   
+		   if (IsVisible(AnswerReCp))
+           {		
+             Log("Solve ImgIconBalk - try - ReCp");
+		     Click(AnswerReCp); 
+		     Wait(2);
+		     invisible_Recaptcha_Function(); //call to check
+		   }
+                         
+		   if (!IsVisible(AnswerReCp))
+           {			
+		     //Find Unique
+             var buttons = ElementsByXPath("//button[@onclick]");
+             IWebElement button = null;
+             foreach (var btn in buttons)
+             {
+                 Log("foreach");
+		     
+                 var onclick = btn.GetAttribute("onclick");
+                 if (string.IsNullOrEmpty(onclick))
+                 {
+                     continue;
+                 }
+		     
+                 if (buttons.Any(b => b != btn && string.Equals(onclick, b.GetAttribute("onclick"), StringComparison.OrdinalIgnoreCase)))
+                 {
+                     continue;
+                 }
+		     
+                 button = btn;
+                 Log("SolveManualCaptcha - success");
+                 break;
+             }
+		     
+             if (button == null)
+             {
+                 return Fail("not found");
+             }
+		     
+             Log("Click");		   
+             Click(button);
+			 
+		   } //AnswerReCp not visible
+		   
+		} //end ImgIconBalk visible 
+		
+  return 0;
+ }//end SolveManualCaptcha
+ //=================//	
+
+
+
+
+//==============//
+//AritmeticCaptcha
+//==============//
+ public bool SolveAritmeticCaptcha()
+ {
+
+          // we see if the captcha is visible
+          var captchaQuestion = ElementByXPath("//div[@class='col-md-12' and contains(text(),'How much is')]");
+          if (IsVisible(captchaQuestion))
+          {
+             Log("Solve Aritmetic Captcha");
+            // we get all posible visible solutions
+            var answersCollection = ElementsByXPath("//button[@onclick]").Where(
+            button => IsVisible(button)).ToList();
+            if (answersCollection.Count > 0)
+            {
+                // We define posible aritmetic operations
+                List<string> allowedSymbols =
+                new List<string>()
+                {
+                "+",
+                "-",
+                "*",
+                "/"
+                };
+                Log(captchaQuestion.Text);
+                //We filter the text of the answer and we only take the numbers and the allowed symbols operations
+                // EXAMPLE: How much is 2 + 2 will be converted in 2+2
+                var questionText = captchaQuestion.Text.Replace("?","").Split(' ')
+                    .Where(section =>
+                    section.All(cha => char.IsDigit(cha))
+                    || allowedSymbols.Contains(section))
+                    .ToList();
+
+                if (questionText.Count != 3)
+                {
+                    //if there is more or less than 3 answer meanns that the algoritm is broken
+                    Log("Error has been ocurred trying to get the captcha sections");
+                    return false;
+
+                }
+                // The number sections
+                int firstSection, secondSection;
+                if (int.TryParse(questionText[0], out firstSection) && int.TryParse(questionText[2], out secondSection))
+                {
+                    // If we can convert the first two secitons
+                    int answer = questionText[1] == allowedSymbols[0] ?
+                        //SUM +
+                        firstSection + secondSection : questionText[1] == allowedSymbols[1] ?
+                        //Rest -
+                        firstSection - secondSection : questionText[1] == allowedSymbols[3] ? 
+                        //*
+                        firstSection * secondSection : 
+                        // /
+                        firstSection / secondSection;
+
+                    Log("The result is " + answer.ToString());
+                    // WE filter form the available buttons if there is some that contains the answer text and click on it 
+                    var finalButton = answersCollection.FirstOrDefault(button => button.Text.Contains(answer.ToString()));
+                    if (finalButton != null)
+                    {
+                        Click(finalButton);
+                        return true;
+                    }
+                }
+            }
+          }
+
+		
+        Log("Aritmetic captcha not found or not visible");
+        // So aritmetic captcha is not found or not visible
+        return false;
+		
+	//return 0;	
+ }
+//==============//
+
 	
 	
 } //public class
