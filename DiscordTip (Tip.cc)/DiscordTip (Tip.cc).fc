@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 16/02/2021 02:30AM - Version 84
+//Last Update: 21/02/2021 15:40PM - Version 85
 //==================//
 
 using System;
@@ -31,52 +31,54 @@ public class DiscordScript: FaucetScript
 				new FaucetSetting(){Name="ALLIN_Success",Display="ALLIN_Success - if ON - it will Skip on all 'Discordtip Main Bot Vote' + 'AirDrops' Tasks & will check same as Success - If you've already done them + If you don't want to repeat the all your actions (under) ",Type=EditorType.CheckBox,Default=false},
 				new FaucetSetting(){Name="All_AirDrop_Success",Display="All_AirDrop_Success - if ON - it will Skip on all 'AirDrops' Tasks & check same as Success",Type=EditorType.CheckBox,Default=false},
                 new FaucetSetting(){Name="ProtectionSetEnglishLanguage",Display="ProtectionSetEnglishLanguage - On/off",Type=EditorType.CheckBox,Default=true},	
-
+                
+				new FaucetSetting(){Name="Discordtip_Main_Label",Display="Tip.cc - for balance message to tip.cc#7731 with !balances OR !help",Type=EditorType.Label},						
                 new FaucetSetting(){Name="Discordtip_Main_vote_OnOff",Display="Discordtip Bot (Tip.cc) | Main - Vote - On/off",Type=EditorType.CheckBox,Default=true},						
                 new FaucetSetting(){Name="Discordtip_Main_Airdrop_1_OnOff",Display="Discordtip Bot (Tip.cc) | Main - Airdrop 1 - 'giveaways' channel - On/off",Type=EditorType.CheckBox,Default=true},						
                 new FaucetSetting(){Name="Discordtip_Main_Airdrop_2_OnOff",Display="Discordtip Bot (Tip.cc) | Main - Airdrop 2 - 'drops-and-begging' channel - On/off",Type=EditorType.CheckBox,Default=true},						
                 new FaucetSetting(){Name="Discordtip_Main_Airdrop_3_OnOff",Display="Discordtip Bot (Tip.cc) | Main - Airdrop 3 - 'promos' channel - On/off",Type=EditorType.CheckBox,Default=true},						
-
+				
 				new FaucetSetting(){Name="Discordtip_Main_ID",Display="Discordtip Bot | Main - Vote and Claim between 100 to 500 satoshi - every 12 hours' ",Default="617037497574359050",Type=EditorType.TextBox,Required=true},
+				
 				new FaucetSetting(){Name="Menu_Bot_Currency",Display="Discordtip Bot | Main - Menu Bot Currency - Select Favorite Currency (correctly available only 'BTC')",Type=EditorType.ComboBox,Default="btc",Items=new System.Collections.Generic.List<string>{"btc","bch","btg","dash","dgb","doge","eos","eth","ethos","ltc","omg","wax","xzc","zec"}},
 
-                new FaucetSetting(){Name="Discordtip_FaucetCollector_OnOff",Display="FaucetCollector - AirDrop - 'giveaways' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
-                
+                new FaucetSetting(){Name="Discordtip_FaucetCollector_OnOff",Display="FaucetCollector - AirDrop - Tip.cc - 'giveaways' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
+
+  				new FaucetSetting(){Name="Discordtip_LaccsFaucet_Label",Display="LaccsFaucet - for balance in LaccsFaucet server, go to 'commands' channel and type - %bals @YourUserName OR %help",Type=EditorType.Label},						             
 				new FaucetSetting(){Name="Discordtip_LaccsFaucet_vote_OnOff",Display="Discordtip_LaccsFaucet_vote - On/off",Type=EditorType.CheckBox,Default=true},
 				new FaucetSetting(){Name="Discordtip_LaccsFaucet_Main_ID",Display="LaccsFaucet - Vote and Claim between 50 to 100 satoshi - every 12 hours' ",Default="719287586849423420",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Discordtip_LaccsFaucet_BTC_OnOff",Display="LaccsFaucet BTC - AirDrop - 'commands' channel - On/off",Type=EditorType.CheckBox,Default=true},	
 				new FaucetSetting(){Name="Command_1",Display="LaccsFaucet_BTC - Command_1 - every 12 hours",Default="%vote",Type=EditorType.TextBox,Required=true},
 				new FaucetSetting(){Name="Command_2",Display="LaccsFaucet_BTC - Command_2 - every 3 hours",Default="%claim",Type=EditorType.TextBox,Required=true},
 
+				new FaucetSetting(){Name="Discordtip_Tippi_Label",Display="Tippi - for balance message to Tippi#5835 with !bals OR !help",Type=EditorType.Label},						
 				new FaucetSetting(){Name="Discordtip_Tippi_vote_OnOff",Display="Discordtip_Tippi_vote - On/off",Type=EditorType.CheckBox,Default=true},
 				new FaucetSetting(){Name="Discordtip_Tippi_Main_ID",Display="Tippi - Vote and Claim between 50 to 100 satoshi - every 12 hours' ",Default="569955063519510549",Type=EditorType.TextBox,Required=true},
-               
-				new FaucetSetting(){Name="Discordtip_CryptoMoon_Airdrop_1_OnOff",Display="CryptoMoon - AirDrop 1 - '💲-raining-🏙' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
-				new FaucetSetting(){Name="Discordtip_CryptoMoon_Airdrop_2_OnOff",Display="CryptoMoon - AirDrop 2 - '💲-airdrops-🎉' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
-				new FaucetSetting(){Name="Discordtip_CryptoMoon_Airdrop_3_OnOff",Display="CryptoMoon - AirDrop 3 - 'tip-cc' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
-				new FaucetSetting(){Name="Discordtip_CryptoMoon_Airdrop_4_OnOff",Display="CryptoMoon - AirDrop 4 - '🌚🌂black-rain-event☂' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
-				new FaucetSetting(){Name="Discordtip_CryptoMoon_Faucet_1_OnOff",Display="CryptoMoon - Faucet 1 - 'tipbot-faucet' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
 				
-				new FaucetSetting(){Name="Discordtip_DreamTeam_Airdrop_1_OnOff",Display="DreamTeam - AirDrop 1 - 'give-aways' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
+				new FaucetSetting(){Name="Discordtip_CryptoMoon_Airdrop_1_OnOff",Display="CryptoMoon - AirDrop 1 - Tip.cc - '💲-airdrops-🎉' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
+				new FaucetSetting(){Name="Discordtip_CryptoMoon_Airdrop_2_OnOff",Display="CryptoMoon - AirDrop 2 - Tip.cc - 'tip-cc' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
+				new FaucetSetting(){Name="Discordtip_CryptoMoon_Airdrop_3_OnOff",Display="CryptoMoon - AirDrop 3 - Tip.cc - '🌚🌂black-rain-event☂' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
+				
+				new FaucetSetting(){Name="Discordtip_DreamTeam_Airdrop_1_OnOff",Display="DreamTeam - AirDrop 1 - Tip.cc - 'give-aways' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
+				new FaucetSetting(){Name="Discordtip_DreamTeam_Airdrop_2_OnOff",Display="DreamTeam - AirDrop 2 - Tip.cc - 'airdrops' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
 
-				new FaucetSetting(){Name="Discordtip_Zero_Airdrop_1_OnOff",Display="Zero - AirDrop 1 - 'zero-tip-💸' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
+				new FaucetSetting(){Name="Discordtip_Zero_Airdrop_1_OnOff",Display="Zero - AirDrop 1 - Tip.cc - 'zero-tip-💸' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
 
-                new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_1_OnOff",Display="Discordtip_FreeCryptoWorld_1 - 'grc-giveaways' channel - OnOff",Type=EditorType.CheckBox,Default=false},		
-                //new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_2_OnOff",Display="Discordtip_FreeCryptoWorld_2 - 'random-giveaways' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
-                //new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_3_OnOff",Display="Discordtip_FreeCryptoWorld_3 - 'get-token' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
-
-                new FaucetSetting(){Name="Discordtip_GridCoin_OnOff",Display="GridCoin - Faucet - 'wallet-bot' channel - OnOff",Type=EditorType.CheckBox,Default=false},		
+				new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_1_Label",Display="TIPBOT - for balance message to TIPBOT#9374 with !balance OR !help",Type=EditorType.Label},						
+                new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_1_OnOff",Display="Discordtip_FreeCryptoWorld_1 - Faucet - 'random-giveaways' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
+				new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_2_Label",Display="CCTip - for balance message to CCTip Bot#0897 with !balance OR !help",Type=EditorType.Label},						
+                new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_2_OnOff",Display="Discordtip_FreeCryptoWorld_2 - CCTip BOT - '✈airdrops' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
+				new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_3_OnOff",Display="Discordtip_FreeCryptoWorld_3 - AirDrop 1 - Tip.cc - 'zero' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
+                new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_4_OnOff",Display="Discordtip_FreeCryptoWorld_4 - AirDrop 2 - Tip.cc - 'vip-airdrops✈' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
+                new FaucetSetting(){Name="Discordtip_FreeCryptoWorld_5_OnOff",Display="Discordtip_FreeCryptoWorld_5 - AirDrop 3 - Tip.cc - 'behind-the-scene' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
  
 				new FaucetSetting(){Name="AutoWithdraw_BTC",Display="AutoWithdraw BTC - On/off",Type=EditorType.CheckBox,Default=false},		
 				new FaucetSetting(){Name="AutoWithdraw_DOGE",Display="AutoWithdraw DOGE - On/off",Type=EditorType.CheckBox,Default=false},	
-				//new FaucetSetting(){Name="AutoWithdraw_GridCoin",Display="AutoWithdraw GridCoin - On/off",Type=EditorType.CheckBox,Default=false},	
 				
 				new FaucetSetting(){Name="WalletAddress_BTC",Display="WalletAddress BTC",Type=EditorType.TextBox,Required=false},
 				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_BTC",Display="AutoDisableWithdrawAfterSuccessful_BTC",Type=EditorType.CheckBox,Required=false},
 				new FaucetSetting(){Name="WalletAddress_DOGE",Display="WalletAddress DOGE",Type=EditorType.TextBox,Required=false},			
-				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_DOGE",Display="AutoDisableWithdrawAfterSuccessful_DOGE",Type=EditorType.CheckBox,Required=false},
-					
-				//new FaucetSetting(){Name="WalletAddress_GridCoin",Display="WalletAddress GridCoin",Type=EditorType.TextBox,Required=false},
+				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_DOGE",Display="AutoDisableWithdrawAfterSuccessful_DOGE",Type=EditorType.CheckBox,Required=false},				
 
 				//new FaucetSetting(){Name="Input_Custom_Bot_ID_Setting",Display="Enter Custom bot ID (option)",Default="Enter Custom Bot ID",Type=EditorType.TextBox,Required=false},
                 //new FaucetSetting(){Name="Custom_Bot_ID_OnOff",Display="Custom bot ID - On/off (in default is off)",Type=EditorType.CheckBox,Default=false},
@@ -821,22 +823,22 @@ public class DiscordScript: FaucetScript
 	 
 
       //=========================//
-      //Discordtip_CryptoMoon_Airdrop_2_OnOff//
+      //Discordtip_CryptoMoon_Airdrop_1_OnOff//
       //=========================//
-      if (GetBoolSetting("Discordtip_CryptoMoon_Airdrop_2_OnOff"))
+      if (GetBoolSetting("Discordtip_CryptoMoon_Airdrop_1_OnOff"))
       {		
   
         //TopSite_Function(); //call
 
 	    Title = "Discord";	
-/*
+
 		GoToUrl("https://discord.gg/k6K347V"); //Tip.cc server
 		Wait();	
 		Wait(5);		
 
         Driver.Navigate().Refresh();
 		Wait();	
-*/		
+	
         Discord_PopUp_General_Function(); //call
 		
 		Wait(2);	
@@ -846,7 +848,7 @@ public class DiscordScript: FaucetScript
         Wait(3);
         Title = "#💲-airdrops-🎉";		
         GoToUrl("https://discord.com/channels/596834389778759690/683726957019791419");
-		Log("Discordtip_CryptoMoon_Airdrop_2_OnOff: go to to claim in '💲-airdrops-🎉' channel | Discordtip ");
+		Log("Discordtip_CryptoMoon_Airdrop_1_OnOff: go to to claim in '💲-airdrops-🎉' channel | Discordtip ");
 		Wait();
 		Wait(8);
 
@@ -854,14 +856,14 @@ public class DiscordScript: FaucetScript
 		
         Wait(3);
 
-     } //end Discordtip_CryptoMoon_Airdrop_2_OnOff
+     } //end Discordtip_CryptoMoon_Airdrop_1_OnOff
      //========================//
 	 
 	 
       //=========================//
-      //Discordtip_CryptoMoon_Airdrop_3_OnOff//
+      //Discordtip_CryptoMoon_Airdrop_2_OnOff//
       //=========================//
-      if (GetBoolSetting("Discordtip_CryptoMoon_Airdrop_3_OnOff"))
+      if (GetBoolSetting("Discordtip_CryptoMoon_Airdrop_2_OnOff"))
       {		
   
         //TopSite_Function(); //call
@@ -886,7 +888,7 @@ public class DiscordScript: FaucetScript
         Wait(3);
         Title = "#tip-cc";		
         GoToUrl("https://discord.com/channels/596834389778759690/683731676995649700");
-		Log("Discordtip_CryptoMoon_Airdrop_3_OnOff: go to to claim in 'tip-cc' channel | Discordtip ");
+		Log("Discordtip_CryptoMoon_Airdrop_2_OnOff: go to to claim in 'tip-cc' channel | Discordtip ");
 		Wait();
 		Wait(8);
 
@@ -894,14 +896,14 @@ public class DiscordScript: FaucetScript
 		
         Wait(3);
 
-     } //end Discordtip_CryptoMoon_Airdrop_3_OnOff
+     } //end Discordtip_CryptoMoon_Airdrop_2_OnOff
      //========================//
 
 
       //=========================//
-      //Discordtip_CryptoMoon_Airdrop_4_OnOff//
+      //Discordtip_CryptoMoon_Airdrop_3_OnOff//
       //=========================//
-      if (GetBoolSetting("Discordtip_CryptoMoon_Airdrop_4_OnOff"))
+      if (GetBoolSetting("Discordtip_CryptoMoon_Airdrop_3_OnOff"))
       {		
   
         //TopSite_Function(); //call
@@ -926,7 +928,7 @@ public class DiscordScript: FaucetScript
         Wait(3);
         Title = "#🌚🌂black-rain-event☂";		
         GoToUrl("https://discord.com/channels/596834389778759690/683726909648928806");
-		Log("Discordtip_CryptoMoon_Airdrop_4_OnOff: go to to claim in '#🌚🌂black-rain-event☂' channel | Discordtip ");
+		Log("Discordtip_CryptoMoon_Airdrop_3_OnOff: go to to claim in '#🌚🌂black-rain-event☂' channel | Discordtip ");
 		Wait();
 		Wait(8);
 
@@ -934,41 +936,10 @@ public class DiscordScript: FaucetScript
 		
         Wait(3);
 
-     } //end Discordtip_CryptoMoon_Airdrop_4_OnOff
+     } //end Discordtip_CryptoMoon_Airdrop_3_OnOff
      //========================//
 
-
-        //================//
-        //Discordtip_CryptoMoon_Faucet_1_OnOff//
-        //================//
-        if (GetBoolSetting("Discordtip_CryptoMoon_Faucet_1_OnOff"))
-        {
-			
-          //TopSite_Function(); //call
-			
-		  Title = "Discord";
-		  
-		  /*
-          GoToUrl("https://discord.gg/k6K347V"); // my link never expire
-		  Log("Discordtip_CryptoMoon_Faucet_1");
-          Wait();
-          Wait(2);
-          inviteServer_Elements_Function(); //call
-          Wait(2);
-          */	
-		  
-		  Title = "#tipbot-faucet";		  
-          GoToUrl("https://discord.com/channels/596834389778759690/691496374658662470");
-		  Log("Discordtip_GridCoin - go to 'tipbot-faucet' channel ");	  
-		  Wait(6);
-		  SetText_CryptoMoon_Faucet_1_SendKeys_Way_Function();  //call to set text %get
-		  Wait(2);
-		  Enter_SendKeys_General_Discord_Input_Function(); //call to do enter	
-		  Wait(3);
-		  
-        } //end Discordtip_CryptoMoon_Faucet_1_OnOff	
-     //========================//
-	 
+ 
 
         //================//
         //Discordtip_DreamTeam_Airdrop_1_OnOff//
@@ -1019,7 +990,49 @@ public class DiscordScript: FaucetScript
 		  
         } //end Discordtip_DreamTeam_Airdrop_1_OnOff	
      //========================//
+	
+
+
+     //================//
+     //Discordtip_DreamTeam_Airdrop_2_OnOff//
+     //================//
+     if (GetBoolSetting("Discordtip_DreamTeam_Airdrop_2_OnOff"))
+     {
+
+        TopSite_Function(); //call
+
+	    Title = "Discord";	
 		
+        /*		
+		GoToUrl("https://discord.gg/TVyN4xF"); //Tip.cc server
+		Wait();	
+		Wait(5);		
+
+        Driver.Navigate().Refresh();
+		Wait();	
+        */		
+		
+        Discord_PopUp_General_Function(); //call
+		
+		Wait(2);	
+		
+        inviteServer_Elements_Function(); //call
+
+        Wait(3);
+        Title = "#airdrops";		
+        GoToUrl("https://discord.com/channels/458955603650281484/480446343962427410");
+		Log("Discordtip_DreamTeam_Airdrop_2_OnOff: go to to claim in '#airdrops' channel | Discordtip ");
+		Wait();
+		Wait(8);
+
+        Reaction_while_Function(); //call	  
+		
+        Wait(3);
+
+     } //end Discordtip_DreamTeam_Airdrop_2_OnOff	
+     //========================//
+
+	 
 
       //=========================//
       //Discordtip_Zero_Airdrop_1_OnOff//
@@ -1058,121 +1071,211 @@ public class DiscordScript: FaucetScript
      //========================//
 
 
-        //================//
-        //Discordtip_FreeCryptoWorld_1_OnOff//
-        //================//
-        if (GetBoolSetting("Discordtip_FreeCryptoWorld_1_OnOff"))
-        {
-			
-          //TopSite_Function(); //call
-		  
-		  Title = "Discord";		
-          GoToUrl("https://discord.gg/v2dWa4E"); // my link never expire
-		  Log("Discordtip_FreeCryptoWorld_1");
-          Wait(2);
-          inviteServer_Elements_Function(); //call
-          Wait(2);
-		  
-          var UnVerifiedStart = ElementByXPath("//div[contains(text(),'unverified')]");
-          if (IsVisible(UnVerifiedStart))
-	      {
-			Title = "#unverified";		
-            GoToUrl("https://discord.com/channels/503152242409340930/448301760730234880");
-			Log("Discordtip_FreeCryptoWorld_1 - do verify in your account in 'unverified' channel ");
-			Wait(6);
-			SetText_GridCoin_1_SendKeys_Way_Function();  //call to set text !agree
-			Wait(2);
-			Enter_SendKeys_General_Discord_Input_Function(); //call to do enter	
-		    Wait(3);
-          }
-		  
-		  Title = "#grc-giveaways";		
-          GoToUrl("https://discord.com/channels/503152242409340930/584473130353950760");
-		  Log("Discordtip_FreeCryptoWorld_1 - go to 'wallet-bot' channel ");	  
-		  Wait(6);
-		  SetText_GridCoin_3_SendKeys_Way_Function();  //call to set text %get
-		  Wait(2);
-		  Enter_SendKeys_General_Discord_Input_Function(); //call to do enter	
-		  Wait(3);
 
-          var NeedToRegister = ElementByXPath("//div[contains(text(),'You do not have an account') and last() ]");
-          if (IsVisible(NeedToRegister))
-	      {
-		    Log("Discordtip_FreeCryptoWorld_1 - need to register ");	 
-		  	Wait(6);
-		    SetText_GridCoin_2_SendKeys_Way_Function();  //call to set text %new	  
-		    Wait(2);
-		    Enter_SendKeys_General_Discord_Input_Function(); //call to do enter	
-		    Wait(6);
-		    SetText_GridCoin_3_SendKeys_Way_Function();  //call to set text %get
-		    Wait(2);
-		    Enter_SendKeys_General_Discord_Input_Function(); //call to do enter	
-		    Wait(3);
-          }
-		  
-        } //end Discordtip_FreeCryptoWorld_1_OnOff	
+      //=========================//
+      //Discordtip_FreeCryptoWorld_1_OnOff//
+      //=========================//
+      if (GetBoolSetting("Discordtip_FreeCryptoWorld_1_OnOff"))
+      {		
+  
+        TopSite_Function(); //call
+
+	    Title = "Discord";	
+		GoToUrl("https://discord.gg/fg6WDWeqc9"); //Tip.cc server
+		Wait();	
+		Wait(5);		
+
+        Driver.Navigate().Refresh();
+		Wait();	
+		
+        Discord_PopUp_General_Function(); //call
+		
+		Wait(2);	
+		
+        inviteServer_Elements_Function(); //call
+
+        Wait(3);
+        Title = "#random-giveaways";		
+        GoToUrl("https://discord.com/channels/503152242409340930/662720118077390867");
+		Log("Discordtip_FreeCryptoWorld_1_OnOff: go to to claim in 'random-giveaways' channel | Faucet ");
+		Wait();
+		Wait(8);
+
+        //Reaction_while_Function(); //call	  
+
+        //TextCommand            
+        var TextCommand = ElementByXPath("//div[contains(@class,'inner')]/div[contains(@class,'textArea')]");
+	        
+        if (IsVisible(TextCommand))
+        {
+			Wait(2);
+			SetText_1_FreeCryptoWorld_SendKeys_Way_Function(); //call to SetText SendKeys Way
+			Wait(2);
+            Enter_SendKeys_General_Discord_Input_Function(); //call to Enter_SendKeys_General_Discord_Input_Function
+			
+            ClaimSuccess(); //Marks the claim as a success
+			
+        } //end TextCommand visible
+		
+	    if (!IsVisible(TextCommand)) 
+        {
+		 Log("Error - TextCommand input not apper - we return after FC time"); 	
+        } //end TextCommand NOT visible
+
+        Wait(3);
+
+     } //end Discordtip_FreeCryptoWorld_1_OnOff
+     //========================//
+
+
+      //=========================//
+      //Discordtip_FreeCryptoWorld_2_OnOff//
+      //=========================//
+      if (GetBoolSetting("Discordtip_FreeCryptoWorld_2_OnOff"))
+      {		
+  
+        TopSite_Function(); //call
+/*
+	    Title = "Discord";	
+		GoToUrl("https://discord.gg/fg6WDWeqc9"); //Tip.cc server
+		Wait();	
+		Wait(5);		
+
+        Driver.Navigate().Refresh();
+		Wait();	
+		
+        Discord_PopUp_General_Function(); //call
+		
+		Wait(2);	
+		
+        inviteServer_Elements_Function(); //call
+*/
+        Wait(3);
+        Title = "#✈airdrops";		
+        GoToUrl("https://discord.com/channels/503152242409340930/798827071337660434");
+		Log("Discordtip_FreeCryptoWorld_2_OnOff: go to to claim in '✈airdrops' channel | CCTip ");
+		Wait();
+		Wait(8);
+
+        Reaction_CCTip_BOT_Function(); //call	  
+
+        Wait(3);
+
+     } //end Discordtip_FreeCryptoWorld_2_OnOff
      //========================//
 	
 	
+	
+      //=========================//
+      //Discordtip_FreeCryptoWorld_3_OnOff//
+      //=========================//
+      if (GetBoolSetting("Discordtip_FreeCryptoWorld_3_OnOff"))
+      {		
+  
+        TopSite_Function(); //call
+/*
+	    Title = "Discord";	
+		GoToUrl("https://discord.gg/fg6WDWeqc9"); //Tip.cc server
+		Wait();	
+		Wait(5);		
 
+        Driver.Navigate().Refresh();
+		Wait();	
+		
+        Discord_PopUp_General_Function(); //call
+		
+		Wait(2);	
+		
+        inviteServer_Elements_Function(); //call
+*/
+        Wait(3);
+        Title = "#zero";		
+        GoToUrl("https://discord.com/channels/503152242409340930/792142086614810644");
+		Log("Discordtip_FreeCryptoWorld_3_OnOff: go to to claim in 'zero' channel | DiscordTip ");
+		Wait();
+		Wait(8);
 
+        Reaction_while_Function(); //call	  
 
-        //================//
-        //Discordtip_GridCoin_OnOff//
-        //================//
-        if (GetBoolSetting("Discordtip_GridCoin_OnOff"))
-        {
-			
-          //TopSite_Function(); //call
-		  
-		  Title = "Discord";		
-          GoToUrl("https://discord.gg/QMJZnEx"); // my link never expire
-		  Log("Discordtip_GridCoin");
-          Wait(2);
-          inviteServer_Elements_Function(); //call
-          Wait(2);
-		  
-          var UnVerifiedStart = ElementByXPath("//div[contains(text(),'unverified')]");
-          if (IsVisible(UnVerifiedStart))
-	      {
-			Title = "#unverified";		
-            GoToUrl("https://discord.com/channels/211637812968161280/448301760730234880");
-			Log("Discordtip_GridCoin - do verify in your account in 'unverified' channel ");
-			Wait(6);
-			SetText_GridCoin_1_SendKeys_Way_Function();  //call to set text !agree
-			Wait(2);
-			Enter_SendKeys_General_Discord_Input_Function(); //call to do enter	
-		    Wait(3);
-          }
-		  
-		  Title = "#wallet-bot";		
-          GoToUrl("https://discord.com/channels/211637812968161280/424786671360409611");
-		  Log("Discordtip_GridCoin - go to 'wallet-bot' channel ");	  
-		  Wait(6);
-		  SetText_GridCoin_3_SendKeys_Way_Function();  //call to set text %get
-		  Wait(2);
-		  Enter_SendKeys_General_Discord_Input_Function(); //call to do enter	
-		  Wait(3);
+        Wait(3);
 
-          var NeedToRegister = ElementByXPath("//div[contains(text(),'You do not have an account') and last() ]");
-          if (IsVisible(NeedToRegister))
-	      {
-		    Log("Discordtip_GridCoin - need to register ");	 
-		  	Wait(6);
-		    SetText_GridCoin_2_SendKeys_Way_Function();  //call to set text %new	  
-		    Wait(2);
-		    Enter_SendKeys_General_Discord_Input_Function(); //call to do enter	
-		    Wait(6);
-		    SetText_GridCoin_3_SendKeys_Way_Function();  //call to set text %get
-		    Wait(2);
-		    Enter_SendKeys_General_Discord_Input_Function(); //call to do enter	
-		    Wait(3);
-          }
-		  
-        } //end Discordtip_GridCoin_OnOff	
+     } //end Discordtip_FreeCryptoWorld_3_OnOff
      //========================//
+
+
+      //=========================//
+      //Discordtip_FreeCryptoWorld_4_OnOff//
+      //=========================//
+      if (GetBoolSetting("Discordtip_FreeCryptoWorld_4_OnOff"))
+      {		
+  
+        TopSite_Function(); //call
+/*
+	    Title = "Discord";	
+		GoToUrl("https://discord.gg/fg6WDWeqc9"); //Tip.cc server
+		Wait();	
+		Wait(5);		
+
+        Driver.Navigate().Refresh();
+		Wait();	
 		
+        Discord_PopUp_General_Function(); //call
 		
+		Wait(2);	
+		
+        inviteServer_Elements_Function(); //call
+*/
+        Wait(3);
+        Title = "#vip-airdrops✈";		
+        GoToUrl("https://discord.com/channels/503152242409340930/768835326687838258");
+		Log("Discordtip_FreeCryptoWorld_4_OnOff: go to to claim in 'vip-airdrops✈' channel | DiscordTip ");
+		Wait();
+		Wait(8);
+
+        Reaction_while_Function(); //call	  
+
+        Wait(3);
+
+     } //end Discordtip_FreeCryptoWorld_4_OnOff
+     //========================//
+
+
+      //=========================//
+      //Discordtip_FreeCryptoWorld_5_OnOff//
+      //=========================//
+      if (GetBoolSetting("Discordtip_FreeCryptoWorld_5_OnOff"))
+      {		
+  
+        TopSite_Function(); //call
+/*
+	    Title = "Discord";	
+		GoToUrl("https://discord.gg/fg6WDWeqc9"); //Tip.cc server
+		Wait();	
+		Wait(5);		
+
+        Driver.Navigate().Refresh();
+		Wait();	
+		
+        Discord_PopUp_General_Function(); //call
+		
+		Wait(2);	
+		
+        inviteServer_Elements_Function(); //call
+*/
+        Wait(3);
+        Title = "#behind-the-scene";		
+        GoToUrl("https://discord.com/channels/503152242409340930/768489728009437207");
+		Log("Discordtip_FreeCryptoWorld_5_OnOff: go to to claim in 'behind-the-scene' channel | DiscordTip ");
+		Wait();
+		Wait(8);
+
+        Reaction_while_Function(); //call	  
+
+        Wait(3);
+
+     } //end Discordtip_FreeCryptoWorld_5_OnOff
+     //========================//
+	
 
      //=========================//
      //Discordtip_LaccsFaucet_BTC//
@@ -1400,7 +1503,6 @@ public class DiscordScript: FaucetScript
 	    if (!IsVisible(TextCommand)) 
         {
 		 Log("Error - TextCommand input not apper - we return after FC time"); 	
-         return GetWaitSetting();	
         } //end TextCommand NOT visible
 	
 		/*
@@ -1409,7 +1511,7 @@ public class DiscordScript: FaucetScript
 		
 		Wait(3);
 		
-		var ReactionButton_Clean = ElementByXPath("//div[contains(@class,'reactionInner') and @aria-pressed='false' ]//img[contains(@src,'assets/b052a4bef57')]");
+		var ReactionButton_Clean = ElementByXPath("//div[contains(@class,'reactionInner') and @aria-pressed='false' ]//img[contains(@src,'assets/f36b66e2f802dc9')]");
         
 		if (!IsVisible(ReactionButton_Clean)) 
         {
@@ -1583,85 +1685,6 @@ public class DiscordScript: FaucetScript
       }
       //=================//	
 
-
-      //=================//
-      //SetText_GridCoin_1_SendKeys_Way_Function
-      //=================//	
-      public int SetText_GridCoin_1_SendKeys_Way_Function()
-      {
-         var TextCommand = ElementByXPath("//div[contains(@class,'inner')]/div[contains(@class,'textArea')]");
-	     if (IsVisible(TextCommand))
-         {
-		   //SetText Keyboard
-           Log("TextCommand - SetText_GridCoin_1");
-           Actions Builder_10_Act = new Actions(Driver);
-           Builder_10_Act.MoveToElement(TextCommand).Build().Perform(); 
-           Wait(3);
-           Builder_10_Act.SendKeys(TextCommand, "!agree").Build().Perform();
-		 }
-		 return 0;
-      }
-      //=================//		  
-
-      //=================//
-      //SetText_GridCoin_2_SendKeys_Way_Function
-      //=================//	
-      public int SetText_GridCoin_2_SendKeys_Way_Function()
-      {
-         var TextCommand = ElementByXPath("//div[contains(@class,'inner')]/div[contains(@class,'textArea')]");
-	     if (IsVisible(TextCommand))
-         {
-		  //SetText Keyboard
-          Log("TextCommand - SetText_GridCoin_2");
-          Actions Builder_11_Act = new Actions(Driver);
-          Builder_11_Act.MoveToElement(TextCommand).Build().Perform(); 
-          Wait(3);
-          Builder_11_Act.SendKeys(TextCommand, "%new").Build().Perform();	
-		 }
-		 return 0;
-      }
-      //=================//	
-
-      //=================//
-      //SetText_GridCoin_3_SendKeys_Way_Function
-      //=================//	
-      public int SetText_GridCoin_3_SendKeys_Way_Function()
-      {
-         var TextCommand = ElementByXPath("//div[contains(@class,'inner')]/div[contains(@class,'textArea')]");
-	     if (IsVisible(TextCommand))
-         {
-	       //SetText Keyboard
-           Log("TextCommand - SetText_GridCoin_3");
-           Actions Builder_12_Act = new Actions(Driver);
-           Builder_12_Act.MoveToElement(TextCommand).Build().Perform(); 
-           Wait(3);
-           Builder_12_Act.SendKeys(TextCommand, "%get").Build().Perform();
-		 }
-		 
-		 return 0;
-      }
-      //=================//	
-	
-
-      //=================//
-      //SetText_CryptoMoon_Faucet_1_SendKeys_Way_Function
-      //=================//	
-      public int SetText_CryptoMoon_Faucet_1_SendKeys_Way_Function()
-      {
-         var TextCommand = ElementByXPath("//div[contains(@class,'inner')]/div[contains(@class,'textArea')]");
-	     if (IsVisible(TextCommand))
-         {
-	       //SetText Keyboard
-           Log("TextCommand - SetText_CryptoMoon_Faucet_1");
-           Actions Builder_13_Act = new Actions(Driver);
-           Builder_13_Act.MoveToElement(TextCommand).Build().Perform(); 
-           Wait(3);
-           Builder_13_Act.SendKeys(TextCommand, ".take").Build().Perform();
-		 }
-		 
-		 return 0;
-      }
-      //=================//	
 	
       //=================//
       //SetText_1_Laccs_SendKeys_Way_Function
@@ -1703,6 +1726,26 @@ public class DiscordScript: FaucetScript
       }
       //=================//	
 	
+
+
+      //=================//
+      //SetText_1_FreeCryptoWorld_SendKeys_Way_Function
+      //=================//	
+      public int SetText_1_FreeCryptoWorld_SendKeys_Way_Function()
+      {
+         var TextCommand = ElementByXPath("//div[contains(@class,'inner')]/div[contains(@class,'textArea')]");
+	     if (IsVisible(TextCommand))
+         {
+		   //SetText Keyboard
+           Log("TextCommand - SetText_1_FreeCryptoWorld");
+           Actions Builder_16_Act = new Actions(Driver);
+           Builder_16_Act.MoveToElement(TextCommand).Build().Perform(); 
+           Wait(3);
+           Builder_16_Act.SendKeys(TextCommand, GetSetting(".take") ).Build().Perform(); 
+		 }
+		 return 0;
+      }
+      //=================//	
 	
 	
       //=================//
@@ -2012,7 +2055,7 @@ public class DiscordScript: FaucetScript
                  return GetWaitSetting();		 
 				}
 				  
-                if (!GetBoolSetting("Discordtip_FaucetCollector_OnOff") && !GetBoolSetting("Discordtip_Main_Airdrop_1_OnOff")  && !GetBoolSetting("Discordtip_Main_Airdrop_2_OnOff") && !GetBoolSetting("Discordtip_Main_Airdrop_3_OnOff") && !GetBoolSetting("Discordtip_LaccsFaucet_BTC_OnOff") && !GetBoolSetting("Discordtip_GridCoin_OnOff") )
+                if (!GetBoolSetting("Discordtip_FaucetCollector_OnOff") && !GetBoolSetting("Discordtip_Main_Airdrop_1_OnOff")  && !GetBoolSetting("Discordtip_Main_Airdrop_2_OnOff") && !GetBoolSetting("Discordtip_Main_Airdrop_3_OnOff") && !GetBoolSetting("Discordtip_LaccsFaucet_BTC_OnOff")  )
                 {
 	             Notification("ThanksMessage' - appear && the all AirDrop from Discordtip are disabled");	
 		         Log(" 'ThanksMessage' - appear && the all AirDrop from Discordtip are disabled ");  
@@ -2033,7 +2076,7 @@ public class DiscordScript: FaucetScript
                  return GetWaitSetting();	
 				}
 				
-                if (!GetBoolSetting("Discordtip_FaucetCollector_OnOff") && !GetBoolSetting("Discordtip_Main_Airdrop_1_OnOff")  && !GetBoolSetting("Discordtip_Main_Airdrop_2_OnOff") && !GetBoolSetting("Discordtip_Main_Airdrop_3_OnOff") && !GetBoolSetting("Discordtip_LaccsFaucet_BTC_OnOff") && !GetBoolSetting("Discordtip_GridCoin_OnOff") )
+                if (!GetBoolSetting("Discordtip_FaucetCollector_OnOff") && !GetBoolSetting("Discordtip_Main_Airdrop_1_OnOff")  && !GetBoolSetting("Discordtip_Main_Airdrop_2_OnOff") && !GetBoolSetting("Discordtip_Main_Airdrop_3_OnOff") && !GetBoolSetting("Discordtip_LaccsFaucet_BTC_OnOff")  )
                 {
 	             Notification(" 'AlreadyVoted' - appear && the all AirDrop from Discordtip are disabled ");	
 		         Log(" 'AlreadyVoted' - appear && the all AirDrop from Discordtip are disabled ");  
@@ -2102,7 +2145,8 @@ public class DiscordScript: FaucetScript
 		
   } //end Scroll_Function
    //=================//
-   
+
+ 
   
   //=================//
   //Reaction_while_Function
@@ -2122,7 +2166,7 @@ public class DiscordScript: FaucetScript
 		   
 		   Wait(2);
 		
-		   var ReactionButton_Clean = ElementByXPath("//div[contains(@class,'container-1ov-mD') and contains(., 'airdrop appear') and contains(., 'Ends') ]//div[contains(@class,'reactionInner') and @aria-pressed='false' ]//img[contains(@src,'assets/b052a4bef57')]");
+		   var ReactionButton_Clean = ElementByXPath("//div[contains(@class,'container-1ov-mD') and contains(., 'airdrop appear') and contains(., 'Ends') ]//div[contains(@class,'reactionInner') and @aria-pressed='false' ]//img[contains(@src,'assets/f36b66e2f802dc9')]");
            
 		   if (!IsVisible(ReactionButton_Clean)) 
            {
@@ -2136,7 +2180,7 @@ public class DiscordScript: FaucetScript
 		   Log("Reaction is now Clean - call to function - to click");
 		   Wait(2);	 
   		   int Count;			     		   
-		   var ReactionButton_2_Clean = ElementsByXPath("//div[contains(@class,'container-1ov-mD') and contains(., 'airdrop appear') and contains(., 'Ends') ]//div[contains(@class,'reactionInner') and @aria-pressed='false' ]//img[contains(@src,'assets/b052a4bef57')]"); //Elements
+		   var ReactionButton_2_Clean = ElementsByXPath("//div[contains(@class,'container-1ov-mD') and contains(., 'airdrop appear') and contains(., 'Ends') ]//div[contains(@class,'reactionInner') and @aria-pressed='false' ]//img[contains(@src,'assets/f36b66e2f802dc9')]"); //Elements
 		   Log("the amount of Reactions to do now is " + ReactionButton_2_Clean.Count);		   
 		   Reaction_Function(); //call to Reaction_Function
 		   }
@@ -2175,7 +2219,7 @@ public class DiscordScript: FaucetScript
 		  Wait(3);
 
           var Reaction_General_apper = ElementByXPath("//div[contains(@class,'embedTitle') and contains(text(),'airdrop')]");
-          var ReactionButton_Clean = ElementByXPath("//div[contains(@class,'container-1ov-mD') and contains(., 'airdrop appear') and contains(., 'Ends') ]//div[contains(@class,'reactionInner') and @aria-pressed='false' ]//img[contains(@src,'assets/b052a4bef57')]");
+          var ReactionButton_Clean = ElementByXPath("//div[contains(@class,'container-1ov-mD') and contains(., 'airdrop appear') and contains(., 'Ends') ]//div[contains(@class,'reactionInner') and @aria-pressed='false' ]//img[contains(@src,'assets/f36b66e2f802dc9')]");
 
           if (!IsVisible(Reaction_General_apper)) //if not apper at all "An airdrop appears"
           {
@@ -2200,6 +2244,49 @@ public class DiscordScript: FaucetScript
 
   //====================//
    
+  
+  
+  //=================//
+  //Reaction_CCTip_BOT_Function
+  //=================//
+  public int Reaction_CCTip_BOT_Function()
+  {
+
+		  var InputTextToCheckBefore = ElementByXPath("//div[contains(text(),'You do not have permission')]"); 
+		  if (IsVisible(InputTextToCheckBefore)) //if the input Lock
+          {
+		   //do not do anything
+           Log("CCTip - You do not have permission to send messages in this channel.");		   
+		  } 
+		  
+		  Wait(3);
+
+          var Reaction_General_apper = ElementByXPath("//div[contains(@class,'embedTitle') and contains(text(),'new airdrop')]");
+          var ReactionButton_Clean = ElementByXPath("//div[contains(., 'Today')]//div[contains(@class,'container-1ov-mD') and contains(., 'airdrop') and contains(., 'Left') ]//div[contains(@class,'reactionInner') and @aria-pressed='false' ]//img[contains(@src,'emojis/733145679022')]");
+
+          if (!IsVisible(Reaction_General_apper)) //if not apper at all "An airdrop appears"
+          {
+           Log("CCTip - Reaction - airdrop not exist at all right now");
+	       Notification("CCTip - Reaction - airdrop not exist at all right now");
+          }  
+  
+          if (IsVisible(ReactionButton_Clean))
+          {
+           Log("CCTip - ReactionButton_Clean - visible - we click on it");
+		   Wait(3);
+		   Click(ReactionButton_Clean);
+		   Wait(2);
+		   Log("CCTip - Reaction: Click On Reaction - done"); 
+	       Notification("CCTip - Reaction: Click On Reaction - done");	
+		   ClaimSuccess(); //Marks the claim as a success
+		   Wait();
+          } 
+   
+        return 0;
+  } //end Reaction_CCTip_BOT_Function
+  //====================//
+  
+  
   
   //====================//
   //Notifications_Function
