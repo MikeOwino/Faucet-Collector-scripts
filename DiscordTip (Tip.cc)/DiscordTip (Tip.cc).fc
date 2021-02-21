@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 21/02/2021 15:40PM - Version 85
+//Last Update: 21/02/2021 16:00PM - Version 85
 //==================//
 
 using System;
@@ -785,42 +785,6 @@ public class DiscordScript: FaucetScript
      //========================//
 
 
-      //=========================//
-      //Discordtip_CryptoMoon_Airdrop_1_OnOff//
-      //=========================//
-      if (GetBoolSetting("Discordtip_CryptoMoon_Airdrop_1_OnOff"))
-      {		
-  
-        TopSite_Function(); //call
-
-	    Title = "Discord";	
-		GoToUrl("https://discord.gg/k6K347V"); //Tip.cc server
-		Wait();	
-		Wait(5);		
-
-        Driver.Navigate().Refresh();
-		Wait();	
-		
-        Discord_PopUp_General_Function(); //call
-		
-		Wait(2);	
-		
-        inviteServer_Elements_Function(); //call
-
-        Wait(3);
-        Title = "#💲-raining-🏙";		
-        GoToUrl("https://discord.com/channels/596834389778759690/683726808616927273");
-		Log("Discordtip_CryptoMoon_Airdrop_1_OnOff: go to to claim in '💲-raining-🏙' channel | Discordtip ");
-		Wait();
-		Wait(8);
-
-        Reaction_while_Function(); //call	  
-		
-        Wait(3);
-
-     } //end Discordtip_CryptoMoon_Airdrop_1_OnOff
-     //========================//
-	 
 
       //=========================//
       //Discordtip_CryptoMoon_Airdrop_1_OnOff//
