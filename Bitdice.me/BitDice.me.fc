@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 11/09/2018 10:30AM - Version 1
-//Last Update: 22/08/2020 10:30AM - Version 5
+//Last Update: 21/02/2021 18:50PM - Version 6
 //==================//
 
 using System;
@@ -26,6 +26,7 @@ public class BitDice : FaucetScript
                 new FaucetSetting(){Name="Email",Display="Email",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
                 new FaucetSetting(){Name="DailyTreasureChest",Display="Daily Treasure Chest - every 24h",Type=EditorType.CheckBox,Default=true},
+                new FaucetSetting(){Name="Convert_Crystals",Display="Convert_Crystals",Type=EditorType.CheckBox,Default=true},
 
                 //insert user settings here
                 //new FaucetSetting { 
@@ -48,10 +49,10 @@ public class BitDice : FaucetScript
     public override void Start()
     {
         //Title that shows in the browser. Is used to identify and close popup windows
-        Title = "bitdice.me";
+        Title = "bitdice";
 
         //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
-		SuccessXPath = "//div[@class='relative']";
+		SuccessXPath = "//*[text()='']";
         FailXPath = "//*[text()='']";
 		
         TimerIsCountingUp = true;
@@ -87,7 +88,8 @@ public class BitDice : FaucetScript
     public override bool IsLoggedIn()
     {
 	   //save Login Cookies - Check if the image of balance is there
-       return ElementByXPath("//div[contains(@class,'deposit')]//a[contains(text(),'Sign Out') ]") != null;
+       return ElementByXPath("//div[contains(@class, 'UserInfoTop') ]") != null;
+	   //return true;
 
     }
 //==================//
@@ -113,53 +115,37 @@ public class BitDice : FaucetScript
  public override int DoLogin()
  {
 
-     var LogoutButton =ElementByXPath("//div[contains(@class,'deposit')]//a[contains(text(),'Sign Out') ]"); //Log Out
+     var LogoutButton =ElementByXPath("//div[contains(@class, 'UserInfoTop') ]"); //Log Out
 
 	 //if i NOT Login - go to Login Page
-	 if (!IsVisible(LogoutButton))
+	 if (LogoutButton ==null) //Not Visible
 	 {
 	
 		//if i already login - go to here
 		Log("Login: go to Login page");
         GoToUrl("https://www.bitdice.me/");
-
-        Wait(6);
+        Wait();
+        Wait(4);
 	
-		var GetIn = ElementByXPath("//button[contains(text(),'Get In')]"); 
-	    if (IsVisible(GetIn))
-	    {
+		var GetIn = ElementByXPath("//div[contains(@class, 'sidebar')]//button[contains(text(),'Sign')]"); 
         Click(GetIn);
-        Wait(6);
-		}
+        Wait(4);
+			
+        var Email_Box =ElementByXPath("//input[@placeholder='Email']");
+        SetText(Email_Box, GetSetting("Email"));
 		
+        Wait(2);
 		
-		var Lightbox = ElementByXPath("//div[@class='modal-mask' and @style='display: none;']");
-	    if (IsVisible(Lightbox))
-	    {	
-		  Log("Lightbox - none - NOT visible");
-		}
+        var Password_Box = ElementByXPath("//input[@placeholder='Password']");
+        SetText(Password_Box, GetPassword("Pass"));
 		
-		if (!IsVisible(Lightbox)) //if is NOT visible mean if the style of Lightbox "block" and not "none" do stuff 
-	    {
-		  Log("Lightbox - block - visible");
-          Wait(2);
-		  
-          var Email_Box =ElementByXPath("//input[@placeholder='Email']");
-          SetText(Email_Box, GetSetting("Email"));
-		  
-          Wait(2);
-		  
-          var Password_Box = ElementByXPath("//input[@placeholder='Password']");
-          SetText(Password_Box, GetPassword("Pass"));
-		  
-          Wait(2);
-		  
-          //Click on LoginButtonVar
-          var LoginButtonVar = ElementByXPath("//button[@class='btn btn-index btn-block']"); //button[text()='Sign In']
-          Click(LoginButtonVar);
-		} //end Lightbox
+        Wait(2);
+		
+        var LoginButtonVar = ElementByXPath("//button[@type='submit']"); 
+        Click(LoginButtonVar);
+    
+	} //end Lightbox
 
-	 } //end LogoutButton	
 		
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.DoLogin();
@@ -296,7 +282,7 @@ public override int DoSolveFaucet()
 
 		//first go to "robots page"
         GoToUrl("https://www.bitdice.me/dashboard/");
-
+        Wait();
         Wait(5);
 
         //Click on DailyTreasureChest image
@@ -316,6 +302,56 @@ public override int DoSolveFaucet()
         }
 	
     } // end DailyTreasureChest
+
+
+
+	if (GetBoolSetting("Convert_Crystals"))
+    {
+		//first go to "robots page"
+        GoToUrl("https://www.bitdice.me/dashboard");
+        Wait();
+        Wait(5);
+
+        var Convert_1_Button = ElementByXPath("//button[contains(text(),'onvert')]");        
+		Click(Convert_1_Button);
+
+        Wait(2);
+
+        var BalanceVAR = ElementByXPath("//p[contains(@class,'ConvertBitDiceTokensModal__Balance')]");
+        string BalanceSTRING = BalanceVAR.Text.Trim().Split(' ')[2];
+        int BalanceINT = Convert.ToInt32(BalanceSTRING);
+
+        if (IsVisible(BalanceVAR) && BalanceINT < 1)
+        {
+            Log("LimitFaucet - the balance under < 1 - not good");
+            //do all stuff
+        }
+
+        if (IsVisible(BalanceVAR) && BalanceINT > 1) 
+        {
+            Log("LimitFaucet - the balance above > 1 - good");
+			
+		    var GetAmountVAR = ElementByXPath("//p[contains(@class,'ConvertBitDiceTokensModal__Balance')]"); //Only then go to <pre> tag - and now we can dive into "different tags" (inside the <iframe>)
+            SetSetting("StoreAmount", GetAmountVAR.Text.Trim().Split(' ')[2] ); //Store/save - the iframe that was in first Domain	
+
+            Wait(2);
+		    
+            var ConvertButton = ElementByXPath("//button[contains(text(),'onvert')]");        
+		    Click(ConvertButton);
+		    
+            Wait(3);
+		    
+            var InputAmountVAR = ElementByXPath("//input[contains(@placeholder,'mount')]");        
+		    SetText(InputAmountVAR, GetSetting("StoreAmount")); //set the text that are stored
+		    
+            var ExchangeButton = ElementByXPath("//span[contains(text(),'xchange')]");        
+		    Click(ExchangeButton);
+			
+            Wait(5);
+			
+        }
+		
+    } // end Convert_Crystals
 
 	return GetWaitSetting(); 
 		
