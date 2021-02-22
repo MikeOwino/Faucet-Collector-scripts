@@ -1106,7 +1106,7 @@ public class DiscordScript: FaucetScript
             Wait(3);
 		}	  
 
-            Offline_Status_Function(); //set Online Status
+            Offline_Status_Function(); //set Offline Status
 
 
      } //end Discordtip_FreeCryptoWorld_1_OnOff
