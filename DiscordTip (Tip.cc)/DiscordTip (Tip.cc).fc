@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 21/02/2021 16:00PM - Version 85
+//Last Update: 22/02/2021 10:15AM - Version 85
 //==================//
 
 using System;
@@ -1065,28 +1065,49 @@ public class DiscordScript: FaucetScript
 		Wait();
 		Wait(8);
 
-        //Reaction_while_Function(); //call	  
-
-        //TextCommand            
-        var TextCommand = ElementByXPath("//div[contains(@class,'inner')]/div[contains(@class,'textArea')]");
-	        
-        if (IsVisible(TextCommand))
-        {
-			Wait(2);
-			SetText_1_FreeCryptoWorld_SendKeys_Way_Function(); //call to SetText SendKeys Way
-			Wait(2);
-            Enter_SendKeys_General_Discord_Input_Function(); //call to Enter_SendKeys_General_Discord_Input_Function
-			
-            ClaimSuccess(); //Marks the claim as a success
-			
-        } //end TextCommand visible
+        Scroll_Function(); //call to scroll down
 		
-	    if (!IsVisible(TextCommand)) 
+		Wait(3);	
+	
+   		var TIPBOT_Check_VAR = ElementByXPath(" //div[contains(@class, 'scrollerInner-') ]//div[contains(@class,'mentioned') and contains(., 'Today at') ] [last()] ");      
+	    if (TIPBOT_Check_VAR !=null) //Visible
         {
-		 Log("Error - TextCommand input not apper - we return after FC time"); 	
-        } //end TextCommand NOT visible
+		 Log("TIPBOT - Claim - you Already Claim Today - try Tomorrow");	  
+		}
+		
+		if (TIPBOT_Check_VAR ==null) //NOT Visible
+        {	
+	
+		    Log("TIPBOT - Claim - go to claim ");
 
-        Wait(3);
+            Online_Status_Function(); //set Online Status
+			
+		    Wait(2);
+			 
+            //TextCommand            
+            var TextCommand = ElementByXPath("//div[contains(@class,'inner')]/div[contains(@class,'textArea')]");
+	            
+            if (IsVisible(TextCommand))
+            {
+		    	Wait(2);
+		    	SetText_1_FreeCryptoWorld_SendKeys_Way_Function(); //call to SetText SendKeys Way
+		    	Wait(2);
+                Enter_SendKeys_General_Discord_Input_Function(); //call to Enter_SendKeys_General_Discord_Input_Function
+		    	
+                ClaimSuccess(); //Marks the claim as a success
+		    	
+            } //end TextCommand visible
+		    
+	        if (!IsVisible(TextCommand)) 
+            {
+		        Log("Error - TextCommand input not apper - we return after FC time"); 	
+            } //end TextCommand NOT visible
+		    
+            Wait(3);
+		}	  
+
+            Offline_Status_Function(); //set Online Status
+
 
      } //end Discordtip_FreeCryptoWorld_1_OnOff
      //========================//
@@ -1705,7 +1726,7 @@ public class DiscordScript: FaucetScript
            Actions Builder_16_Act = new Actions(Driver);
            Builder_16_Act.MoveToElement(TextCommand).Build().Perform(); 
            Wait(3);
-           Builder_16_Act.SendKeys(TextCommand, GetSetting(".take") ).Build().Perform(); 
+		   Builder_16_Act.SendKeys(TextCommand,".take").Build().Perform();
 		 }
 		 return 0;
       }
@@ -2003,8 +2024,10 @@ public class DiscordScript: FaucetScript
 */
             Wait(3);
 
-            var ThanksMessage = ElementByXPath("//div[@id='reminder']/h2[text()='Thanks for voting!']");
-            var AlreadyVoted = ElementByXPath("//input[@id='votingvoted' and contains(@value, 'You already voted') ]");
+
+            var ThanksMessage = ElementByXPath("//input[@id='votingvoted' and contains(@value,'Voting.')]");
+            var AlreadyVoted = ElementByXPath("//input[@id='votingvoted' and contains(@value,'already voted')]"); 
+            var MultipleAccount = ElementByXPath("//input[@id='votingvoted' and contains(@value,'multiple account')]");
 
 	        if (ThanksMessage !=null) //Visible
             {
@@ -2031,6 +2054,28 @@ public class DiscordScript: FaucetScript
 	        if (AlreadyVoted !=null) //Visible
             {
                 Log("FaucetClaim: Already Voted");
+				
+				if (GetBoolSetting("All_AirDrop_Success"))
+				{
+	             Notification("AlreadyVoted - All_AirDrop_Success");	
+		         Log("AlreadyVoted - All_AirDrop_Success ");  
+		    	 ClaimSuccess(); 
+                 return GetWaitSetting();	
+				}
+				
+                if (!GetBoolSetting("Discordtip_FaucetCollector_OnOff") && !GetBoolSetting("Discordtip_Main_Airdrop_1_OnOff")  && !GetBoolSetting("Discordtip_Main_Airdrop_2_OnOff") && !GetBoolSetting("Discordtip_Main_Airdrop_3_OnOff") && !GetBoolSetting("Discordtip_LaccsFaucet_BTC_OnOff")  )
+                {
+	             Notification(" 'AlreadyVoted' - appear && the all AirDrop from Discordtip are disabled ");	
+		         Log(" 'AlreadyVoted' - appear && the all AirDrop from Discordtip are disabled ");  
+		    	 ClaimSuccess();
+                }
+             
+            }
+
+
+	        if (MultipleAccount !=null) //Visible
+            {
+                Log("FaucetClaim: voted - but you have - Multiple Accounts - Voting failed");
 				
 				if (GetBoolSetting("All_AirDrop_Success"))
 				{
@@ -2250,6 +2295,65 @@ public class DiscordScript: FaucetScript
   } //end Reaction_CCTip_BOT_Function
   //====================//
   
+  
+  //=================//
+  //Online_Status_Function
+  //=================//
+  public int Online_Status_Function()
+  {
+  	  
+   		  var Online_Check_VAR = ElementByXPath("//div[contains(@class,'avatar') and contains(@role,'img') and contains(@aria-label,'nline') ]");      
+	      if (Online_Check_VAR !=null) //Visible
+          {
+			  Log("Online_Status_Function - you already Online");	  
+		  }
+		    
+		  if (Online_Check_VAR ==null) //NOT Visible
+          {
+			  Log("Online_Status_Function - need to set - Online ");
+	
+   		      var Menu_Status_VAR = ElementByXPath("//div[contains(@class,'avatarWrapper')]");      
+              Click(Menu_Status_VAR);
+		      Wait(2);	
+   		      var Online_Status_VAR = ElementByXPath("//div[contains(@id,'status-picker-online')]");      
+              Click(Online_Status_VAR);
+		      Wait(2);	
+		  }	  
+		  
+        return 0;
+		
+  } //end Online_Status_Function
+   //=================//
+  
+  
+  //=================//
+  //Offline_Status_Function
+  //=================//
+  public int Offline_Status_Function()
+  {
+  	  
+   		  var Offline_Check_VAR = ElementByXPath("//div[contains(@class,'avatar') and contains(@role,'img') and contains(@aria-label,'nvisible') ]");      
+	      if (Offline_Check_VAR !=null) //Visible
+          {
+			  Log("Offline_Status_Function - you already Offline");	  
+		  }
+		    
+		  if (Offline_Check_VAR ==null) //NOT Visible
+          {
+			  Log("Offline_Status_Function - need to set - Offline ");
+	
+   		      var Menu_Status_VAR = ElementByXPath("//div[contains(@class,'avatarWrapper')]");      
+              Click(Menu_Status_VAR);
+		      Wait(2);	
+   		      var Offline_Status_VAR = ElementByXPath("//div[contains(@id,'status-picker-invisible')]");      
+              Click(Offline_Status_VAR);
+		      Wait(2);	
+		  }
+		  
+        return 0;
+		
+  } //end Offline_Status_Function
+   //=================//
   
   
   //====================//
