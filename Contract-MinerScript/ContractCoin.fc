@@ -225,7 +225,7 @@ public class ContractMiner : FaucetScript
             }
 
         }
-    
+
 
 
         var LoginBtn = ElementsByXPath("//button[@id='submit']").FirstOrDefault();
@@ -249,7 +249,6 @@ public class ContractMiner : FaucetScript
     /// </summary>
     public override int AfterLogin()
     {
-        CheckDailyAd();
 
 
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
@@ -362,6 +361,8 @@ public class ContractMiner : FaucetScript
 
     public override int DoSolveFaucet()
     {
+        CheckDailyAd();
+
         // Daily claim area
         if (GetBoolSetting("DailyClaim"))
         {
@@ -389,19 +390,29 @@ public class ContractMiner : FaucetScript
             {
                 Click(beginClaimBtn);
             }
-            else if(IsVisible(ElementByXPath("//h4[contains(text(),'Claim is pending')]")))
+            else if (IsVisible(ElementByXPath("//p[contains(text(),'Your claim is on cooldown. Try again later to get ')]")))
             {
                 Log("Miners top is in cooldown");
             }
             else
             {
 
-                TryUseShortlink();
-                beginClaimBtn = ElementByXPath(" //button[contains(text(),'Begin Claim')]");
+
+                beginClaimBtn = ElementByXPath(" //button[@id='generate_rp_shortener_cm']");
                 if (IsVisible(beginClaimBtn))
                 {
 
                     Click(beginClaimBtn);
+
+                    var goUrl = ElementByXPath("//a[contains(@href,'auth=step')]");
+                    if (IsVisible(goUrl))
+                    {
+
+                        Click(goUrl);
+                        Wait();
+                        DoTheInternalShort();
+
+                    }
                 }
             }
 
@@ -419,7 +430,7 @@ public class ContractMiner : FaucetScript
             {
                 Click(beginClaimBtn);
             }
-            else if (IsVisible(ElementByXPath("//h4[contains(text(),'Claim is pending')]")))
+            else if (IsVisible(ElementByXPath("//p[contains(text(),'Your claim is on cooldown. Try again later to get ')]")))
             {
                 Log("Hourly Pot is in cooldown");
             }
@@ -446,15 +457,15 @@ public class ContractMiner : FaucetScript
             if (boxButtons.Count > 0)
             {
                 int MaxTries = boxButtons.Count;
-                int nTrie = 0; 
-                while (boxButtons.Count > 0  && nTrie < MaxTries)
+                int nTrie = 0;
+                while (boxButtons.Count > 0 && nTrie < MaxTries)
                 {
 
 
                     Click(boxButtons[0]);
                     nTrie++;
-                    Wait(); 
-                     boxButtons = ElementsByXPath("//button[@name='claim_box']").Where(button => IsVisible(button)).ToList();
+                    Wait();
+                    boxButtons = ElementsByXPath("//button[@name='claim_box']").Where(button => IsVisible(button)).ToList();
                 }
             }
             else
@@ -468,7 +479,7 @@ public class ContractMiner : FaucetScript
             {
                 int MaxTries = boxOpenButtons.Count;
                 int nTrie = 0;
-                while(boxOpenButtons.Count >0 && nTrie< MaxTries)
+                while (boxOpenButtons.Count > 0 && nTrie < MaxTries)
                 {
                     Click(boxOpenButtons[0]);
                     nTrie++;
