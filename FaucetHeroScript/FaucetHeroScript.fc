@@ -85,7 +85,7 @@ public class FaucetHeroScript : FaucetScript
         var captchaSelect = ElementByXPath("//select[@name='captcha']");
         if (IsVisible(captchaSelect))
         {
-            var valueCorrectCaptcha = GetBoolSetting("UseSolvemedia") ? "SolveMedia" : "reCaptcha";
+            var valueCorrectCaptcha = GetBoolSetting("UseSolvemedia") ? "solvemedia" : "recaptcha";
             SelectOptionByValue(captchaSelect, valueCorrectCaptcha);
             Wait(2, 3);
         }
