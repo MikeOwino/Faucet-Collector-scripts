@@ -1,4 +1,5 @@
-﻿using FaucetCollector.Script;
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
 using FaucetCollector.Utilities;
 
 using System;
@@ -85,9 +86,11 @@ public class CoinbitScript: FaucetScript
         SuccessXPath = "//div[contains(@class,'alert alert-success')]";
         FailXPath = "//div[contains(@class,'alert alert-danger')]";
         Title = "Coinbit.ro";
+    AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
+        
         base.Start();
     }
-
+    AntibotLinksMlUtils AntibotLinksMlUtils;
     public void SolveCloudflare()
     {
 
@@ -140,61 +143,12 @@ public class CoinbitScript: FaucetScript
     public override int DoSolveFaucet()
     {
 
-        Wait(1);
-        GoToUrl(FaucetUrl);
-
-        Wait(2, 3);
-
-        var startClaimBtn = ElementByXPath("//button[@id='proceed']");
-        if (!IsVisible(startClaimBtn))
-        {
-            return Fail("start claim btn not found or not visible");
-        }
-        Click(startClaimBtn);
-        Wait(3, 4);
-
-        var s1ProccedBtn = ElementByXPath("//button[@id='s11proceed']");
-        if (!IsVisible(s1ProccedBtn))
-        {
-            return Fail("s1 procced btn is not visible");
-        }
-        Click(s1ProccedBtn);
-
-        DateTime timeout = DateTime.Now.AddSeconds(20);
-        while (!IsVisible(ElementByXPath("//img[@src='images/car.png']")) && DateTime.Now < timeout)
-        {
-            Wait();
-        }
-        Wait();
-
-        var carBtn = ElementByXPath("//img[@src='images/car.png']");
-        if (!IsVisible(carBtn))
-        {
-            return Fail("captcha solution is broken, car is not visible");
-        }
-        Click(carBtn);
-
-        Wait(5, 6);
-
-        var s3ProccedBtn = ElementByXPath("//button[@id='s31proceed']");
-        if (!IsVisible(s3ProccedBtn))
-        {
-            return Fail("final btn is not visible or not found");
-        }
-        Click(s3ProccedBtn);
-
-
-        return base.DoSolveFaucet();
-    }
-    public override int DoLogin()
-    {
-
         GoToUrl(SelectedFaucetUrl);
         Wait(1, 2);
         SolveCloudflare();
         Wait(2, 4);
 
-        var userBox = ElementByXPath("//input[@name='wantusername']");
+        var userBox = ElementByXPath("//input[@name='address']");
         if (!IsVisible(userBox))
         {
             return Fail("userbox is not visible or not found");
@@ -202,22 +156,97 @@ public class CoinbitScript: FaucetScript
         SetText(userBox, GetSetting("User"));
 
 
-        var startClaimBtn = ElementByXPath("//button[@type='submit']");
+        var startClaimBtn = ElementByXPath("//button[contains(text(),'Start Claiming')]");
         if (!IsVisible(startClaimBtn))
         {
             return Fail("Start claim btn is not visible or not found");
         }
         Click(startClaimBtn);
-        return base.DoLogin();
+
+
+        Wait(2, 3);
+
+        var startClaim2 = ElementByXPath("//button[@id='s12proceed']");
+        if (!IsVisible(startClaim2))
+        {
+            return Fail("start claim btn not found or not visible");
+        }
+        Click(startClaim2);
+        Wait(3, 4);
+
+        var s1ProccedBtn = ElementByXPath("//button[@id='s21proceed']");
+        if (!IsVisible(s1ProccedBtn))
+        {
+            return Fail("s1 procced btn is not visible");
+        }
+        Click(s1ProccedBtn);
+
+        var result = DoSolveCaptcha();
+        if (result > 0)
+        {
+            return result;
+        }
+
+        var s3ProccedBtn = ElementByXPath("//input[@value='Get Reward!']");
+        if (!IsVisible(s3ProccedBtn))
+        {
+            return Fail("final btn is not visible or not found");
+        }
+        Click(s3ProccedBtn);
+
+        CheckFaucetResult();
+        if (IsSuccess)
+        {
+            return GetWaitSetting();
+
+        }
+
+
+        return base.DoSolveFaucet();
     }
+
 
     public override bool IsLoggedIn()
     {
-        return ElementByXPath("//a[@href='logout.php']") != null;
+        return true;
     }
 
 
+    public override int DoSolveCaptcha()
+    {
 
+        if (ElementByXPath("//img[contains(@src,'data:image')]") != null)
+        {
+
+            var resultAbl = AntibotLinksMlUtils.DosolveAntibotLinks(true);
+            if (resultAbl > 0)
+            {
+                return resultAbl;
+            }
+
+        }
+
+
+        return base.DoSolveCaptcha();
+    }
+
+    public override int CheckFaucetResult()
+    {
+
+
+
+        var result = base.CheckFaucetResult();
+
+        var failElement = ElementByXPath(FailXPath);
+        if (IsVisible(failElement) && failElement.Text.Contains("solving AntiBot"))
+        {
+
+            AntibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+
+        }
+
+        return result;
+    }
 
     public override int GetFaucetWaitTime()
     {
