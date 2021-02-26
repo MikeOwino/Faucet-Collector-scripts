@@ -79,12 +79,15 @@ namespace FaucetCollectorScripts.Scripts
             }
         }
 
+        AntibotLinksMlUtils AntibotLinksMlUtils;
 
         public override void Start()
         {
             SuccessXPath = "//div[contains(@class,'alert alert-success')]";
             FailXPath = "//div[contains(@class,'alert alert-danger')]";
             Title = "GGFaucet";
+            AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
+
             base.Start();
         }
 
@@ -204,15 +207,16 @@ namespace FaucetCollectorScripts.Scripts
 
         public override int DoSolveCaptcha()
         {
-            AntibotLinksMlUtils antibotLinksMlUtils = new AntibotLinksMlUtils(this);
+
             if (ElementByXPath("//img[contains(@src,'data:image')]") != null)
             {
 
-                var resultAbl = antibotLinksMlUtils.DosolveAntibotLinks(true);
+                var resultAbl = AntibotLinksMlUtils.DosolveAntibotLinks(true);
                 if (resultAbl > 0)
                 {
                     return resultAbl;
                 }
+
             }
 
 
@@ -227,6 +231,23 @@ namespace FaucetCollectorScripts.Scripts
 
 
 
+        public override int CheckFaucetResult()
+        {
+
+
+
+            var result = base.CheckFaucetResult();
+
+            var failElement = ElementByXPath(FailXPath);
+            if (IsVisible(failElement) && failElement.Text.Contains("solving AntiBot"))
+            {
+
+                AntibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+
+            }
+
+            return result;
+        }
 
         public override int GetFaucetWaitTime()
         {
