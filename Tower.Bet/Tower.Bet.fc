@@ -1,0 +1,596 @@
+
+//==================//
+//script Written by: ••AviramDayan•• 27/02/2021 21:50PM - Version 1
+//Last Update: 27/02/2021 21:50PM - Version 1
+//==================//
+
+using System;
+using System.IO;
+using FaucetCollector.Script;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+using System.Collections.Generic;
+using System.Globalization;
+
+//css_ref FaucetCollector.Utilities
+//css_inc RecaptchaUtilities
+
+
+public class TowerBet : FaucetScript
+{
+    /// <summary>
+    /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
+    /// You can get the value the user entered with the methods: GetSetting("[Name of the FaucetSetting]"), GetBoolSetting and GetDateTimeSetting
+    /// You can also create a new setting value using SetSetting("[Name you want to use]", "value")
+    /// </summary>
+    public override FaucetSettings Settings
+    {
+        get
+        {
+            return new FaucetSettings("https://Tower.Bet")
+            {
+                new FaucetSetting(){Name="Email",Display="Email OR UserName - you need to login with your 'DuckDice.io' Email OR UserName ",Type=EditorType.TextBox,Required=true},
+                new FaucetSetting(){Name="Password",Display="Password - you need to login with your 'DuckDice.io' password ",Type=EditorType.Password,Required=true},
+
+                new FaucetSetting(){Name="LoginChoose",Display="LoginChoose - ON/OFF - if ON - use with normal login | if OFF - login with DuckDice",Type=EditorType.CheckBox,Default=true},		
+
+                new FaucetSetting(){Name="Race",Display="Race - join to race - Increase the chance of winning - if you have the highest wagered amount",Type=EditorType.CheckBox,Default=true},			
+                new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim - Claim TWG coin",Type=EditorType.CheckBox,Default=true},		
+                
+			
+                //insert user settings here
+                //new FaucetSetting { 
+                //    Name = "Name of your setting", 
+                //    Display = "Display shown in Faucet Collector", 
+                //    Type = EditorType.TextBox | EditorType.Password | EditorType.CheckBox | EditorType.Wallet | EditorType.Numeric | EditorType.ComboBox | EditorType.CheckComboBox, 
+                //    Required = true | false, 
+                //    Default = "Optionally a default value" | true | false | null.
+                //    Items = new List<string> { "item1", "item2" } (only valid for ComboBox or CheckComboBox)
+                //} 
+            };
+        }
+    }
+
+	
+	
+//============================================================//
+//the number of "successes" in the script - when are finished  
+//============================================================//
+    public override void Start()
+    {
+		ad=false;
+		
+        //Title that shows in the browser. Is used to identify and close popup windows
+        Title = "Tower.bet | DuckDice";
+
+        //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
+        SuccessXPath = "//*"; //*[text()='']
+        FailXPath = "//*"; //*[text()='']
+
+        //Let Faucet Collector start up everything
+        base.Start();
+    }
+//============================================================//
+//the number of "successes" in the script - when are finished  
+//============================================================//
+	
+	
+	
+	bool ad;
+	
+	
+    public override int DoInit()
+    {
+
+	   
+        //Let Faucet Collector continue.
+        return base.DoInit();
+    }
+
+	
+	
+	
+//==================//
+//save Login Cookies 
+//==================//
+    public override bool IsLoggedIn()
+    {
+
+        //In this case we check for en element with the class "loggedIn"
+		return ElementByXPath("//div[contains(@class,'collapse__collapse')]//div[contains(@class,'avatar__avatar')]/img | //div[contains(@class,'profile-name drop-select')]") != null;
+		//return true;
+    }
+//==================//
+//save Login Cookies 
+//==================//
+	
+	
+	
+	
+	
+    /// <summary>
+    /// This method gets called if IsLoggedIn returned false, right before the DoLogin method is called.
+    /// </summary>
+    public override int BeforeLogin()
+    {
+		
+		
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeLogin();
+    }
+	
+	
+
+//========//
+//DoLogin
+//========//
+ public override int DoLogin()
+ {
+
+  var ExitButton = ElementByXPath ("//div[contains(@class,'collapse__collapse')]//div[contains(@class,'avatar__avatar')]/img | //div[contains(@class,'profile-name drop-select')]"); 
+
+  //if i NOT Login - go to Login Page
+  if (!IsVisible(ExitButton))
+  {
+
+      if (GetBoolSetting("LoginChoose")) //ON - use with normal login
+      {	  
+        Login_Start_URL_Action_Function(); //call	
+        Login_Action_All_Function(); //call	 
+        Driver.Navigate().Refresh(); //Refresh
+	  } //end - ON - use with normal login
+
+	  
+      if (!GetBoolSetting("LoginChoose")) //OFF - login with DuckDice
+      {	  
+        Login_Start_URL_Action_Function(); //call
+		
+		Wait(2); 
+        
+		var ConnectDuckDice = ElementByXPath("//button[contains(@class,'buttonSignUp')]") ;
+		if (IsVisible(ConnectDuckDice))
+		{
+         Click(ConnectDuckDice);
+        }
+
+		Wait(2);
+
+        var HandlesVAR = Driver.WindowHandles;
+        foreach (var MyWindowVAR in HandlesVAR)
+        {
+			  
+          CheckForPopupsEnabled = false;
+		
+          Driver.SwitchTo().Window(MyWindowVAR);
+                  
+          //do something on all windows
+          if (Driver.Url.Contains("duckdice.io"))
+          {
+            Log("duckdice.io");
+
+            Login_Action_All_Function(); //call	 
+		
+          } //end driver.Url.Contains	
+
+	      Driver.SwitchTo().DefaultContent(); //go back to default content in <html>		
+		
+          Title = "Tower.Bet";	
+          GoToUrl("https://tower.bet/");
+		  Wait();				
+				
+        }// end foreach
+
+      }// end OFF - login with DuckDice
+
+  } // end ExitButton
+  
+  return base.DoLogin();
+ }
+//========//
+//DoLogin
+//========//
+	
+
+	
+	
+	
+	
+//==========//
+//AfterLogin
+//=========//
+ public override int AfterLogin()
+ {
+ 
+	 
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterLogin();
+ }
+//==========//
+//AfterLogin
+//=========//
+	
+	
+	
+
+	
+//=============//
+//GetFaucetWaitTime
+//=============//
+ public override int GetFaucetWaitTime()
+ {
+
+    if(ad)
+	{
+        ad=false; //solve the problem in start - after he return to script again
+        //return GetWaitSetting();  
+
+        return GetWaitSetting();  
+		
+    }	//end ad
+	
+		
+   //let Faucet Collector continue.
+   return base.GetFaucetWaitTime();
+ }
+//=============//
+//GetFaucetWaitTime
+//=============//
+	
+	
+	
+	
+
+    public override int BeforeSolveCaptcha()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeSolveCaptcha();
+    }
+
+
+    public override int DoSolveCaptcha()
+    {
+
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoSolveCaptcha();
+    }
+
+
+    public override int AfterSolveCaptcha()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterSolveCaptcha();
+    }
+	
+	
+
+    public override int BeforeSolveFaucet()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeSolveCaptcha();
+    }
+	
+	
+	
+
+
+//=============//
+//DoSolveFaucet
+//=============//
+    public override int DoSolveFaucet()
+    {
+	
+      //=========//
+      //Race//
+      //=========//
+      if (GetBoolSetting("Race"))
+      {	
+        Title = "Tower.Bet";	
+        GoToUrl("https://tower.bet/");
+		Wait(2);
+		Wait();	 
+		
+		var JoinToRace = ElementByXPath("//button[contains(text(),'Join') or contains(text(),'join')]") ;
+		if (IsVisible(JoinToRace))
+		{
+		 Log("Join to Race - Click");
+         Click(JoinToRace);
+        }		
+      }
+      //=========//
+	  
+	
+      //=============//
+      //FaucetClaim
+      //=============//
+      if (GetBoolSetting("FaucetClaim"))
+      {
+	
+        //else go to normal login
+		GoToUrl("https://Tower.Bet/");
+		
+        Choose_TWG_Function(); //call	
+
+        var BalanceVAR = ElementByXPath("//div[contains(@class,'balanceCollapse')]//strong");
+        string BalanceSTRING = BalanceVAR.Text.Trim().Split('.')[0];
+        int BalanceINT = Convert.ToInt32(BalanceSTRING);
+		
+        if (IsVisible(BalanceVAR) && BalanceINT > 1) // above
+        {
+            Log("LimitFaucet - the balance above > 1 not good");
+
+        }
+		
+        if (IsVisible(BalanceVAR) && BalanceINT < 1) // under
+        {
+           Log("LimitFaucet - the balance under < 1 good");
+			
+            var ClaimStart = ElementByXPath("//span[contains(@data-for,'gold-claim-tooltip')]//span[contains(text(),'laim')]");
+	        if (IsVisible(ClaimStart))
+		    {
+	          Log("FaucetClaim - ClaimStart - Click");
+              Click(ClaimStart);
+            }	
+		    
+	        Wait(2);
+		    
+            var ClaimEnd = ElementByXPath("//div[contains(@class,'modal__modalBlock')]//button[contains(@class,'button__button')]");
+	        if (IsVisible(ClaimEnd))
+		    {
+              Click(ClaimEnd);
+	          Log("FaucetClaim - ClaimEnd - Success_Claim");
+		      ClaimSuccess(); //Marks the claim as a success
+            }	
+		    
+	        Wait(2);
+        }
+			
+      } //end FaucetClaim
+
+      return Time_Function(); //call
+	 
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoSolveFaucet();
+    }
+	
+	
+
+    public override int AfterSolveFaucet()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterSolveFaucet();
+    }
+	
+
+    /// <summary>
+    /// This method gets called in the end after the BeforeSolveFaucet/DoSolveFaucet and AfterSolveFaucet methods were done.
+    /// The base.CheckFaucetResult will try to find a visible element on the page using the XPath from SuccessXPath and FailXPath (see the Start method)
+    /// These properties should contain XPath expressions to find certain elements on the page.
+    /// For example if it finds one of the elements from the SuccessXPath, and it is visible, then it will flag the claim attempt as a success.
+    /// Or if it finds one of the elements from the FailXPath, and it is visible, then it will flag the claim attempt as a failure.
+    /// </summary>
+    public override int CheckFaucetResult()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.CheckFaucetResult();
+    }
+	
+
+        //=================//
+        //Choose_TWG_Function
+        //=================//
+        public int Choose_TWG_Function()
+        {
+           var MenuStart = ElementByXPath("//div[contains(@class,'balanceCollapse')]/div");
+	       if (IsVisible(MenuStart))
+		   {
+	         Log("FaucetClaim - MenuStart - Click");
+             Click(MenuStart);
+           }
+		   
+	       Wait(2);
+		   
+           var ChooseTWG = ElementByXPath("//div[contains(@class,'balanceCollapse')]//li/span[contains(text(),'TWG')]");
+	       if (IsVisible(ChooseTWG))
+		   {
+	         Log("FaucetClaim - ChooseTWG - Click");
+             Click(ChooseTWG);
+           }	
+		   
+	       Wait(2);
+		   
+		return 0;
+        }//end Choose_TWG_Function
+        //=================//	
+		
+
+        //=================//
+        //Login_Start_URL_Action_Function
+        //=================//
+        public int Login_Start_URL_Action_Function()
+        {
+			
+           Title = "Tower.bet | DuckDice";
+           GoToUrl("https://tower.bet/"); //https://tower.bet/social-auth/connect/duckdice
+           Wait();		
+           Wait(2);
+		   
+           var ButtonStart = ElementByXPath("//button[contains(text(),'Log In')]");
+		   if (IsVisible(ButtonStart))
+		   {
+           Click(ButtonStart);
+           }
+		   
+		return 0;
+        }//end Login_Start_URL_Action_Function
+        //=================//	
+	
+	
+        //=================//
+        //Login_Action_All_Function
+        //=================//
+        public int Login_Action_All_Function()
+        {
+
+            var box_user = ElementByXPath("//input[contains(@name, 'sername') ]");
+		    if (IsVisible(box_user))
+		    {
+            SetText(box_user, GetSetting("Email"));
+		    Wait(2);			
+            }
+		
+            var box_pass = ElementByXPath("//input[contains(@name, 'assword') ]") ;
+		    if (IsVisible(box_pass))
+			{
+            SetText(box_pass, GetPassword("Password"));
+		    Wait(2);			
+            }
+
+            var AgreeButtonCheckBefore = ElementByXPath("//div[@class='box']");
+		    if (AgreeButtonCheckBefore !=null) //visible
+			{
+             var AgreeButton = ElementByXPath("//input[@type='checkbox']");
+		     if (AgreeButton !=null) //visible
+	         {
+              Log("AgreeButton - Click");
+              Click(AgreeButton);
+             }
+			}
+				  
+		    Wait(2);	
+			
+            var ButtonLog = ElementByXPath("//button[@type='submit']");
+		    if (IsVisible(ButtonLog))
+			{
+			 Log("ButtonLog - Click");
+             Click(ButtonLog);
+		     Wait(2);			 
+            }
+	       	       
+		    Recaptcha_Function (); //call
+		       
+		    Wait();	
+			
+		return 0;
+        }//end Login_Action_All_Function
+        //=================//		
+	
+	
+	
+        //=================//
+       //Time_Function
+        //=================//
+        public int Time_Function()
+        {
+
+           //site time with date - example 10:00 PM | 10:00 AM  OR UTC LocalTime
+           var CheckAvailableGeneral = ElementByXPath("//div[contains(@id,'result') and contains(text(),'wait') or contains(text(),'UTC') ]");
+           if (IsVisible(CheckAvailableGeneral))
+           {
+	         Log("ParseExact - here");             
+	         var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
+	         var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //AM-PM -- t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  			   
+	         //var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US") ).ToLocalTime(); //UTC -- yyyy-MM-dd HH:mm:ss =  LocalTime - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
+	         //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+	 
+             var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
+             return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
+		  
+           } //end CheckAvailableGeneral
+		   		   
+		   //site time with normal counter
+           var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
+		   var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
+
+           if (IsVisible(MinVar))
+           {
+	         Log("Time_Function - WaitTimerText apper - return to site time"); 
+             int min,sec;
+             min = Convert.ToInt32(MinVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[0])*60;
+             sec = Convert.ToInt32(SecVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[1]);
+             return min+sec;
+           } 
+
+           if (!IsVisible(MinVar))
+           {
+	            Log("Time_Function - return to your time"); 
+		        return GetWaitSetting();
+           }
+
+	       Log("Time_Function - return to your time - backup general"); 
+		   return GetWaitSetting(); //backup general
+
+           return 0;		
+        }//end Time_Function
+        //=================//	
+		
+	
+        //=================//
+       //invisible_Recaptcha_Function
+        //=================//
+        public int invisible_Recaptcha_Function()
+        {
+			
+          var RecaptchaOpen_Iframe = ElementByXPath ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]");  
+          if (RecaptchaOpen_Iframe !=null)          
+		  {
+            //SolveCaptcha if apper
+            Log("DO invisible_Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+		    RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		    
+            Wait();
+		    
+            //ExecuteScript("afterResolveCaptcha");
+		  }
+		
+		return 0;
+        }//end invisible_Recaptcha_Function
+        //=================//	
+
+
+
+        //=================//
+       //Recaptcha_Function
+        //=================//
+
+        public int Recaptcha_Function()
+        {
+			
+          //DoSolveImageCaptcha
+          var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
+          if (IsVisible(SolveMedia))
+		  {  
+            Log("DO SolveMedia");	  
+	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']")); 
+            if (result_2 > 0)
+            {
+                return Fail("SolveMedia - Fail solving captcha");
+            }
+		  }
+		  
+	     //for recaptcha popup after click on button - ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]")   
+          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
+          if (IsVisible(RecaptchaOpen_Iframe))
+		  {
+            //SolveCaptcha if apper
+            Log("DO Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		  }
+
+		return 0;
+        }//end Recaptcha_Function
+        //=================//	
+	
+	
+} //public class
