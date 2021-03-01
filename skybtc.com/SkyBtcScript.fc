@@ -1,0 +1,152 @@
+﻿using FaucetCollector.Script;
+
+using System;
+
+
+public class SkyBtcScript : FaucetScript
+{
+    public override FaucetSettings Settings
+    {
+        get
+        {
+
+            return new FaucetSettings("https://skybtc.com/")
+                {
+                    new FaucetSetting()
+                    {
+                        Name="User",
+                        Display="Username",
+                        Type=EditorType.TextBox,
+                        Required=true
+                    },
+                    new FaucetSetting()
+                    {
+                        Name="Pass",
+                        Required=true,
+                        Type=EditorType.Password,
+                        Display="Password"
+                    }
+                };
+        }
+    }
+
+    public override int DoInit()
+    {
+        SuccessXPath = "//div[@class='mx-auto v-card v-sheet theme--dark elevation-2 rounded']";
+        FailXPath = "//div[@class='mx-auto v-card v-sheet theme--red elevation-2 rounded']";
+        Title = "Welcome|SkyBtc";
+        return base.DoInit();
+    }
+
+    public override bool IsLoggedIn()
+    {
+
+        return ElementByXPath("//button[contains(text(),'Sign out')]") != null;
+
+    }
+
+    public override int DoLogin()
+    {
+
+        GoToUrl("https://skybtc.com/login");
+        Wait(1, 2);
+
+        var userNameBox = ElementByXPath("//input[@id='username']");
+
+        if (!IsVisible(userNameBox))
+        {
+            return Fail("Username box is not visible");
+        }
+        SetText(userNameBox, GetSetting("User"));
+
+        var passwordBox = ElementByXPath("//input[@id='password']");
+        if (!IsVisible(passwordBox))
+        {
+            return Fail("Password box not visible or not found");
+        }
+        SetText(passwordBox, GetPassword("pass"));
+
+        var loginBtn = ElementByXPath("//button[@type='submit']");
+        if (!IsVisible(loginBtn))
+        {
+            return Fail("Login btn not visible or not found");
+        }
+
+        Click(loginBtn);
+        Wait(1, 2);
+
+        return base.DoLogin();
+    }
+
+
+
+    public override int DoSolveFaucet()
+    {
+
+        tryRemoveModal();
+
+        Wait(1, 2);
+
+        var rollBtn = ElementByXPath("//button[@type='button' and contains(@class,'v-btn')] ");
+        if (!IsVisible(rollBtn))
+        {
+            return Fail("roll btn not visible or not found");
+        }
+
+        Click(rollBtn);
+
+        Wait(1);
+
+        return base.DoSolveFaucet();
+    }
+
+    public override int GetFaucetWaitTime()
+    {
+        tryRemoveModal();
+        Wait(1, 2);
+
+        var minuteElement = ElementByXPath("//span[contains(@class,'badge-info')]");
+        var secondElement = ElementByXPath("//span[contains(@class,'badge-warning')]");
+
+        if (IsVisible(minuteElement) && IsVisible(secondElement))
+        {
+            int m, s; 
+            if(int.TryParse(minuteElement.Text,out m) && int.TryParse(secondElement.Text, out s))
+            {
+                return m * 60 + s;
+            }
+        }
+
+        return base.GetFaucetWaitTime();
+
+    }
+
+    private bool tryRemoveModal()
+    {
+        GoToUrl("https://skybtc.com/dash/faucet");
+        Wait(1, 2);
+
+
+
+        var claimBtn = ElementByXPath("//button[@type='button' and contains(@class,'v-size--default')]");
+        DateTime timeout = DateTime.Now.AddSeconds(20);
+
+        while (!IsVisible(claimBtn) && DateTime.Now < timeout)
+        {
+
+            claimBtn = ElementByXPath("//button[@type='button' and contains(@class,'v-size--default')]");
+
+            Wait();
+        }
+
+        if (!IsVisible(claimBtn))
+        {
+            return false;
+        }
+
+        Click(claimBtn);
+
+        return true;
+    }
+
+}
