@@ -1,0 +1,137 @@
+﻿using FaucetCollector.Script;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FaucetCollectorScripts.Scripts
+{
+    public class EarnSatoScript :FaucetScript
+    {
+        public override FaucetSettings Settings { 
+            get {
+
+                return new FaucetSettings("https://earnsato.com/index")
+                {
+                    new FaucetSetting()
+                    {
+                        Name="User",
+                        Display="Username",
+                        Type=EditorType.TextBox,
+                        Required=true
+
+                    },
+                    new FaucetSetting()
+                    {
+                        Name="Pass",
+                        Type=EditorType.Password,
+                        Required=true,
+                        Display="Password"
+                    },
+                    new FaucetSetting()
+                    {
+                        Display="UseImage",
+                        Type=EditorType.CheckBox,
+                        Name="UseImage",
+                        Default=true
+                    }
+
+                };
+            
+            } }
+
+
+        public override int DoInit()
+        {
+            SuccessXPath = "//div[contains(text(),'You received')]";
+            FailXPath = "//div[contains(text(),'Incorrect')]";
+            Title = "EarnSato";
+            return base.DoInit();
+        }
+
+        public override bool IsLoggedIn()
+        {
+            return ElementByXPath("//a[contains(text(),'Sign Out')]") !=null;
+        }
+
+        public override int DoLogin()
+        {
+            GoToUrl("https://earnsato.com/index.php?view=login");
+            Wait(1);
+            var userBox = ElementByXPath("//input[@name='user']");
+            if (!IsVisible(userBox))
+            {
+                return Fail("User box is not visible or not found");
+            }
+
+            SetText(userBox, GetSetting("User"));
+
+            var passwordBox = ElementByXPath("//input[@name='password']");
+            if (!IsVisible(passwordBox))
+            {
+                return Fail("password box is not visible or not found");
+            }
+
+            var result = DoSolveCaptcha();
+            if (result>0)
+            {
+                return result;
+            }
+            var loginBtn = ElementByXPath("//button[@id='kt_login_signin_submit']");
+            if (!IsVisible(loginBtn))
+            {
+                return Fail("login btn is not visible or not found");
+            }
+
+            Click(loginBtn);
+
+            return base.DoLogin();
+        }
+
+        public override int DoSolveFaucet()
+        {
+
+            string urlAppend = GetBoolSetting("UseImage") ? "&captcha=1" : "&captcha=2";
+            GoToUrl("https://earnsato.com/index.php?view=claim"+urlAppend);
+            var result = DoSolveCaptcha();
+            if (result>0)
+            {
+                return result;
+            }
+
+            var claimBtn = ElementByXPath("//h3[contains(text(),'Claim Satoshi!')]");
+            if (!IsVisible(claimBtn))
+            {
+                return Fail("Claim btn is not visible or not found");
+            }
+
+            Click(claimBtn);
+
+
+            return base.DoSolveFaucet();
+        }
+
+        public override int GetFaucetWaitTime()
+        {
+            var minutes = ElementByXPath("//span[@class='minutes']");
+            var seconds= ElementByXPath("//span[@class='seconds']");
+            if (IsVisible(minutes) && IsVisible(seconds))
+            {
+                int m, s;
+                if(int.TryParse(minutes.Text,out m) && int.TryParse(seconds.Text,out s))
+                {
+                    return m * 60 + s;
+                }
+
+            }
+            return base.GetFaucetWaitTime();
+
+        }
+
+
+    }
+}
