@@ -6,6 +6,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 //css_ref FaucetCollector.Utilities
 //css_ref FaucetCollector.Captcha
@@ -181,7 +182,7 @@ public class FaucetCryptoScript : FaucetScript
                         Log("Need to wait");
                         break;
                     }
-                    var buttonClaim = ElementByXPath("//span[contains(@class,'notranslate')]//button");
+                    var buttonClaim = ElementsByXPath("//button[contains(@class,'notranslate')]").FirstOrDefault(b => IsVisible(b));
                     if (!IsVisible(buttonClaim))
                     {
                         Log("Error has been ocurred trying to claim the ad", Level.Error);
@@ -197,7 +198,7 @@ public class FaucetCryptoScript : FaucetScript
                     while (IsVisible(buttonClaim) && !buttonClaim.Text.Contains("Get Reward") && DateTime.Now < timeout)
                     {
                         Wait(1, 2);
-                        buttonClaim = ElementByXPath("//span[contains(@class,'notranslate')]//button");
+                        buttonClaim = ElementsByXPath("//button[contains(@class,'notranslate')]").FirstOrDefault(b => IsVisible(b));
                     }
                     Wait(1, 2);
 
@@ -268,7 +269,7 @@ public class FaucetCryptoScript : FaucetScript
             return Fail("We need to solve the captcha a new time");
         }
 
-        var buttonClaim = ElementByXPath("//span[contains(@class,'notranslate')]//button");
+        var buttonClaim = ElementsByXPath("//button[contains(@class,'notranslate')]").FirstOrDefault(b => IsVisible(b));
         if (!IsVisible(buttonClaim))
         {
             return Fail("button claim is not visible or not found");
@@ -280,12 +281,12 @@ public class FaucetCryptoScript : FaucetScript
         while (IsVisible(buttonClaim) && !buttonClaim.Text.Contains("Get Reward") && DateTime.Now < timeout)
         {
             Wait(1, 2);
-            buttonClaim = ElementByXPath("//span[contains(@class,'notranslate')]//button");
+            buttonClaim = ElementsByXPath("//button[contains(@class,'notranslate')]").FirstOrDefault(b => IsVisible(b));
         }
         Wait(1, 2);
 
         Click(buttonClaim);
-
+ 
 
         return base.DoSolveFaucet();
     }
