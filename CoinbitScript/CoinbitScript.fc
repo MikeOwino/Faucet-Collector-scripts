@@ -10,8 +10,8 @@ using System.Linq;
 
 
 
-public class CoinbitScript: FaucetScript
-    {
+public class CoinbitScript : FaucetScript
+{
 
     public override FaucetSettings Settings
     {
@@ -86,8 +86,8 @@ public class CoinbitScript: FaucetScript
         SuccessXPath = "//div[contains(@class,'alert alert-success')]";
         FailXPath = "//div[contains(@class,'alert alert-danger')]";
         Title = "Coinbit.ro";
-    AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
-        
+        AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
+
         base.Start();
     }
     AntibotLinksMlUtils AntibotLinksMlUtils;
@@ -166,7 +166,7 @@ public class CoinbitScript: FaucetScript
 
         Wait(2, 3);
 
-        var startClaim2 = ElementByXPath("//button[@id='s12proceed']");
+        var startClaim2 = ElementByXPath("//button[@id='s11proceed']");
         if (!IsVisible(startClaim2))
         {
             return Fail("start claim btn not found or not visible");
