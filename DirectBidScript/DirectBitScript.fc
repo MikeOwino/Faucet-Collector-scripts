@@ -164,7 +164,7 @@ public class DirectBitScript : FaucetScript
 
         Wait(2, 3);
 
-        var startClaim2 = ElementByXPath("//button[@id='s12proceed']");
+        var startClaim2 = ElementByXPath("//button[@id='s11proceed']");
         if (!IsVisible(startClaim2))
         {
             return Fail("start claim btn not found or not visible");
