@@ -112,9 +112,15 @@ class Coinfaucets : FaucetScript
             "LTC",new Coinfaucet{
                 Url="https://free-ltc.com/",
                 MinWithdraw=0.5
-        }
-
-
+        }  
+        },
+        {
+            "DOGE",
+            new Coinfaucet
+            {
+                Url="https://free-doge.com/",
+                MinWithdraw=10
+            }
         }
     };
 
