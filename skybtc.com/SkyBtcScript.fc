@@ -32,7 +32,7 @@ public class SkyBtcScript : FaucetScript
 
     public override int DoInit()
     {
-        SuccessXPath = "//div[@class='mx-auto v-card v-sheet theme--dark elevation-2 rounded']";
+        SuccessXPath = "//div[contains(text(),'Claim Successfully! Your Reward')]";
         FailXPath = "//div[@class='mx-auto v-card v-sheet theme--red elevation-2 rounded']";
         Title = "Welcome|SkyBtc";
         return base.DoInit();
@@ -110,8 +110,8 @@ public class SkyBtcScript : FaucetScript
 
         if (IsVisible(minuteElement) && IsVisible(secondElement))
         {
-            int m, s; 
-            if(int.TryParse(minuteElement.Text,out m) && int.TryParse(secondElement.Text, out s))
+            int m, s;
+            if (int.TryParse(minuteElement.Text.Replace("minutes", "").Trim(), out m) && int.TryParse(secondElement.Text.Replace("seconds", "").Trim(), out s))
             {
                 return m * 60 + s;
             }
