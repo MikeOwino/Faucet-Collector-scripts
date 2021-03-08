@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 //css_ref FaucetCollector.Utilities
 //css_ref FaucetCollector.Captcha
 namespace Adbtc
@@ -40,9 +41,7 @@ namespace Adbtc
 
         public override void Start()
         {
-
-            Title = "adbtc.top|DO|YOUH|You|Please solve the|satoshi|Сатоши|Bitcoin|Just a moment|adbtc|YES!|Active Window";
-
+            Title = "adbtc.top|DO|YOUH|You|Please solve the|satoshi|Bitcoin|Just a moment|Сатоши|adbtc|YES!|Active Window";
 
             SuccessXPath = "//p[@class='white-text flow-text']";
             FailXPath = "//a[@class='btn-large light-blue darken-4']";
@@ -56,7 +55,7 @@ namespace Adbtc
             return base.DoInit();
         }
 
-      
+
         public override bool IsLoggedIn()
         {
 
@@ -135,14 +134,15 @@ namespace Adbtc
             return base.BeforeLogin();
         }
 
-        private void CheckCloudFlare()
+        private void CheckCloudFlare(string href="")
         {
-
+         
             FaucetCollector.Utilities.CloudFlareUtilities cloudUtils = new FaucetCollector.Utilities.CloudFlareUtilities(this);
+            bool haveParam = !string.IsNullOrEmpty(href);
 
-            if (cloudUtils.IsVisibleCloudflare())
+            if (cloudUtils.IsVisibleCloudflare() || haveParam)
             {
-                cloudUtils.TryGetCloudflareCookieUsingChrome(Driver.Url);
+                cloudUtils.TryGetCloudflareCookieUsingChrome(!haveParam? Driver.Url:href);
 
             }
         }
@@ -241,12 +241,27 @@ namespace Adbtc
             // Open the menu if we are in mobile design 
             OpenMenu();
 
-            var surf = ElementByXPath("//a[contains(@href,'https://adbtc.top/surf/browse')]//li[contains(@class,'collection-item')]");
+            //var surf = ElementByXPath("//a[contains(@href,'https://adbtc.top/surf/browse')]//li[contains(@class,'collection-item')]");           
+            var surf = ElementByXPath("//a[contains(@href,'https://adbtc.top/surf/browse')]");
             if (!IsVisible(surf))
             {
                 return Fail("Go to ad area button is not visible");
             }
-            Click(surf);
+            
+            string surfHref = surf.GetAttribute("href");
+
+            if (string.IsNullOrEmpty(surfHref))
+            {
+                return Fail("Can't locate ads url");
+            }
+
+
+            GoToUrl("about:blank");
+
+
+            CheckCloudFlare(surfHref);
+
+
             return base.BeforeSolveFaucet();
         }
         public override int DoSolveFaucet()
