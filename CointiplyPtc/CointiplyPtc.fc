@@ -305,7 +305,7 @@ public class CointiplyPtc : FaucetScript
             string Path = AssetDir("Other") + "\\KnowImages\\" + CorrectOption + ".png";
             if (!File.Exists(Path))
             {
-                Disable();
+                Log("Asset for option: "+CorrectOption + "Not exist", Level.Error);
                 return;
 
             }
