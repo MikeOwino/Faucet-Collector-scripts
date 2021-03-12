@@ -1,8 +1,7 @@
 
-
 //==================//
 //script Written by: ••AviramDayan•• 01/02/2020 10:30AM - Version 1
-//Last Update: 10/06/2020 15:00AM - Version 4
+//Last Update: 08/03/2021 17:30PM - Version 5
 //==================//
 
 using System;
@@ -33,7 +32,7 @@ public class haugames : FaucetScript
     {
         get
         {
-            return new FaucetSettings("https://haugames.com")
+            return new FaucetSettings("https://HauGames.club")
             {
                 new FaucetSetting(){Name="Email",Display="Your Email (important not UserName)",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
@@ -56,7 +55,7 @@ public class haugames : FaucetScript
 
 
     //My DomainName
-    //string DomainName_String = "https://haugames.com";
+    //string DomainName_String = "https://HauGames.club";
 	//example - GoToUrl(DomainName_String);
     //==========//
 	
@@ -69,7 +68,7 @@ public class haugames : FaucetScript
 		ad=false;
 		
         //Title that shows in the browser. Is used to identify and close popup windows
-        Title = "haugames.com";
+        Title = "haugames";
 
         //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
         SuccessXPath = "//*"; //*[text()='']
@@ -142,7 +141,7 @@ public class haugames : FaucetScript
   if (!IsVisible(ExitButton))
   {
 
-        GoToUrl("https://haugames.com/login");
+        GoToUrl("https://HauGames.club/login");
         Wait();		
         Wait(2);
 
@@ -274,10 +273,10 @@ public class haugames : FaucetScript
       if (GetBoolSetting("FaucetClaim"))
       {
 
-        Title = "haugames.com";
+        Title = "haugames";
 	
         //else go to normal login
-		GoToUrl("https://haugames.com/earn-crypto-coins/neo-earning");
+		GoToUrl("https://HauGames.club/earn-crypto-coins/neo-earning");
 		
 	    Wait();
 	    Wait(4);
@@ -291,17 +290,24 @@ public class haugames : FaucetScript
         var Button_Claim = ElementByXPath("//button[contains(text(),'Start Round')]");  
         if (IsVisible(Button_Claim))
 		{
-        Title = "NEO Cryptocurrency";
 		Click(Button_Claim);		
 		}
+		
+        Title = "tpkom";
 
-	    Wait(10);
+	    Wait(13);
+		
+        var RobotButton = ElementByXPath("//button[contains(text(),'obot')]");  
+        if (IsVisible(RobotButton))
+		{
+		Click(RobotButton);		
+		}
 
-		Recaptcha_Function(); //call
+		//Recaptcha_Function(); //call
 		
 		Wait(2);		
 
-        Title = "haugames.com";
+        Title = "haugames";
 		
         var ButtonLog = ElementByXPath("//a[contains(text(),'Go')]");  
         if (IsVisible(ButtonLog))
