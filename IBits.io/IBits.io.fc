@@ -105,13 +105,15 @@ public class IBitsScript : FaucetScript
     {
 
 
-        var taskCaptcha = Task.Run(() => base.DoSolveCaptcha());
+        var resultRecaptcha = base.DoSolveCaptcha();
+        if (resultRecaptcha > 0)
+        {
+            return resultRecaptcha;
+        }
 
-        var antibotLinksTask = Task.Run(() => AntibotLinksMlUtils.DosolveAntibotLinks());
+        var resultAntibot = AntibotLinksMlUtils.DosolveAntibotLinks();
 
-        Task.WhenAll(taskCaptcha, antibotLinksTask).Wait();
-
-        return taskCaptcha.Result + antibotLinksTask.Result;
+        return resultRecaptcha + resultAntibot;
     }
 
     public override int GetFaucetWaitTime()
