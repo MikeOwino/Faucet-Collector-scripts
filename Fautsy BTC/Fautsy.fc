@@ -106,16 +106,15 @@ public class FautsyScript : FaucetScript
     public override int DoSolveCaptcha()
     {
 
+        var resultRecaptcha = base.DoSolveCaptcha();
+        if (resultRecaptcha > 0)
+        {
+            return resultRecaptcha;
+        }
 
+        var resultAntibot = AntibotLinksMlUtils.DosolveAntibotLinks();
 
-        var taskCaptcha = Task.Run(() => base.DoSolveCaptcha());
-
-        var antibotLinksTask = Task.Run(() => AntibotLinksMlUtils.DosolveAntibotLinks());
-
-        Task.WhenAll(taskCaptcha, antibotLinksTask).Wait();
-
-
-        return taskCaptcha.Result + antibotLinksTask.Result;
+        return resultRecaptcha + resultAntibot;
 
 
     }
