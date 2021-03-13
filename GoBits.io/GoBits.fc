@@ -112,15 +112,15 @@ public class GobitsScript : FaucetScript
 
 
 
-        var taskCaptcha = Task.Run(() => base.DoSolveCaptcha());
+        var resultRecaptcha = base.DoSolveCaptcha();
+        if (resultRecaptcha > 0)
+        {
+            return resultRecaptcha;
+        }
 
+        var resultAntibot = AntibotLinksMlUtils.DosolveAntibotLinks();
 
-        var taskAbl = Task.Run(() => AntibotLinksMlUtils.DosolveAntibotLinks());
-
-        Task.WhenAll(taskCaptcha, taskAbl).Wait();
-
-
-        return taskCaptcha.Result + taskAbl.Result;
+        return resultRecaptcha + resultAntibot;
 
     }
 
