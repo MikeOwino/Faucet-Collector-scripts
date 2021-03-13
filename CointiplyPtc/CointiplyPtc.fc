@@ -302,12 +302,22 @@ public class CointiplyPtc : FaucetScript
         if (IsVisible(Actual))
         {
             string CorrectOption = Actual.Text.Split(':')[1].Trim();
-            string Path = AssetDir("Other") + "\\KnowImages\\" + CorrectOption + ".png";
-            if (!File.Exists(Path))
-            {
-                Log("Asset for option: "+CorrectOption + "Not exist", Level.Error);
-                return;
+            string AssetsDirectory = Path.Combine(AssetDir("Other"), "KnowImages");
 
+            if (!Directory.Exists(AssetsDirectory))
+            {
+                Log("Directory for assets does not exist in:\n" + AssetsDirectory, Level.Error);
+                return;
+            }
+
+            var files = Directory.GetFiles(AssetsDirectory);
+
+            var correctFile = files.FirstOrDefault(f => f.ToLower().Replace(" ", "").Contains(CorrectOption.ToLower().Replace(" ", "")));
+
+            if (string.IsNullOrEmpty(correctFile) || !File.Exists(correctFile))
+            {
+                Log("Asset for option: " + CorrectOption + "Not exist", Level.Error);
+                return;
             }
 
             var TimeToShuffling = ElementByXPath("//span[contains(text(),'Images shuffling in ')]");
@@ -325,9 +335,9 @@ public class CointiplyPtc : FaucetScript
             {
                 Log("Something bad was happenned getting the correct time ex message " + ex.Message);
             }
-            if (File.Exists(Path))
+            if (File.Exists(correctFile))
             {
-                using (Stream img = File.Open(Path, FileMode.Open))
+                using (Stream img = File.Open(correctFile, FileMode.Open))
                 {
                     using (Bitmap KnowImage = ResizeImage(new Bitmap(img), new Size(70, 70)))
                     {
