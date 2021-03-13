@@ -104,15 +104,17 @@ public class ClaimBitsScript : FaucetScript
     public override int DoSolveCaptcha()
     {
 
-     
 
-        var taskCaptcha = Task.Run(() => base.DoSolveCaptcha());
 
-        var antibotLinksTask = Task.Run(() => AntibotLinksMlUtils.DosolveAntibotLinks());
+        var resultRecaptcha = base.DoSolveCaptcha();
+        if (resultRecaptcha > 0)
+        {
+            return resultRecaptcha;
+        }
 
-        Task.WhenAll(taskCaptcha, antibotLinksTask).Wait();
+        var resultAntibot = AntibotLinksMlUtils.DosolveAntibotLinks();
 
-        return taskCaptcha.Result + antibotLinksTask.Result;
+        return resultRecaptcha + resultAntibot;
     }
 
     public override int GetFaucetWaitTime()
