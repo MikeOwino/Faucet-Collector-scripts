@@ -1,25 +1,23 @@
+
 //==================//
-//script Written by: ••AviramDayan•• 14/03/2021 04:00AM - Version 1
-//Last Update: 14/03/2021 04:00AM - Version 1
+//script Written by: ••AviramDayan•• 14/03/2021 05:00AM - Version 1
+//Last Update: 14/03/2021 05:00AM - Version 1
 //==================//
 
 using System;
 using System.IO;
 using FaucetCollector.Script;
+using System.Text.RegularExpressions;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Globalization;
 
-//css_inc ShortLinkUtilities
 //css_ref FaucetCollector.Utilities
 //css_inc RecaptchaUtilities
-//css_inc AntiBotLinksUtility
-//css_ref ImageProcessing
-//css_ref ProcessingImagesUsingLockBits
-//css_inc GetestCaptcha
-
 
 public class graviex : FaucetScript
 {
@@ -269,11 +267,12 @@ public class graviex : FaucetScript
 		Log("FaucetCollect: Collect All" );
 	    Wait();		
 	    Wait(5);	
+          
 		
         var TimeToWaitForBreak = DateTime.Now.AddSeconds(360);
         while (true)
         {
-        
+
           var FaucetCheck = ElementByXPath("//a[contains(text(),'Take')] | //a[contains(text(),'take')]");
           if (FaucetCheck !=null) //Visible
           {
