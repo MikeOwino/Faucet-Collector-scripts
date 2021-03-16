@@ -218,6 +218,8 @@ class RollerCoin : FaucetScript
             Click(ButtonAcceptCookies);
             Wait();
         }
+        TryClickOnEnergyButton();
+
         return base.BeforeSolveFaucet();
     }
 
@@ -299,6 +301,17 @@ class RollerCoin : FaucetScript
 
 
         return base.DoSolveFaucet();
+    }
+
+    private void TryClickOnEnergyButton()
+    {
+        var rechargeButton = ElementByXPath("//button[contains(@class,'electricity-recharge-btn')]");
+
+        if(IsVisible(rechargeButton) && rechargeButton.Enabled)
+        {
+            Click(rechargeButton);
+            Wait(1, 2);
+        }
     }
 
 
