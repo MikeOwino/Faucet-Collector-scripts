@@ -1,11 +1,14 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/11/2018 17:00PM
-//Last update - 18/02/2021 06:30AM - version 16
+//Last update - 16/03/2021 18:00PM - version 17
 //==================//
 
 using System;
 using System.IO;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using FaucetCollector.Script;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
@@ -37,6 +40,8 @@ public class bitsler : FaucetScript
                 //new FaucetSetting(){Name="DeleteCookies",Display="Delete Cookies - Sometimes solves problems in login area (Recommended)",Type=EditorType.CheckBox,Default=false},
 
 				//new FaucetSetting(){Name="Menu_SiteLanguage",Display="Menu_SiteLanguage - Select Your Language",Type=EditorType.ComboBox,Default="en",Items=new System.Collections.Generic.List<string>{"en","es","fr","br","ru","tr","jp"}},
+
+                new FaucetSetting() { Name = "ExclusiveBonusDrop_Telegram", Display = "Exclusive Bonus Drop - ON/OFF - in Telegram - 'bitsler.com - Play Smarter' - Public Channel", Type = EditorType.CheckBox, Default =true},	
 
                 new FaucetSetting(){Name="FreeBtc",Display="FreeBtc - bitsler coin - ON/OFF",Type=EditorType.CheckBox,Default=false},
                 new FaucetSetting(){Name="RakeBack",Display="RakeBack - ON/OFF - from Gold level",Type=EditorType.CheckBox,Default=false},
@@ -739,6 +744,67 @@ public override int GetFaucetWaitTime()
 		 }
 		//===========================//
 
+
+		//======//
+		//ExclusiveBonusDrop_Telegram//
+		//======//
+        if (GetBoolSetting("ExclusiveBonusDrop_Telegram"))
+        {
+	      CheckForPopupsEnabled = false;    //disable
+
+	      Title="bitsler";		
+		  
+          GoToUrl("https://t.me/s/bitsler_casino");
+	      Log("Go to try - ExclusiveBonusDrop_Telegram");	
+	      Wait();
+	      Wait(5);	
+
+            //Vertical - scrollHeight | scrollTop   //Horizontal - | scrollWidth | scrollLeft
+            ExecuteScript("window.scrollTo(0, document.body.scrollTop)"); //if some elements not found in html - just before need to do `scrollTop` to find some elements
+            Wait(3);
+            ExecuteScript("window.scrollTo(0, document.body.scrollTop)"); //again
+            Wait(3);
+			
+            var ExclusiveBonusDrop_Telegram_Last = ElementsByXPath("//div[contains(@class,'tgme_widget_message_text js-message_text') and contains(., 'COUPON') ]//a[position() = last() ]");
+            var ElementsToCheck = ExclusiveBonusDrop_Telegram_Last.LastOrDefault();
+
+            if (ElementsToCheck ==null) // Not Visible
+            {
+	           Log("ElementsToCheck - NOT found");
+			}
+			
+            if (ElementsToCheck !=null) //Visible  
+            {
+			   Click(ElementsToCheck);
+	           Log("ElementsToCheck - here");
+			   
+               Driver.SwitchTo().Window(Driver.WindowHandles[1]); 
+			   
+			   Wait(5);
+			   
+			   Coins_Function();
+			   
+			   Wait(5);
+			   
+               var Redeem_VAR = ElementByXPath("//span/span[contains(text(),'Redeem')]"); 
+		       if (IsVisible(Redeem_VAR))
+               {				
+	             Log("ExclusiveBonusDrop_Telegram_Last - here");			
+			     Click(Redeem_VAR);
+			     Wait(7);			  
+			   }
+			   
+               Driver.SwitchTo().Window(Driver.WindowHandles[0]); 
+			   
+               CheckForPopupsEnabled = true;     //enable
+               CheckForPopups();    //call		
+			   
+	           Title="bitsler";		  
+               GoToUrl("https://bitsler.com");	  
+            }
+	
+        } //end ExclusiveBonusDrop_Telegram
+		//======//
 	
          //===========//
          //FreeBtc//
@@ -1043,6 +1109,29 @@ public override int GetFaucetWaitTime()
 
 
 	
+ //=================//
+ //Games_Save_Settings_For_AutoBet_Function
+ //=================//
+ public int Games_Save_Settings_For_AutoBet_Function()
+ {
+	 
+  var Message_Save_Settings = ElementByXPath("//p[contains(text(),'you like to save your')]"); 
+  if (IsVisible(Message_Save_Settings))
+  {
+    Log("AutoBet - popup - save settings ");
+    var No_Button = ElementByXPath("//button[@type='button' and contains(text(),'No') or contains(text(),'no') ]");
+    if (IsVisible(No_Button))
+    {
+      Log("AutoBet - click - NO - Button  ");
+      Click(No_Button);
+    }
+				 
+  }
+
+ return 0;
+ }//end Games_Save_Settings_For_AutoBet_Function
+//=================//	
+	
 	
 	
 //====================//	
@@ -1110,6 +1199,10 @@ public override int GetFaucetWaitTime()
           Click(SpinButtonAuto);
 
 	      Wait(2);
+
+          Games_Save_Settings_For_AutoBet_Function(); //call
+
+          Wait(2);
 		  
           SetText(CounterInput, GetSetting("MulticolorGame_Counter"));
 
@@ -1177,6 +1270,10 @@ Wait(2);
 var Dice_Tab_AutoGame = ElementByXPath("//span[contains(text(),'Auto') or contains(text(),'auto') ]");
 Click(Dice_Tab_AutoGame);
 Log("Dice - click on Tab AutoGame");
+Wait(2);
+
+Games_Save_Settings_For_AutoBet_Function(); //call
+
 Wait(2);
 
 //Dice_AmountInput
