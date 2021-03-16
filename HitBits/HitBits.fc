@@ -138,7 +138,7 @@ class HitBits : FaucetScript
         }
     }
 
-    
+
     public override int DoSolveFaucet()
     {
         GoToUrl("https://hitbits.io/home");
@@ -258,10 +258,19 @@ class HitBits : FaucetScript
                     {
                         CheckForPopupsEnabled = false;
 
-                        Click(visitLink,false);
-                        if (Driver.WindowHandles.Count > 1)
+                        Click(visitLink, false);
+
+                        Wait(2, 3);
+
+                        if (Driver.WindowHandles.Count == 2)
                         {
-                            Driver.SwitchTo().Window(Driver.WindowHandles[1]);
+                            Driver.SwitchTo().Window(Driver.WindowHandles[0]);
+                            Driver.Close();
+
+                            Driver.SwitchTo().Window(Driver.WindowHandles[0]);
+
+                            Driver.SwitchTo().DefaultContent();
+                            CheckForPopupsEnabled = true;
                         }
 
                         shortLinkBypasser.DoShortLink();
@@ -271,7 +280,7 @@ class HitBits : FaucetScript
                         CheckForPopupsEnabled = true;
                         Driver.SwitchTo().Window(Driver.WindowHandles[0]);
                         CheckForPopups();
-                        
+
                         GoToUrl("https://hitbits.io/home");
                     }
 
