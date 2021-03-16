@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM - Version 1
-//Last Update: 22/06/2020 22:25PM - Version 23
+//Last Update: 16/03/2021 21:00PM - Version 24
 //==================//
 
 using System;
@@ -39,6 +39,8 @@ public class luckyfishorg : FaucetScript
                 new FaucetSetting() { Name = "UserCustomTimeLimitFaucet_input", Display = "UserCustomTimeLimitFaucet - if you claim multiple currency one after one, and you have a message to wait between each coin, so i recommended to set to 2 min (the default is 2 min) ", Type = EditorType.Numeric, Default = 2},
 
                 new FaucetSetting() { Name = "AllCoinsFaucets", Display = "AllCoinsFaucets - ON/OFF", Type = EditorType.CheckBox, Default = true},	
+
+                new FaucetSetting() { Name = "DailyWager", Display = "DailyWager - ON/OFF", Type = EditorType.CheckBox, Default = true},	
 				
                 new FaucetSetting() { Name = "btc", Display = "btc - claim", Type = EditorType.CheckBox, Default = true},	
                 new FaucetSetting() { Name = "doge", Display = "doge - claim", Type = EditorType.CheckBox, Default = true},	
@@ -300,7 +302,49 @@ public class luckyfishorg : FaucetScript
      }// end AffWithdraw
      //=============//
 	 
-	 
+
+
+     //===========//
+     //DailyWager
+     //===========//
+
+     if (GetBoolSetting("DailyWager"))
+     {	
+
+        Title = "LuckyFish.io";
+        GoToUrl("https://www.luckyfish.io/");
+		Log("Go to DailyWager");	
+		Wait();
+		Wait(2);	
+
+        var AccountMenu = ElementByXPath("//div[contains(@class,'el-dropdown')]/span");
+        if (IsVisible(AccountMenu))
+        {		
+		Log("AccountMenu");		
+        Click(AccountMenu);
+        }
+
+		Wait(2);
+		
+        var Tasks_URL_Tab = ElementByXPath("//li[contains(@class,'el-dropdown-menu') and contains(text(),'Task') or contains(text(),'task')]");
+        if (IsVisible(Tasks_URL_Tab))
+        {		
+		Log("Tasks_URL_Tab");		
+        Click(Tasks_URL_Tab);
+        }
+
+		Wait(2);
+
+        var DailyWager_Claim = ElementByXPath("//tr[contains(., 'Daily') or contains(., 'daily')]/td[contains(@class,'3')]//span[contains(text(),'Do') or contains(text(),'do') ]");
+        if (IsVisible(DailyWager_Claim))
+        {		
+		Log("DailyWager_Claim");		
+        Click(DailyWager_Claim);
+        ClaimSuccess(); //Marks the claim as a success
+        }	
+		
+     }// end DailyWager 
+
 
 
      //========//
