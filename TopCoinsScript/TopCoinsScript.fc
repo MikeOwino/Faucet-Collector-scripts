@@ -55,7 +55,7 @@ public class TopCoinsScript : FaucetScript
     {
         get
         {
-            string selectedFaucet = GetSetting("Facet");
+            string selectedFaucet = GetSetting("Faucet");
 
             if (AvailableFaucets.ContainsKey(selectedFaucet))
             {
