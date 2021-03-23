@@ -86,14 +86,14 @@ public class EarnScript : FaucetScript
 
         Wait();
 
-        var userBox = ElementByXPath("//div[@id='signupModal']//input[@name='email']");
+        var userBox = ElementByXPath("//div[@id='loginModal']//input[@name='email']");
         if (!IsVisible(userBox))
         {
             return Fail("User box is not visible or not found");
         }
         SetText(userBox, GetSetting("User"));
 
-        var passwordBox = ElementByXPath("//div[@id='signupModal']//input[@name='password']");
+        var passwordBox = ElementByXPath("//div[@id='loginModal']//input[@name='password']");
 
         if (!IsVisible(passwordBox))
         {
@@ -143,7 +143,7 @@ public class EarnScript : FaucetScript
 
     public override int DoSolveCaptcha()
     {
-        var result =base.DoSolveCaptcha();
+        var result = base.DoSolveCaptcha();
         if (result > 0)
         {
             return result;
@@ -163,11 +163,11 @@ public class EarnScript : FaucetScript
 
         var seconds = ElementByXPath("//div[@id='CDT']//span[contains(@class,'number sec')]");
 
-        if(IsVisible(minutes) && IsVisible(hours) && IsVisible(seconds))
+        if (IsVisible(minutes) && IsVisible(hours) && IsVisible(seconds))
         {
             int minutesN, hoursN, secondsN;
 
-            if(int.TryParse(minutes.Text,out minutesN) && int.TryParse(hours.Text,out hoursN) && int.TryParse(seconds.Text,out secondsN))
+            if (int.TryParse(minutes.Text, out minutesN) && int.TryParse(hours.Text, out hoursN) && int.TryParse(seconds.Text, out secondsN))
             {
                 return minutesN * 60 + hoursN * 3600 + secondsN;
             }
