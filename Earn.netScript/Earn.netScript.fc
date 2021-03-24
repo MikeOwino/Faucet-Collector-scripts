@@ -66,7 +66,7 @@ public class EarnScript : FaucetScript
 
     public override int DoInit()
     {
-        Title = "Faucet";
+        Title = "Faucet|m:";
         SuccessXPath = "//div[@id='lucky_number']|//div[@id='lucky_number']//h3";
         FailXPath = "//div[@class='alert alert-default']";
         Url = FaucetUrl;
@@ -134,7 +134,8 @@ public class EarnScript : FaucetScript
             return result;
         }
 
-        Click(claimBtn);
+        //use js no popup
+        ExecuteScript("arguments[0].click()", claimBtn);
         Wait(1, 2);
 
 
