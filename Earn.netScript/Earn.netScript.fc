@@ -134,8 +134,16 @@ public class EarnScript : FaucetScript
             return result;
         }
 
-        //use js no popup
-        ExecuteScript("arguments[0].click()", claimBtn);
+        string claimFunction = claimBtn.GetAttribute("onclick");
+        if (!string.IsNullOrEmpty(claimFunction))
+        {
+            ExecuteScript(claimFunction);
+        }
+        else
+        {
+            //use js no popup
+            Click(claimBtn);
+        }
         Wait(1, 2);
 
 
@@ -158,24 +166,64 @@ public class EarnScript : FaucetScript
     }
     public override int GetFaucetWaitTime()
     {
+        string FaucetUrl = this.FaucetUrl + "/home";
+        GoToUrl(FaucetUrl);
 
-        var minutes = ElementByXPath("//div[@id='CDT']//span[contains(@class,'number min')]");
-        var hours = ElementByXPath("//div[@id='CDT']//span[contains(@class,'number hour')]");
+        Wait(1, 2);
 
-        var seconds = ElementByXPath("//div[@id='CDT']//span[contains(@class,'number sec')]");
-
-        if (IsVisible(minutes) && IsVisible(hours) && IsVisible(seconds))
-        {
-            int minutesN, hoursN, secondsN;
-
-            if (int.TryParse(minutes.Text, out minutesN) && int.TryParse(hours.Text, out hoursN) && int.TryParse(seconds.Text, out secondsN))
-            {
-                return minutesN * 60 + hoursN * 3600 + secondsN;
-            }
-        }
-
-
-        return base.GetFaucetWaitTime();
+        return GetTimerUsingJs();
     }
+
+
+    private int GetTimerUsingJs()
+    {
+        // As the faucet remove the elements from the site to avoid exception we use JS to catch the timer
+        string timeInSeconds = ExecuteScript(GetTimerJSFunc).ToString();
+        int seconds = 0;
+        if (int.TryParse(timeInSeconds, out seconds))
+        {
+
+            Log("Faucet is not ready to claim");
+            return seconds;
+        }
+        Log("Faucet is ready to claim");
+        return seconds;
+    }
+
+    private const string GetTimerJSFunc = "function getTimer(){" +
+        "let cdt = document.getElementById('CDT');" +
+        "let totalSeconds =0;" +
+        "if(cdt){" +
+        "let hourTimer = cdt.children[0];" +
+        "if(hourTimer){" +
+        "let text = hourTimer.outerText;" +
+        "if(text){" +
+        "let hours = replaceAndParse(text,'HOURS');" +
+        "if(hours){" +
+        "totalSeconds+=hours*3600;" +
+        "}}}" +
+        "let minutesTimer = cdt.children[1];" +
+        "if(minutesTimer){" +
+        "let text  = minutesTimer.outerText;" +
+        "if(text){" +
+        "let minutes = replaceAndParse(text,'MINS');" +
+        "if(minutes){" +
+        "totalSeconds+=minutes*60;" +
+        "}}}" +
+        "let secondsTimer = cdt.children[2];" +
+        "if(secondsTimer){" +
+        "let text = secondsTimer.outerText;" +
+        "if(text){" +
+        "let seconds = replaceAndParse(text,'SECS');" +
+        "if(seconds){" +
+        "totalSeconds+=seconds;" +
+        "}}}}" +
+        "return totalSeconds;}" +
+        "function replaceAndParse(text,replace){" +
+        "text = text.replace(replace,'');" +
+        "return Number.parseInt(text);}" +
+        "return getTimer()";
+
+
 
 }
