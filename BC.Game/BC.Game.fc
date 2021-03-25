@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 30/04/2019 21:09PM - Version 1
-//Last Update: 25/03/2021 08:00AM - Version 40
+//Last Update: 25/03/2021 09:00AM - Version 40
 //==================//
 
 using System;
@@ -33,7 +33,7 @@ public class bcgame : FaucetScript
         {	
             return new FaucetSettings("https://bc.game/")
             {
-                new FaucetSetting(){Name="UserName",Display="UserName",Type=EditorType.TextBox,Required=false},
+                new FaucetSetting(){Name="UserName",Display="Email",Type=EditorType.TextBox,Required=false},
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=false},
                 //new FaucetSetting(){Name="DeleteCookies",Display="Delete Cookies - Sometimes solves problems (in login) if you have (Recommended)",Type=EditorType.CheckBox,Default=false},
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim - LuckySpin",Type=EditorType.CheckBox,Default=true},	
