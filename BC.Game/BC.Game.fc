@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 30/04/2019 21:09PM - Version 1
-//Last Update: 16/10/2020 05:00AM - Version 39
+//Last Update: 25/03/2021 08:00AM - Version 40
 //==================//
 
 using System;
@@ -38,7 +38,7 @@ public class bcgame : FaucetScript
                 //new FaucetSetting(){Name="DeleteCookies",Display="Delete Cookies - Sometimes solves problems (in login) if you have (Recommended)",Type=EditorType.CheckBox,Default=false},
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim - LuckySpin",Type=EditorType.CheckBox,Default=true},	
                 //new FaucetSetting(){Name="ToiletPaper",Display="ToiletPaper - Claim Token",Type=EditorType.CheckBox,Default=false},	
-                new FaucetSetting(){Name="Tredump_Bidgreen",Display="Tredump_Bidgreen - Claim Token",Type=EditorType.CheckBox,Default=true},
+                //new FaucetSetting(){Name="Tredump_Bidgreen",Display="Tredump_Bidgreen - Claim Token",Type=EditorType.CheckBox,Default=true},
 				 
 				new FaucetSetting(){Name="MenuCoins",Display="MenuCoins - Select Favorite Coins",Type=EditorType.ComboBox,Default="JB",Items=new System.Collections.Generic.List<string>{"TRTL","EOS","TRX","VSYS","BCG","BKBT","DOGE","LTC","JB"}},
                 
@@ -120,7 +120,7 @@ public class bcgame : FaucetScript
     public override bool IsLoggedIn()
     {
 	    //save Login Cookies - Check if the "Logout" exist
-        return ElementByXPath("//div[@class='user']") != null;
+        return ElementByXPath("//a[contains(@href,'user')]") != null;
 	 
         //return base.IsLoggedIn();
     }
@@ -153,7 +153,7 @@ public class bcgame : FaucetScript
     public override int DoLogin()
     {
 	
-     var ExitButton = ElementByXPath("//div[@class='user']"); //user login panel - 1 Unique
+     var ExitButton = ElementByXPath("//a[contains(@href,'user')]"); //user login panel - 1 Unique
 
 	
 	 //if i NOT Login - go to Login Page
@@ -164,7 +164,7 @@ public class bcgame : FaucetScript
 		Wait();		
 		Wait(2);
 		
-        var LoginLightBox = ElementByXPath("//span[@class='login-label'] | //a[@class='nologin']");		 
+        var LoginLightBox = ElementByXPath("//p[contains(text(),'ign in')]");		 
         Click(LoginLightBox);
 		
 		Wait();		
@@ -180,7 +180,7 @@ public class bcgame : FaucetScript
 		
 		Wait(2);
 			
-        var ButtonLog = ElementByXPath("//div[contains(@class,'xdialog')]//button[contains(@class,'button')]");
+        var ButtonLog = ElementByXPath("//div[contains(@class,'dialog-body')]//div[contains(text(),'ign in')]");
         Click(ButtonLog);
 		
 		Wait(1);
@@ -299,20 +299,20 @@ public class bcgame : FaucetScript
 		GoToUrl("https://bc.game/");
 		Wait();		
 		Wait(5);
+		
 
-		var Timer_ON = ElementByXPath("//div[@id='spin-enter' and @class='countdown']");
-		var Timer_OFF = ElementByXPath("//div[@id='spin-enter' and @class='enter']");
+		var Timer = ElementByXPath("//div[contains(@class,'enter-animate active')]//img[contains(@src,'EIg9Dof0Cqg5CoRxGf4xCHL')]");
 
-		if (IsVisible(Timer_ON))
+		if (Timer ==null ) //NOT visible
 		{
 		  Log("FaucetClaim - not visible");
 		}
 		
-		if (IsVisible(Timer_OFF))
+		if (Timer !=null) //visible
 		{
 		    Log("FaucetClaim - Timer not visible - go to LuckySpin");
 
-		    var OpenLuckySpin_Button = ElementByXPath("//div[@id='spin-enter']");
+		    var OpenLuckySpin_Button = ElementByXPath("//div[contains(@class,'enter-animate active')]//img[contains(@src,'EIg9Dof0Cqg5CoRxGf4xCHL')]");
             Click(OpenLuckySpin_Button);
 		    Wait(4);
 		    
@@ -320,45 +320,44 @@ public class bcgame : FaucetScript
             var canvas_VAR = Driver.FindElement(By.ClassName("spin-canvas"));  
             var size = canvas_VAR.Size;
 
-			var Timer_ON_2 = ElementByXPath("//div[@id='spin-enter' and @class='countdown']");		
-            var Timer_OFF_2 = ElementByXPath("//div[@id='spin-enter' and @class='enter']");				
+			var Timer_2 = ElementByXPath("//div[contains(@class,'enter-animate active')]//img[contains(@src,'EIg9Dof0Cqg5CoRxGf4xCHL')]");		
 
-			if (IsVisible(Timer_OFF_2))
+			if (Timer_2 !=null) //visible
 		    {	
 		    Log("FaucetClaim - try LuckySpin - 50% zoom");
 		    Wait(3);
             new Actions(Driver).MoveToElement(canvas_VAR, 241, 259).Click().Release().Perform(); // 50% zoom
 			}
 
-			if (IsVisible(Timer_OFF_2))
+			if (Timer_2 !=null) //visible
 		    {	
 		    Log("FaucetClaim - try LuckySpin - 67% zoom");
 		    Wait(3);
             new Actions(Driver).MoveToElement(canvas_VAR, 242, 273).Click().Release().Perform(); // 67% zoom
 			}
 
-			if (IsVisible(Timer_OFF_2))
+			if (Timer_2 !=null) //visible
 		    {	
 		    Log("FaucetClaim -try LuckySpin - 75% zoom");	
 		    Wait(3);
             new Actions(Driver).MoveToElement(canvas_VAR, 245, 271).Click().Release().Perform(); // 75% zoom
 			}
 			
-			if (IsVisible(Timer_OFF_2))
+			if (Timer_2 !=null) //visible
 		    {	
 		    Log("FaucetClaim - try LuckySpin - 80% zoom");		
 		    Wait(3);
             new Actions(Driver).MoveToElement(canvas_VAR, 242, 272).Click().Release().Perform(); // 80% zoom
 			}
 
-			if (IsVisible(Timer_OFF_2))
+			if (Timer_2 !=null) //visible
 		    {	
 		    Log("FaucetClaim - try LuckySpin - 90% zoom");		
 		    Wait(3);
             new Actions(Driver).MoveToElement(canvas_VAR, 240, 269).Click().Release().Perform(); // 90% zoom
 			}
 
-			if (IsVisible(Timer_OFF_2))
+			if (Timer_2 !=null) //visible
 		    {	
 		    Log("FaucetClaim - try LuckySpin - 100% zoom");		
 		    Wait(3);
@@ -368,7 +367,7 @@ public class bcgame : FaucetScript
 		    
 		    Wait(4);
 
-			if (IsVisible(Timer_ON_2)) 
+			if (Timer_2 ==null ) //NOT visible 
 		    {	
 		    Log("FaucetClaim - LuckySpin - Success");
             Notification("FaucetClaim - LuckySpin - Success");
@@ -388,11 +387,10 @@ public class bcgame : FaucetScript
           if (GetBoolSetting("Agent_Commissions_Reward"))
           { 
 	  
-           GoToUrl("https://bc.game/");
-           Log("Agent_Commissions_Reward - go to");
+           //GoToUrl("https://bc.game/");
+           //Log("Agent_Commissions_Reward - go to");
 		   
-           Wait();
-		   Wait(2); 
+           BonusTasksTab_Open_Function(); //call
 		   
 		   var BoxTasksTop = ElementByXPath("//button[@class='magic-button active'] | //button[@class='magic-button'] ");
            if (IsVisible(BoxTasksTop)) 
@@ -498,18 +496,10 @@ public class bcgame : FaucetScript
         if (GetBoolSetting("3rd_DailyTasks_ClaimBonus"))
         {  
 	
-           GoToUrl("https://bc.game/bonus");
-           Log("3rd_DailyTasks_ClaimBonus - go to");
+           //GoToUrl("https://bc.game/bonus");
+           //Log("3rd_DailyTasks_ClaimBonus - go to");
 		   
-           Wait();
-		   Wait(2); 
-
-		   var Open_3rd_DailyTasks_VAR = ElementByXPath("//div[@class='bonus-item']/div[@class='am-jbtask-wrap img-con']");
-           if (IsVisible(Open_3rd_DailyTasks_VAR)) // click to open & do stuff
-           { 
-           Click(Open_3rd_DailyTasks_VAR);
-           Log("Open_3rd_DailyTasks_VAR");
-           }
+		   BonusTasksTab_Open_Function(); //call
 		   
            Wait();
 		   Wait(2); 
@@ -610,11 +600,14 @@ public class bcgame : FaucetScript
         if (GetBoolSetting("RollingTheLucky"))
         {  
 		
-           GoToUrl("https://bc.game/bonus");
-		   Log("RollingTheLucky: Go to bonus page");		
+           //GoToUrl("https://bc.game/bonus");
+		   //Log("RollingTheLucky: Go to bonus page");		
 		
            Wait();
 		   Wait(2);
+
+		   BonusTasksTab_Open_Function(); //call
+
 		
 		   var OneWindowsVAR = ElementByXPath("//div[@class='bonus-item']/div[@class='am-exchange-wrap img-con']");	
            Click(OneWindowsVAR);
@@ -646,21 +639,21 @@ public class bcgame : FaucetScript
         if (GetBoolSetting("RollDaily"))
         {  
 		
-           GoToUrl("https://bc.game/bonus");
+           GoToUrl("https://bc.game/user/level");
 		   Log("RollDaily: Go to bonus page");		
-		
+	
            Wait();
 		   Wait(2);
 		
-		   var OneWindowsVAR = ElementByXPath("//div[@class='bonus-item']/div[@class='am-rollpoint-wrap img-con']");	
+		   var OneWindowsVAR = ElementByXPath("//div[contains(@class,'center-cont')]//div[contains(text(),'Roll')]");	
            Click(OneWindowsVAR);
 		   Log("RollDaily: click on OneWindows");	
 		
 		   Wait(2);
 		   
-           var Time_RollDaily = ElementByXPath("//div[@class='roll-time']");
-           if (!IsVisible(Time_RollDaily))
-           {
+           //var Time_RollDaily = ElementByXPath("//div[@class='roll-time']");
+           //if (!IsVisible(Time_RollDaily))
+           //{
 			   
 		   var RollDailyVAR = ElementByXPath("//div[@class='roll-butwrap']/button"); //button[contains(text(),'ROLL')]
            Click(RollDailyVAR);
@@ -672,7 +665,7 @@ public class bcgame : FaucetScript
 
            Wait();
            Wait(2);	  
-           } 			   
+           //} 			   
  		   
         }// end RollDaily
         //================//	
@@ -926,8 +919,8 @@ public class bcgame : FaucetScript
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.CheckFaucetResult();
     }
-	
- 
+
+
  
    //====================//	
    //CaptchaX2Function
@@ -935,7 +928,7 @@ public class bcgame : FaucetScript
    public int CaptchaX2Function()
    {
 
-        var Error_1_Message = ElementByXPath("//div[contains(@class,'xinput captcha')]//img | //div[contains(@class,'xform-item')]//img | //div[@class='xmessage-content' and contains(text(),'verify' )] | //div[@class='xnotify-content' and contains(text(),'error')] ");
+        var Error_1_Message = ElementByXPath("//div[contains(@class,'dialog-body')]//img[contains(@class,'verify-img')]");
         if (IsVisible(Error_1_Message))
         {
 			
@@ -943,7 +936,7 @@ public class bcgame : FaucetScript
 		  while(true)
 		  {
             //solve Captcha X2 XPath (1 = captcha image | 2 = input text )
-            var result = DoSolveImageCaptcha(ElementByXPath ("//div[contains(@class,'xinput captcha')]//img | //div[contains(@class,'xform-item')]//img"),ElementByXPath("//input[@placeholder='Verification Code']") ); 
+            var result = DoSolveImageCaptcha(ElementByXPath ("//div[contains(@class,'dialog-body')]//img[contains(@class,'verify-img')]"),ElementByXPath("//input[@placeholder='Verification Code']") ); 
             if (result > 0)
             {
             return Fail("Error_1_Message - Fail login --- captcha failed");
@@ -951,12 +944,12 @@ public class bcgame : FaucetScript
 		    
 		    Wait(5);
 		    
-            var Button_2_Log = ElementByXPath("//button[contains(@class,'xbutton') and contains(text(),'SIGN IN')]");
+            var Button_2_Log = ElementByXPath("//div[contains(@class,'dialog-body')]//div[contains(text(),'ign in')]");
             Click(Button_2_Log);
 		    
 		    Wait(10);
 		
-            var Captcha_image_Check = ElementByXPath("//div[contains(@class,'xinput captcha')]//img | //div[contains(@class,'xform-item')]//img");
+            var Captcha_image_Check = ElementByXPath("//div[contains(@class,'dialog-body')]//img[contains(@class,'verify-img')]");
             if (!IsVisible(Captcha_image_Check))
             {
             Log("break - Captcha_image_Check - not visible");
@@ -972,8 +965,8 @@ public class bcgame : FaucetScript
           }	//end while true
         }
 		
-        var Error_2_Message = ElementByXPath("//div[@class='xmessage-content' and contains(text(),'verify' )] | //div[@class='xnotify-content' and contains(text(),'error')] ");
-        if (IsVisible(Error_2_Message))
+        var Error_2_Message = ElementByXPath("//div[@class='notify-item']//div[contains(text(),'rror')]"); //Error
+        if (Error_2_Message !=null)
         {
           Log("Error_2_Message - Appear - we return after 1 min ");
           //return 2*60; //we return after 1 min	
@@ -983,6 +976,27 @@ public class bcgame : FaucetScript
    }//end CaptchaX2Function
    //====================//	
 		
+
+   //====================//	
+   //BonusTasksTab_Open_Function
+   //====================//	
+   public int BonusTasksTab_Open_Function()
+   {
+	   
+        GoToUrl("https://bc.game/");
+	    Wait();
+	    Wait(2);
+		
+		var BonusTasksTab = ElementByXPath("//div[contains(@class,'img-wrap active')]//img[contains(@src,'zq7O1tJODX2NnV1te2t7itU')]");
+		if (BonusTasksTab !=null) //visible
+		{
+		Log("Click BonusTasksTab");
+	    Click(BonusTasksTab);
+		}
+		
+   return 0;				 
+   }//end BonusTasksTab_Open_Function
+    //====================//	
 
 
    //====================//	
@@ -1019,8 +1033,6 @@ public class bcgame : FaucetScript
    //====================//	
 
 
-
-
 //====================//	
 //Coins_Function
 //====================//	
@@ -1030,12 +1042,14 @@ public class bcgame : FaucetScript
       Wait(2);
 	  
       var OpenTabCoins = ElementByXPath("//div[@class='xselect currency-select']"); 
-      Log("click - OpenTabCoins");
-      Click(OpenTabCoins);
-		
+	  if (IsVisible(OpenTabCoins))
+      {
+	  Log("click - OpenTabCoins");
+      Click(OpenTabCoins);		
       Wait();
       Wait(2);
-		 
+	  }
+	  
       var MenuCoinsVAR = GetSetting("MenuCoins"); 
 	  
       if(MenuCoinsVAR=="TRTL")
