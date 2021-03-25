@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 30/04/2019 21:09PM - Version 1
-//Last Update: 25/03/2021 09:00AM - Version 40
+//Last Update: 25/03/2021 09:15AM - Version 40
 //==================//
 
 using System;
@@ -120,7 +120,7 @@ public class bcgame : FaucetScript
     public override bool IsLoggedIn()
     {
 	    //save Login Cookies - Check if the "Logout" exist
-        return ElementByXPath("//a[contains(@href,'user')]") != null;
+        return ElementByXPath("//div[contains(@class,'wallet')]") != null;
 	 
         //return base.IsLoggedIn();
     }
@@ -153,7 +153,7 @@ public class bcgame : FaucetScript
     public override int DoLogin()
     {
 	
-     var ExitButton = ElementByXPath("//a[contains(@href,'user')]"); //user login panel - 1 Unique
+     var ExitButton = ElementByXPath("//div[contains(@class,'wallet')]"); //user login panel - 1 Unique
 
 	
 	 //if i NOT Login - go to Login Page
