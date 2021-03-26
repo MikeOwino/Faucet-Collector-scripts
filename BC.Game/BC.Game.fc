@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 30/04/2019 21:09PM - Version 1
-//Last Update: 25/03/2021 09:15AM - Version 40
+//Last Update: 25/03/2021 10:00AM - Version 41
 //==================//
 
 using System;
@@ -315,10 +315,10 @@ public class bcgame : FaucetScript
 		    var OpenLuckySpin_Button = ElementByXPath("//div[contains(@class,'enter-animate active')]//img[contains(@src,'EIg9Dof0Cqg5CoRxGf4xCHL')]");
             Click(OpenLuckySpin_Button);
 		    Wait(4);
-		    
+			   
             //MoveToElement ONLY - x/y mouse position click switch - good for "canvas" TagName flash/Games
-            var canvas_VAR = Driver.FindElement(By.ClassName("spin-canvas"));  
-            var size = canvas_VAR.Size;
+			var canvas_VAR = Driver.FindElement(By.TagName("canvas")); 
+			var size = canvas_VAR.Size;
 
 			var Timer_2 = ElementByXPath("//div[contains(@class,'enter-animate active')]//img[contains(@src,'EIg9Dof0Cqg5CoRxGf4xCHL')]");		
 
@@ -326,44 +326,48 @@ public class bcgame : FaucetScript
 		    {	
 		    Log("FaucetClaim - try LuckySpin - 50% zoom");
 		    Wait(3);
-            new Actions(Driver).MoveToElement(canvas_VAR, 241, 259).Click().Release().Perform(); // 50% zoom
+            new Actions(Driver).MoveToElement(canvas_VAR, 205, 211).Click().Release().Perform(); // 50% zoom
 			}
 
 			if (Timer_2 !=null) //visible
 		    {	
 		    Log("FaucetClaim - try LuckySpin - 67% zoom");
 		    Wait(3);
-            new Actions(Driver).MoveToElement(canvas_VAR, 242, 273).Click().Release().Perform(); // 67% zoom
+            new Actions(Driver).MoveToElement(canvas_VAR, 205, 208).Click().Release().Perform(); // 67% zoom
 			}
 
 			if (Timer_2 !=null) //visible
 		    {	
 		    Log("FaucetClaim -try LuckySpin - 75% zoom");	
 		    Wait(3);
-            new Actions(Driver).MoveToElement(canvas_VAR, 245, 271).Click().Release().Perform(); // 75% zoom
+            new Actions(Driver).MoveToElement(canvas_VAR, 210, 210).Click().Release().Perform(); // 75% zoom
 			}
 			
 			if (Timer_2 !=null) //visible
 		    {	
 		    Log("FaucetClaim - try LuckySpin - 80% zoom");		
 		    Wait(3);
-            new Actions(Driver).MoveToElement(canvas_VAR, 242, 272).Click().Release().Perform(); // 80% zoom
+            new Actions(Driver).MoveToElement(canvas_VAR, 212, 211).Click().Release().Perform(); // 80% zoom
 			}
 
 			if (Timer_2 !=null) //visible
 		    {	
 		    Log("FaucetClaim - try LuckySpin - 90% zoom");		
 		    Wait(3);
-            new Actions(Driver).MoveToElement(canvas_VAR, 240, 269).Click().Release().Perform(); // 90% zoom
+            new Actions(Driver).MoveToElement(canvas_VAR, 213, 210).Click().Release().Perform(); // 90% zoom
 			}
 
 			if (Timer_2 !=null) //visible
 		    {	
 		    Log("FaucetClaim - try LuckySpin - 100% zoom");		
 		    Wait(3);
-            new Actions(Driver).MoveToElement(canvas_VAR, 237, 267).Click().Release().Perform(); // 100% zoom
+            new Actions(Driver).MoveToElement(canvas_VAR, 213, 210).Click().Release().Perform(); // 100% zoom
 			}		
             //=======//
+
+		    Wait(4);
+			
+            Driver.Navigate().Refresh(); //Refresh
 		    
 		    Wait(4);
 
