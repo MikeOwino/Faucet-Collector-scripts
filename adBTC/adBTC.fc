@@ -41,7 +41,7 @@ namespace Adbtc
 
         public override void Start()
         {
-            Title = "adbtc.top|DO|YOUH|You|Please solve the|satoshi|Bitcoin|Just a moment|Сатоши|adbtc|YES!|Active Window";
+            Title = "adbtc.top|DO|YOUH|You|Please solve the|satoshi|Bitcoin|Just a moment|adbtc|Сатоши|YES!|Active Window";
 
             SuccessXPath = "//p[@class='white-text flow-text']";
             FailXPath = "//a[@class='btn-large light-blue darken-4']";
@@ -235,6 +235,16 @@ namespace Adbtc
                 Click(OpenMenuBtn);
                 Wait(1);
             }
+            else
+            {
+                var winSectionOpen = ElementByXPath("//div[contains(@class,'collapsible-header')]");
+                if(IsVisible(winSectionOpen))
+                {
+                    Click(winSectionOpen);
+                    Wait();
+                }
+            }
+            
         }
         public override int BeforeSolveFaucet()
         {
@@ -247,6 +257,7 @@ namespace Adbtc
             {
                 return Fail("Go to ad area button is not visible");
             }
+
             
             string surfHref = surf.GetAttribute("href");
 
