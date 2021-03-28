@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/11/2018 17:00PM
-//Last update - 16/03/2021 18:00PM - version 17
+//Last update - 28/03/2021 05:00AM - version 18
 //==================//
 
 using System;
@@ -158,7 +158,7 @@ bool ad;
     public override bool IsLoggedIn()
     {
 
-        return ElementByXPath("//a[@class='nav-link dropdown-toggle'] | //a[contains(text(),'Logout')] ") != null;  
+        return ElementByXPath("//span[contains(@class,'username')] | //a[contains(text(),'Logout')] ") != null;  
 
         //return base.IsLoggedIn();
     }
@@ -176,7 +176,7 @@ bool ad;
 
 
 	 //var checks login or exit
-     var ExitButton = ElementByXPath("//a[@class='nav-link dropdown-toggle'] | //a[contains(text(),'Logout')] ") ;
+     var ExitButton = ElementByXPath("//span[contains(@class,'username')] | //a[contains(text(),'Logout')] ") ;
 
 	 //if i already Login - go to "bonus"	 
 	 if (IsVisible(ExitButton))
@@ -205,7 +205,7 @@ bool ad;
 	 
      Wait(2);
 	 
-     var SiteLanguageTAB = ElementByXPath("//*[@id='__BVID__24'] | //*[@id='__BVID__40']");
+     var SiteLanguageTAB = ElementByXPath("//button[contains(@class,'btn-language')]/img[contains(@src,'flag')]");
 	 if (IsVisible(SiteLanguageTAB))
 	 {
      Click(SiteLanguageTAB);
@@ -238,7 +238,7 @@ bool ad;
     public override int DoLogin()
     {
 
-     var ExitButton = ElementByXPath("//a[@class='nav-link dropdown-toggle'] | //a[contains(text(),'Logout')] ");
+     var ExitButton = ElementByXPath("//span[contains(@class,'username')] | //a[contains(text(),'Logout')] ");
 	 if (!IsVisible(ExitButton))
 	 {
 
