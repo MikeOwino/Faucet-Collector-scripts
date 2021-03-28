@@ -305,11 +305,12 @@ class RollerCoin : FaucetScript
 
     private void TryClickOnEnergyButton()
     {
-        var rechargeButton = ElementByXPath("//button[contains(@class,'electricity-recharge-btn')]");
+        var rechargeButton = ElementByXPath("//button[contains(@class,'electricity-recharge-btn')]|//button[contains(@id,'recharge-btn')]");
 
         if(IsVisible(rechargeButton) && rechargeButton.Enabled)
         {
             Click(rechargeButton);
+            Log("Clicking on " + rechargeButton.Text);
             Wait(1, 2);
         }
     }
