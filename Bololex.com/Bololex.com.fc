@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 14/08/2020 11:00AM - Version 1
-//Last Update: 01/01/2021 02:15AM - Version 5
+//Last Update: 29/03/2021 02:00AM - Version 6
 //==================//
 
 using System;
@@ -492,10 +492,18 @@ public class Bololex : FaucetScript
         public int Time_Function()
         {
 			
-           var MinVar = ElementByXPath("//div[@class='energies_info']");
+           var Energies_Timer_0 = ElementByXPath("//div[@class='energies_info' and contains(text()[2],'00:00:00')]");
 
-           if (IsVisible(MinVar))
+           if (IsVisible(Energies_Timer_0))
            {
+	            Log("Time_Function - have some bug in the site - we return to your time"); 
+		        return GetWaitSetting();
+           }			
+
+           if (!IsVisible(Energies_Timer_0))
+           {
+             var MinVar = ElementByXPath("//div[@class='energies_info']");
+			   
 	         Log("Time_Function - WaitTimerText apper - return to site time"); 
              int min,sec;
              min = Convert.ToInt32(MinVar.Text.Trim().Split(':')[1])*60;  //Replace("m.", "")
@@ -503,11 +511,6 @@ public class Bololex : FaucetScript
              return min+sec;
            } 
 
-           if (!IsVisible(MinVar))
-           {
-	            Log("Time_Function - return to your time"); 
-		        return GetWaitSetting();
-           }
 
            return 0;		
         }//end Time_Function
