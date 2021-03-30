@@ -1,0 +1,154 @@
+﻿using FaucetCollector.Script;
+
+using System.Collections.Generic;
+using System.Linq;
+
+public class SpeedSatoshiScript : FaucetScript
+{
+    public override FaucetSettings Settings { get
+        {
+
+            return new FaucetSettings("about:blank")
+            {
+                new FaucetSetting()
+                {
+                    Name="User",
+                    Type=EditorType.TextBox,
+                    Required=true,
+                    Display="Email"
+                },
+                new FaucetSetting()
+                {
+                    Name="Pass",
+                    Type=EditorType.Password,
+                    Required=true,
+                    Display="Password"
+                },
+                new FaucetSetting()
+                {
+                    Name="Faucet",
+                    Type=EditorType.ComboBox,
+                    Default=AvailableFaucets.Keys.FirstOrDefault(),
+                    Items = AvailableFaucets.Keys.ToList(),
+                    Display="Selected Faucet"
+                }
+            };
+        }
+    }
+
+    private readonly Dictionary<string, string> AvailableFaucets = new Dictionary<string, string>
+    {
+
+        {"BTC","https://www.speedsatoshi.com/" },
+        {"ETH","https://ethereum.speedsatoshi.com/" },
+        {"BCH","https://bitcoin-cash.speedsatoshi.com/" },
+        {"LTC","https://litecoin.speedsatoshi.com/" },
+        {"TRON","https://tron.speedsatoshi.com/" },
+        {"DOGE","https://dogecoin.speedsatoshi.com/" }
+
+    };
+
+    private string SelectedUrl
+    {
+        get
+        {
+            var setting = GetSetting("Faucet");
+            if(!string.IsNullOrEmpty(setting) && AvailableFaucets.ContainsKey(setting))
+            {
+                return AvailableFaucets[setting];
+            }
+
+            return AvailableFaucets.Values.FirstOrDefault();
+        }
+    }
+
+    private string FaucetUrl
+    {
+        get
+        {
+            return SelectedUrl + "faucet/manual";
+        }
+    }
+    public override int DoInit()
+    {
+        SuccessXPath = "//*[contains(@class,'alert alert-info')]";
+        FailXPath = "//*[contains(@class,'alert alert-warning')]";
+        Title = "SpeedSatoshi";
+        return base.DoInit();
+    }
+
+    public override int DoLogin()
+    {
+        GoToUrl(SelectedUrl);
+        Wait(1, 2);
+
+        var loginModalBtn = ElementByXPath("//button[@class='login']");
+        if (!IsVisible(loginModalBtn))
+        {
+            return Fail("Login modal btn is not visible or not found");
+        }
+        Click(loginModalBtn);
+        Wait(1);
+
+        var emailBox = ElementByXPath("//input[@id='session_email']");
+        if (!IsVisible(emailBox))
+        {
+            return Fail("Email box is not visible or not found");
+        }
+        SetText(emailBox, GetSetting("Email"));
+
+        var passwordBox = ElementByXPath("//input[@id='session_password']");
+        if (!IsVisible(passwordBox))
+        {
+            return Fail("Password box is not visible or not found");
+        }
+
+        var loginBtn = ElementByXPath("//button[@id='signin']");
+        if (!IsVisible(loginBtn))
+        {
+            return Fail("login btn is not visible or not found");
+        }
+        Click(loginBtn);
+        Wait(1, 2);
+
+
+        return base.DoLogin();
+    }
+
+    public override bool IsLoggedIn()
+    {
+        return ElementByXPath("//*[@id='logout']") != null;
+    }
+
+
+    public override int DoSolveFaucet()
+    {
+        GoToUrl(FaucetUrl);
+        Wait(1, 2);
+
+        var claimButton = ElementByXPath("//button[@id='claim']");
+        if (!IsVisible(claimButton))
+        {
+            return Fail("Claim button is not visible or not found");
+        }
+
+        var result = DoSolveCaptcha();
+        if (result>0)
+        {
+            return result;
+        }
+
+        Click(claimButton);
+
+        CheckFaucetResult();
+        if (IsSuccess)
+        {
+            // Faucet allow claim every 0 minutes if claim is success we wait
+            return GetWaitSetting();
+        }
+
+        return base.DoSolveFaucet();
+    }
+
+
+}
