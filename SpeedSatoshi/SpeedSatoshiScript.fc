@@ -117,7 +117,7 @@ public class SpeedSatoshiScript : FaucetScript
 
     public override bool IsLoggedIn()
     {
-        return ElementByXPath("//img[@id='logout']") != null;
+        return ElementByXPath("//*[@id='logout']") != null;
     }
 
 
