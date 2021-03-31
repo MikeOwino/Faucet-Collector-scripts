@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 13/11/2019 09:00AM - Version 1
-//Last Update: 22/03/2021 02:10PM - Version 12
+//Last Update: 31/03/2021 14:48PM - Version 13
 //==================//
 
 using System;
@@ -171,7 +171,7 @@ public class TrustDice : FaucetScript
 
 		Wait(4);
 		
-        var ButtonLog = ElementByXPath("//button[contains(@class,'MuiButton-containedSecondary MuiButton-fullWidth') and @type='submit']");
+        var ButtonLog = ElementByXPath("//button[contains(@class,'MuiButton-fullWidth') and @type='submit']");
         Click(ButtonLog);
 		
 		Wait(4);
