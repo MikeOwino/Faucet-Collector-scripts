@@ -73,7 +73,7 @@ public class freeLitecoinScript : FaucetScript
         Wait(1);
 
         //Solve the captcha
-        var result = SolveCaptcha();
+        var result = DoSolveCaptcha();
         if (result > 0)
         {
 
@@ -141,35 +141,33 @@ public class freeLitecoinScript : FaucetScript
     public override int DoSolveCaptcha()
     {
 
-	    if ( ElementByXPath ( "//div[contains(@class,'g-recaptcha')]" )==null )
+	 
+
+        if (IsVisible(ElementByXPath("//div[@class='h-captcha']")))
+        {
+            var result = DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+            string captchaToken = Context.CaptchaResult.Result;
+            if (string.IsNullOrEmpty(captchaToken))
+            {
+                return result;
+            }
+            ExecuteScript("callbackhcaptcha("+captchaToken+");");
+            Wait(1);
+        }
+
+        if (ElementByXPath("//div[contains(@class,'g-recaptcha')]") == null)
         {
             return 0;
         }
-		
+
         return base.DoSolveCaptcha();
     }
 
-    public override int AfterSolveCaptcha()
-    {
 
-        return base.AfterSolveCaptcha();
-    }
-
-
-
-
-    public override int BeforeSolveFaucet()
-    {
-	
-
-        return base.BeforeSolveFaucet();
-    }
-
-
-
-//============//
-//DoSolveFaucet//
-//============//
     public override int DoSolveFaucet()
     {
 	
@@ -182,27 +180,15 @@ public class freeLitecoinScript : FaucetScript
         }
 
         //Solve the captcha
-        var result_2 = DoSolveCaptcha();
-        if (result_2 > 0)
+        var captchaResult = DoSolveCaptcha();
+        if (captchaResult > 0)
         {
-           return Fail("fail not solve"); //if something wrong
+            return captchaResult; //if something wrong
         }
         Wait();
         Click(rollNumberBtn);
 		
         return base.DoSolveFaucet();
-    }
-//============//
-//DoSolveFaucet//
-//============//
-
-
-
-
-    public override int AfterSolveFaucet()
-    {
-
-        return base.AfterSolveFaucet();
     }
 
 
