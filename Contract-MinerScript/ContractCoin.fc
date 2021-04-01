@@ -1,7 +1,6 @@
 using FaucetCollector.Script;
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 //css_ref FaucetCollector.Utilities
 //css_ref FaucetCollector.Captcha
@@ -49,6 +48,13 @@ public class ContractMiner : FaucetScript
                     Type=EditorType.CheckBox,
                     Display="Claim Coinflip",
                     Default=true
+                },
+                new FaucetSetting()
+                {
+                    Name="RewardPoints",
+                    Type=EditorType.CheckBox,
+                    Display="Claim Reward Point",
+                    Default=true
                 }
 
 
@@ -56,19 +62,16 @@ public class ContractMiner : FaucetScript
         }
     }
 
-    /// <summary>
-    /// This method gets called when the faucet is enabled and the GO button is clicked
-    /// </summary>
+
     public override void Start()
     {
-        //Title that shows in the browser. Is used to identify and close popup windows
+
         Title = "Miner";
 
-        //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
         SuccessXPath = "//div[@class='alert alert-success']";
         FailXPath = "//div[@class='alert alert-danger']";
 
-        //Let Faucet Collector start up everything
+
         base.Start();
     }
 
@@ -79,37 +82,10 @@ public class ContractMiner : FaucetScript
         Tails
     }
 
-    private List<string> AvailableCoinflipOptions
-    {
-        get
-        {
-            return Enum.GetNames(typeof(CoinflipOption)).ToList();
-        }
-    }
 
-    private CoinflipOption coinflipSelectedOption
-    {
-        get
-        {
-            var settingSelected = GetSetting("Coinflip");
-
-            CoinflipOption selectedOrDefaultOption = CoinflipOption.Disabled;
-
-            if (!Enum.TryParse(settingSelected, out selectedOrDefaultOption))
-            {
-
-                Log("We have problems reaching setting that you have selected on coinflip please select it again", Level.Warning);
-
-            }
-            return selectedOrDefaultOption;
-        }
-
-    }
     public override bool IsLoggedIn()
     {
 
-        //In here we can check for the presence of an element that is only present when you are logged in.
-        //In this case we check for en element with the class "loggedIn"
         return ElementByXPath("//a[contains(@href,'logout')]") != null;
     }
 
@@ -175,15 +151,10 @@ public class ContractMiner : FaucetScript
         SelectCorrectCaptcha();
 
 
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.BeforeLogin();
     }
 
-    /// <summary>
-    /// This method gets called after BeforeLogin, but only if IsLoggedIn returned false.
-    /// It can be used to actually login the user/enter wallet details in the faucet
-    /// </summary>
-    /// <returns></returns>
+
     public override int DoLogin()
     {
         if (!Driver.Url.Contains("https://www.contract-miner.com/?my-account=index&target=login"))
@@ -240,27 +211,13 @@ public class ContractMiner : FaucetScript
         {
             Log(Error.Text);
         }
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+
         return base.DoLogin();
     }
 
-    /// <summary>
-    /// This method gets called after the DoLogin method.
-    /// </summary>
-    public override int AfterLogin()
-    {
 
 
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.AfterLogin();
-    }
 
-    /// <summary>
-    /// This method gets called after the login methods are successful, so we are logged into the faucet.
-    /// If the faucet is not yet ready to claim you should return a TimeStamp value to return how long it takes before the Faucet claim can be done.
-    /// This is used to pause the script while the faucet its timer runs out.
-    /// Return the number of seconds the bot should wait.
-    /// </summary>
     public override int GetFaucetWaitTime()
     {
 
@@ -353,11 +310,7 @@ public class ContractMiner : FaucetScript
         return 0;
     }
 
-    /// <summary>
-    /// This method gets called after the BeforeSolveFaucet. You can do the actual claiming of the faucet in here.
-    /// </summary>
-    /// <returns></returns>
-    /// 
+
 
     public override int DoSolveFaucet()
     {
@@ -378,6 +331,22 @@ public class ContractMiner : FaucetScript
             }
         }
 
+        if (GetBoolSetting("RewardPoints"))
+        {
+            GoToUrl("https://www.contract-miner.com/index.php?captcha=recaptcha");
+            Wait(1, 2);
+            var claimRpBtn = ElementByXPath("//button[@name='claim_rp_sub']");
+            if (IsVisible(claimRpBtn))
+            {
+                var result = DoSolveCaptcha();
+                if (result > 0)
+                {
+                    return result;
+                }
+
+                Click(claimRpBtn);
+            }
+        }
 
         // Miners tap area
 
@@ -511,7 +480,6 @@ public class ContractMiner : FaucetScript
             }
         }
 
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return GetWaitSetting();
     }
 
