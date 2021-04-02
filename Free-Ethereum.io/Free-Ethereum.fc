@@ -121,7 +121,7 @@ public class FreeEthereumScript : FaucetScript
 
         if (IsVisible(ElementByXPath("//div[@class='h-captcha']")))
         {
-            var result = DoSolveCaptcha();
+            var result = base.DoSolveCaptcha();
             if (result > 0)
             {
                 return result;
@@ -133,6 +133,7 @@ public class FreeEthereumScript : FaucetScript
             }
             ExecuteScript("callbackhcaptcha(" + captchaToken + ");");
             Wait(1);
+            return result;
         }
 
         if (ElementByXPath("//div[contains(@class,'g-recaptcha')]") == null)
