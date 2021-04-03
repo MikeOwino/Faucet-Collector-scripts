@@ -1,9 +1,11 @@
-using System;
 using FaucetCollector.Script;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Interactions;
 //css_ref HumanActions.dll;
 using HumanActions;
+
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+
+using System;
 public class freeLitecoinScript : FaucetScript
 {
     public override FaucetSettings Settings
@@ -14,7 +16,7 @@ public class freeLitecoinScript : FaucetScript
             {
                 new FaucetSetting() { Name = "Email", Display = "Email Address", Type = EditorType.TextBox, Required = true },
                 new FaucetSetting() { Name = "Pass", Display = "password", Type = EditorType.Password, Required = true },
-                
+
             };
         }
     }
@@ -22,7 +24,7 @@ public class freeLitecoinScript : FaucetScript
     public override void Start()
     {
         Title = "Free-Litecoin.com";
-        
+
         SuccessXPath = "//h2[@id='info']";
         FailXPath = "//h1[@id='numberroll' and contains(@style, 'red')]";
 
@@ -32,7 +34,7 @@ public class freeLitecoinScript : FaucetScript
     public override bool IsLoggedIn()
     {
 
-        return ElementByXPath("//a[contains(@href,'logout.php')]")!=null;
+        return ElementByXPath("//a[contains(@href,'logout.php')]") != null;
     }
 
     public override int BeforeLogin()
@@ -44,11 +46,11 @@ public class freeLitecoinScript : FaucetScript
 
     public override int DoLogin()
     {
-		 DriverHumanActions humanActions=new DriverHumanActions(Driver);
+        DriverHumanActions humanActions = new DriverHumanActions(Driver);
         var signInUser = ElementById("usr");
         if (!IsVisible(signInUser))
         {
-            Driver.Manage ( ).Cookies.DeleteAllCookies ( );
+            Driver.Manage().Cookies.DeleteAllCookies();
             return Fail("Email input not found.");
         }
 
@@ -66,7 +68,7 @@ public class freeLitecoinScript : FaucetScript
         var loginButton = ElementByXPath("//button[@class='btn btn-primary btn-lg']");
         if (!IsVisible(loginButton))
         {
- 
+
             return Fail("Login button not found.");
         }
 
@@ -80,7 +82,7 @@ public class freeLitecoinScript : FaucetScript
             return result;
         }
 
-       Wait(1);
+        Wait(1);
 
 
         humanActions.Click(loginButton);
@@ -89,24 +91,24 @@ public class freeLitecoinScript : FaucetScript
         return base.DoLogin();
     }
 
-	public void HumanClick ( IWebElement element )
+    public void HumanClick(IWebElement element)
     {
-        Actions actions =new Actions(Driver);
+        Actions actions = new Actions(Driver);
 
-        actions.MoveToElement ( element , element.Size.Width/2 , element.Size.Height/2 ).Build ( ).Perform ( );
-        Wait (1 );
-        actions.Click ( ).Build ( ).Perform ( );
+        actions.MoveToElement(element, element.Size.Width / 2, element.Size.Height / 2).Build().Perform();
+        Wait(1);
+        actions.Click().Build().Perform();
 
     }
-	
+
     public override int AfterLogin()
     {
-		var body = ElementByXPath("//body");
-		
-		Wait();
-		//open the popup
-		Click(body);
-		
+        var body = ElementByXPath("//body");
+
+        Wait();
+        //open the popup
+        Click(body);
+
         return base.AfterLogin();
     }
 
@@ -141,7 +143,7 @@ public class freeLitecoinScript : FaucetScript
     public override int DoSolveCaptcha()
     {
 
-	 
+
 
         if (IsVisible(ElementByXPath("//div[@class='h-captcha']")))
         {
@@ -155,7 +157,8 @@ public class freeLitecoinScript : FaucetScript
             {
                 return result;
             }
-            ExecuteScript("callbackhcaptcha("+captchaToken+");");
+            string callbackScript = "callbackhcaptcha('" + captchaToken + "');";
+            ExecuteScript(callbackScript);
             Wait(1);
             return result;
         }
@@ -171,7 +174,7 @@ public class freeLitecoinScript : FaucetScript
 
     public override int DoSolveFaucet()
     {
-	
+
         GoToUrl("https://www.free-litecoin.com");
         Wait();
         var rollNumberBtn = ElementByXPath("//button[@id='roll']");
@@ -188,7 +191,7 @@ public class freeLitecoinScript : FaucetScript
         }
         Wait();
         Click(rollNumberBtn);
-		
+
         return base.DoSolveFaucet();
     }
 
