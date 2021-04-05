@@ -6,6 +6,8 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 
 using System;
+using System.Linq;
+
 public class freeLitecoinScript : FaucetScript
 {
     public override FaucetSettings Settings
@@ -157,8 +159,7 @@ public class freeLitecoinScript : FaucetScript
             {
                 return result;
             }
-            string callbackScript = "callbackhcaptcha('" + captchaToken + "');";
-            ExecuteScript(callbackScript);
+           
             Wait(1);
             return result;
         }
@@ -207,6 +208,54 @@ public class freeLitecoinScript : FaucetScript
         }
 
         return result;
+    }
+
+    public override bool SetHCaptchaResponse(string response)
+    {
+
+        CallHCaptchaCallBack(response);
+
+        var validHCaptchaIframe = ElementsByXPath("//div[contains(@class,'h-captcha')]")
+            .FirstOrDefault(hcaptchaFrame => IsVisible(hcaptchaFrame));
+
+        SetAttributeUsingJS(validHCaptchaIframe, "data-hcaptcha-response", response);
+
+        SetHCaptchaResponseInForm(response);
+
+        return base.SetHCaptchaResponse(response);
+    }
+    private void CallHCaptchaCallBack(string captchaResult)
+    {
+        string callbackScript = "callbackhcaptcha('" + captchaResult + "');";
+        ExecuteScript(callbackScript);
+    }
+    private void SetAttributeUsingJS(IWebElement source, string attributeName, string value)
+    {
+        if (source == null) { return; }
+        ExecuteScript("arguments[0].setAttribute('" + attributeName + "','" + value + "')", source);
+    }
+    private void SetHCaptchaResponseInForm(string captchaResult)
+    {
+        bool isLoggedIn = IsLoggedIn();
+        var hcaptchaFormFieldXPath = !isLoggedIn ?
+            "//div[@id='loginform']//*[contains(@id,'h-captcha-response')]" :
+            "//*[contains(@id,'h-captcha-response')]";
+
+        SetValueUsingJS(ElementByXPath(hcaptchaFormFieldXPath), captchaResult);
+
+        var recaptchaFormFieldXPath = !isLoggedIn ?
+            "//div[@id='loginform']//*[contains(@id,'g-recaptcha-response')]" :
+            "//*[contains(@id,'g-recaptcha-response')]";
+
+        SetValueUsingJS(ElementByXPath(recaptchaFormFieldXPath), captchaResult);
+
+    }
+
+    private void SetValueUsingJS(IWebElement source, string value)
+    {
+        if (source == null) { return; }
+
+        ExecuteScript("arguments[0].value='" + value + "'", source);
     }
 
 }

@@ -5,7 +5,9 @@ using HumanActions;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 
+
 using System.Linq;
+
 //css_ref HumanActions.dll;
 public class FreeEthereumScript : FaucetScript
 {
@@ -133,8 +135,10 @@ public class FreeEthereumScript : FaucetScript
             {
                 return result;
             }
+
             
         
+
             Wait(1);
             return result;
         }
@@ -169,7 +173,7 @@ public class FreeEthereumScript : FaucetScript
     }
 
 
-  
+
     public override int DoSolveFaucet()
     {
         if (!Driver.Url.Contains("https://www.free-ethereum.io/free/"))
