@@ -1,0 +1,191 @@
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
+
+using System.Collections.Generic;
+using System.Linq;
+//css_ref FaucetCollector.Captcha
+//css_ref FaucetCollector.Utilities
+public class FaucetStarScript : FaucetScript
+{
+    public override FaucetSettings Settings
+    {
+        get
+        {
+
+            return new FaucetSettings("about:blank")
+            {
+                new FaucetSetting()
+                {
+                    Name="User",
+                    Type=EditorType.TextBox,
+                    Required=true,
+                    Display="Wallet Address"
+                },
+                new FaucetSetting()
+                {
+                    Name="Faucet",
+                    Type=EditorType.ComboBox,
+                    Items= AvailableFaucets.Keys.ToList(),
+                    Default = AvailableFaucets.Keys.FirstOrDefault(),
+                    Display="Selected Faucet"
+                },
+                new FaucetSetting()
+                {
+                    Name="SelectedCaptcha",
+                    Type=EditorType.ComboBox,
+                    Items =AvailableCaptchas,
+                    Default = AvailableCaptchas.FirstOrDefault(),
+                    Display="Selected Captcha"
+                }
+            };
+        }
+    }
+
+
+    private readonly Dictionary<string, string> AvailableFaucets = new Dictionary<string, string>()
+    {
+        {"ETH",FaucetHost+"ethstar" },
+        {"BTC",FaucetHost+"btcstar" },
+        {"DOGE",FaucetHost+"dogestar" },
+        {"LTC",FaucetHost+"ltcstar" },
+        {"BCH",FaucetHost+"bchstar" },
+        {"Dash",FaucetHost+"dashstar" },
+        {"DGB",FaucetHost+"dgbstar" },
+        {"TRX",FaucetHost+"trxstar" },
+        {"USDT","https://tethstar.dogestar.website/" },
+        {"Feyorra","https://feystar.dogestar.website/" }
+    };
+
+    private const string FaucetHost = "https://dogestar.website/";
+    private readonly List<string> AvailableCaptchas = new List<string>()
+    {
+        "ReCaptcha",
+        "HCaptcha"
+    };
+
+    private string FaucetUrl
+    {
+        get
+        {
+
+            var selectedFaucetSetting = GetSetting("Faucet");
+            string selectedFaucet;
+            if (!string.IsNullOrEmpty(selectedFaucetSetting) && AvailableFaucets.ContainsKey(selectedFaucetSetting))
+            {
+                selectedFaucet = AvailableFaucets[selectedFaucetSetting];
+            }
+            else
+            {
+                selectedFaucet = AvailableFaucets.Values.FirstOrDefault();
+            }
+
+            return AppendCaptchaQuery(selectedFaucet);
+        }
+    }
+
+    private string AppendCaptchaQuery(string faucetUrl)
+    {
+        string selectedCaptchaSetting = GetSetting("SelectedCaptcha");
+
+        switch (selectedCaptchaSetting)
+        {
+            case "ReCaptcha":
+                faucetUrl += "?cc=reCaptcha";
+                break;
+            case "HCaptcha":
+                faucetUrl += "?cc=hCaptcha";
+                break;
+        }
+
+        return faucetUrl;
+    }
+
+    private AntibotLinksMlUtils AntibotLinksMlUtils;
+    public override void Start()
+    {
+
+        SuccessXPath = "//div[contains(@class,'alert alert-success')]";
+        FailXPath = "//div[@class='alert alert-danger']";
+        Title = "Star";
+        AntibotLinksMlUtils = new AntibotLinksMlUtils(this)
+        {
+            AntibotLinksHeaderXPath = "//p[@class='alert alert-info']//img"
+        };
+        base.Start();
+    }
+
+    public override int DoInit()
+    {
+        Url = FaucetUrl;
+        return base.DoInit();
+    }
+
+
+    public override int DoSolveFaucet()
+    {
+
+        var addressBox = ElementByXPath("//input[@type='text']");
+        if (!IsVisible(addressBox))
+        {
+
+            return Fail("Address box is not visible or not found");
+        }
+        SetText(addressBox, GetSetting("User"));
+
+        var captchaResult = DoSolveCaptcha();
+        if (captchaResult > 0)
+        {
+            return captchaResult;
+        }
+
+        var claimBtn = ElementByXPath("//input[@value='Get reward!']");
+        if (!IsVisible(claimBtn))
+        {
+
+            return Fail("claim button is not visible or not found");
+
+
+
+        }
+        Click(claimBtn);
+
+        CheckFaucetResult();
+
+        if (IsSuccess)
+        {
+            return GetWaitSetting();
+        }
+
+        return base.DoSolveFaucet();
+    }
+
+    public override int DoSolveCaptcha()
+    {
+        var antibotLinksResult = AntibotLinksMlUtils.DosolveAntibotLinks();
+        if (antibotLinksResult > 0)
+        {
+            return antibotLinksResult;
+        }
+
+        var regularCaptchaResult = base.DoSolveCaptcha();
+
+        return regularCaptchaResult + antibotLinksResult;
+    }
+
+
+    public override int CheckFaucetResult()
+    {
+
+        var result = base.CheckFaucetResult();
+
+        var failElement = ElementByXPath(FailXPath);
+        if (IsVisible(failElement) && failElement.Text.ToLower().Contains("invalid"))
+        {
+            AntibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+        }
+        
+
+        return result;
+    }
+
+}
