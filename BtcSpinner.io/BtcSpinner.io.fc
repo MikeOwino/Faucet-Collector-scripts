@@ -20,16 +20,13 @@ public class BtcSpinner : FaucetScript
             {
                 new FaucetSetting(){Name="User",Display="Email",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
-                new FaucetSetting(){Name="Spin",Display="Spin For(minutes) 0 disabled", Type=EditorType.Numeric,Default=1 }                
-                //insert user settings here
-                //new FaucetSetting { 
-                //    Name = "Name of your setting", 
-                //    Display = "Display shown in Faucet Collector", 
-                //    Type = EditorType.TextBox | EditorType.Password | EditorType.CheckBox | EditorType.Wallet | EditorType.Numeric | EditorType.ComboBox | EditorType.CheckComboBox, 
-                //    Required = true | false, 
-                //    Default = "Optionally a default value" | true | false | null.
-                //    Items = new List<string> { "item1", "item2" } (only valid for ComboBox or CheckComboBox)
-                //} 
+                new FaucetSetting(){
+                Name="Rolls",
+                Display="Number of rolls",
+                Type=EditorType.Numeric,
+                Default=5
+                }
+              
             };
         }
     }
@@ -99,6 +96,11 @@ public class BtcSpinner : FaucetScript
         {
             Click(closeModalBtn);
         }
+        var termsCloseButton = ElementByXPath("//button[@data-dismiss='modal']");
+        if (IsVisible(termsCloseButton))
+        {
+            Click(termsCloseButton);
+        }
     }
     private int RetryLogin()
     {
@@ -121,7 +123,7 @@ public class BtcSpinner : FaucetScript
             return Fail("Button login is not visible");
         }
 
-        if (IsVisible(ElementByXPath("//div[@class='h-captcha']")))
+        if (IsVisible(ElementByXPath("//div[@class='h-captcha']")))  
         {
             var result = DoSolveCaptcha();
             if (result > 0)
@@ -176,66 +178,71 @@ public class BtcSpinner : FaucetScript
     {
         DismissModal();
         Wait(1);
-        int spinTime = GetIntSetting("Spin");
-        if (spinTime > 0)
-        {
-            GotoiFimNot("https://btcspinner.io/game");
-            Wait(4, 5);
-            try
-            {
-                var spinner = ElementByXPath("//div[@class='spinner']");
-                DateTime spinTimeout = DateTime.Now.AddMinutes(spinTime);
-                Actions actionBuilder = new Actions(Driver).MoveToElement(spinner)
-                    .ClickAndHold()
-                    .MoveByOffset(0, 300).Release();
-
-                while (IsVisible(spinner) && DateTime.Now < spinTimeout)
-                {
-                    actionBuilder.Build().Perform();
-                    Wait(4, 5);
-
-                }
-            }
-            catch (WebDriverException)
-            {
-                Log("There is a problem playing the game, by "
-                    + spinTime.ToString() +
-                    "Minutes, try disable adblock and try again",Level.Warning);
-            }
-        }
-
-
+     
         return base.BeforeSolveFaucet();
     }
     public override int DoSolveFaucet()
     {
-        GotoiFimNot("https://btcspinner.io/faucet");
+        GotoiFimNot("https://btcspinner.io/spinner");
         // GET CODE TO CLAIM FAUCET
 
         DismissModal();
         Wait(1);
-        var captchaSolvedBtn = ElementByXPath("//button[@type='submit']");
-        if (!IsVisible(captchaSolvedBtn))
-        {
-            return Fail("captcha solved btn is not visible");
-        }
 
-        if (IsVisible(ElementByXPath("//div[@class='h-captcha']")))
+        int setting = GetIntSetting("Rolls");
+        var spinnerButton = ElementByXPath("//button[contains(@class,'rounded-pill')]");
+        int count = 0;
+        while (IsVisible(spinnerButton) && count<setting)
         {
-            var result = DoSolveCaptcha();
-            if (result > 0)
+            try
             {
-                return result;
-            }
+                Click(spinnerButton);
 
-            Wait();
+                Wait(2, 3);
+                var okButton = ElementByXPath(" //button[contains(text(),'OK')]");
+                if (IsVisible(okButton))
+                {
+                    Click(okButton);
+                }
+            }
+            finally
+            {
+                count++;
+            }
         }
 
-        Click(captchaSolvedBtn);
-        Wait(2, 3);
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.DoSolveFaucet();
+        GoToUrl("https://btcspinner.io/store");
+        Wait(1, 2);
+        var faucetButton = ElementByXPath("//button[@id='faucet']");
+
+        if (IsVisible(faucetButton))
+        {
+            Click(faucetButton);
+        }
+
+        return GetWaitSetting();
+
+
     }
 
+    public override bool SetHCaptchaResponse(string response)
+    {
+        try
+        {
+            var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+            if (hcaptchaIframe != null)
+            {
+                ExecuteScript("arguments[0].setAttribute('data-hcaptcha-response','" + response + "');", hcaptchaIframe);
+            }
+
+        }
+        catch (Exception)
+        {
+
+        }
+
+        return base.SetHCaptchaResponse(response);
+    }
 
 }
