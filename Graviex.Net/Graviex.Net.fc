@@ -120,16 +120,25 @@ public class graviex : FaucetScript
 //==============//
  public override int DoLogin()
  {
-
+	 Wait(15);
 	 var LoginVar = ElementByXPath("//a[contains(@href,'logout') or contains(@href,'signout') ]"); //Login
 
      if (!IsVisible(LoginVar))
      {	
  	    // go to login page
+		var FlareCheck = ElementByXPath("//a[contains(text(),'CloudFlare')] | //a[contains(text(),'Cloudflare')] | //a[contains(text(),'cloudflare')]");
+		if (FlareCheck !=null)
+		{
+			Log("Waiting / Solving CloudFlare ... Hold on" );
+			FaucetCollector.Utilities.CloudFlareUtilities cloudUtils = new FaucetCollector.Utilities.CloudFlareUtilities(this);
+			cloudUtils.DoSolve();
+		}
+
+        Wait(3);
 	    Log("Login: go to login page");
 	    GoToUrl("https://graviex.net/signin");	
 	    Wait();		
-	    Wait(5);
+	    Wait(15);
 				
 	    var UserNameVar = ElementByXPath("//input[contains(@id,'email')]");
         Log("Login: set Email");
@@ -261,7 +270,15 @@ public class graviex : FaucetScript
     //=============//
     if (GetBoolSetting("FaucetCollect"))
     { 
+		var FlareCheck = ElementByXPath("//a[contains(text(),'CloudFlare')] | //a[contains(text(),'Cloudflare')] | //a[contains(text(),'cloudflare')]");
+		if (FlareCheck !=null)
+		{
+			Log("Waiting / Solving CloudFlare ... Hold on" );
+			FaucetCollector.Utilities.CloudFlareUtilities cloudUtils = new FaucetCollector.Utilities.CloudFlareUtilities(this);
+			cloudUtils.DoSolve();
+		}
 
+        Wait(3);
 		//go to faucet
         GoToUrl("https://graviex.net/faucets/list");
 		Log("FaucetCollect: Collect All" );
