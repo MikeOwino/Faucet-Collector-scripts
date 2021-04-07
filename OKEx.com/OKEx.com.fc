@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 30/12/2020 06:00AM - Version 1
-//Last Update: 30/12/2020 06:00AM - Version 1
+//Last Update: 07/04/2021 20:00PM - Version 2
 //==================//
 
 using System;
@@ -34,7 +34,10 @@ public class btcsamsity : FaucetScript
 				
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim",Type=EditorType.CheckBox,Default=true},		
                 new FaucetSetting(){Name="CustomWaitForCode",Display="Custom Wait For Code in Login - in sec ",Type=EditorType.Numeric,Default=60},
-                
+                new FaucetSetting(){Name="Withdraw_To_OKEX_Balance",Display="Withdraw_To_OKEX_Balance",Type=EditorType.CheckBox,Default=true},
+				new FaucetSetting() { Name = "Limit_Withdraw_To_OKEX_Balance", Display = "Limit_Withdraw_To_OKEX_Balance - please don't change this value of 10000 satoshi (It should be an exact value like that) ", Type = EditorType.TextBox, Default = 10000 }, //if there is a problem with "Numeric" so cahnge to "TextBox"                
+
+
 			
                 //insert user settings here
                 //new FaucetSetting { 
@@ -289,6 +292,54 @@ public class btcsamsity : FaucetScript
 //=============//
     public override int DoSolveFaucet()
     {
+
+
+
+      //=============//
+      //Withdraw_To_OKEX_Balance
+      //=============//
+      if (GetBoolSetting("Withdraw_To_OKEX_Balance"))
+      {
+	    Title = "Freebitcoin";
+		GoToUrl("https://www.okex.com/freebitcoin");
+	    Wait();
+	    Wait(4);
+		
+        var BalanceVAR = ElementByXPath("//div[contains(@class,'info-withdrawable')]//p/span");
+        string BalanceSTRING = BalanceVAR.Text.Trim();
+        int BalanceINT = Convert.ToInt32(BalanceSTRING);
+
+        int MyAmount;
+        Int32.TryParse(GetSetting("Limit_Withdraw_To_OKEX_Balance"), out MyAmount);
+
+        if (IsVisible(BalanceVAR) && BalanceINT < MyAmount) // under 10000
+        {
+           Log("Limit_Withdraw_To_OKEX_Balance - the balance under < " + MyAmount + " not good");
+           //do all stuff
+        }
+
+        if (IsVisible(BalanceVAR) && BalanceINT > MyAmount) // above 10000
+        {
+            Log("Limit_Withdraw_To_OKEX_Balance - the balance above > " + MyAmount + " good your amount is " + BalanceVAR.Text );
+            Wait(2);
+			var ClaimStart = ElementByXPath("//span[@class='withdraw']");		
+			Click(ClaimStart);
+            Wait(2);
+			var InputClaim = ElementByXPath("//div[@class='withdrawbale-content']//input");		
+		    SetText(InputClaim, GetSetting("Limit_Withdraw_To_OKEX_Balance"));
+            Wait(4);
+			var ClaimEnd = ElementByXPath("//div[@class='okui-dialog-footer-box']//button");		
+		    Click(ClaimEnd);
+			Wait(2);
+			ClaimSuccess(); //Marks the claim as a success
+			Log("Limit_Withdraw_To_OKEX_Balance - Success");	
+            Wait();
+            Wait(2);
+        }
+
+      } //end Withdraw_To_OKEX_Balance
+      //=============//
+	  
 	
       //=============//
       //FaucetClaim
@@ -389,6 +440,7 @@ public class btcsamsity : FaucetScript
 	    Wait();		
 		
       } //end FaucetClaim
+
 
         //ad = true; //call to timer / and do success	
 		//return GetWaitSetting();
