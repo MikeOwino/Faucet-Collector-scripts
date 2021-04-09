@@ -1,0 +1,130 @@
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
+//css_ref FaucetCollector.Utilities
+
+public class IQFaucetScript : FaucetScript
+{
+
+    public override FaucetSettings Settings
+    {
+        get
+        {
+
+            return new FaucetSettings("https://iqfaucet.com/index.php")
+                {
+                    new FaucetSetting()
+                    {
+                        Display="Wallet address",
+                        Type=EditorType.TextBox,
+                        Name="User",
+                        Required=true
+                    },
+
+                };
+        }
+    }
+
+    public override void Start()
+    {
+        Title = "IQFaucet";
+        SuccessXPath = "//*[contains(@class,'alert alert-success')]";
+        FailXPath = "//*[contains(@class,'alert alert-danger')]";
+        base.Start();
+    }
+
+    public override int DoLogin()
+    {
+        var addressBox = ElementByXPath("//input[@name='address']");
+        if (!IsVisible(addressBox))
+        {
+            return Fail("address box is not visible or not found");
+        }
+        SetText(addressBox, GetSetting("User"));
+
+        var loginBtn = ElementByXPath("//button[@type='submit']");
+        if (!IsVisible(loginBtn))
+        {
+            return Fail("Login btn is not visible or not found");
+        }
+        Click(loginBtn);
+        return base.DoLogin();
+    }
+
+    public override bool IsLoggedIn()
+    {
+        return ElementByXPath("//a[@href='account.php']") != null;
+    }
+
+    public override int DoSolveFaucet()
+    {
+        var beginClaimBtn = ElementByXPath("//form[@method='post']//button[@type='submit']");
+        if (!IsVisible(beginClaimBtn))
+        {
+
+            return Fail("Begin claim button is not visible or not found");
+
+          }
+        Click(beginClaimBtn);
+        Wait();
+
+
+        var finishClaimBtn = ElementByXPath("//form[@method='post']//button[@type='submit']");
+        if (!IsVisible(finishClaimBtn))
+        {
+            return Fail("finish claim btn is not visible or not found");
+        }
+
+        var captchaResult = DoSolveCaptcha();
+        if (captchaResult>0)
+        {
+            return captchaResult;
+        }
+
+        Click(finishClaimBtn);
+        return base.DoSolveFaucet();
+    }
+
+    public override int DoSolveCaptcha()
+    {
+        var captchaResult = base.DoSolveCaptcha();
+        if (captchaResult>0)
+        {
+            return captchaResult;
+        }
+        var recaptchaUtility = new RecaptchaUtility(this);
+        recaptchaUtility.DoSolve();
+        return captchaResult;
+    }
+
+
+    public override int GetFaucetWaitTime()
+    {
+        GoToUrl("https://iqfaucet.com/index.php?c=1");
+        Wait();
+
+        var needToWait = NeedToWaitUsingJS();
+        if (needToWait)
+        {
+            return 300;
+        }
+        return base.GetFaucetWaitTime();
+    }
+    private const string GetWaitTimeJS =
+        "let currenAlerts = document.getElementsByClassName('alert');" +
+        "let needToWait=false;" +
+        "for(let i = 0 ; i< currenAlerts.length ; i++){" +
+        "if(currenAlerts[i].textContent.includes('You can claim again in')){needToWait =true; break;}}" +
+        "return needToWait";
+
+    private bool NeedToWaitUsingJS()
+    {
+        var waitScriptResult = ExecuteScript(GetWaitTimeJS).ToString();
+        bool needToWait = false;
+        if (!bool.TryParse(waitScriptResult, out needToWait))
+        { 
+            return false;
+        };
+        return needToWait;
+    }
+
+}
