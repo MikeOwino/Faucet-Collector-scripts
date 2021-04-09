@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 15/07/2020 17:00AM - Version 1
-//Last Update: 20/09/2020 05:30AM - Version 3
+//Last Update: 09/04/2021 18:00PM - Version 5
 //==================//
 
 using FaucetCollector.Script;
@@ -441,12 +441,19 @@ public class FocusGames : FaucetScript
         }
 
         //DoSolveImageCaptcha
-        var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]");
-        if ( IsVisible(SolveMedia) )
+        var SolveMediaNormal = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]");
+        if (IsVisible(SolveMediaNormal))
         {
             Log("DO SolveMedia");
             var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']"));
         }
+
+        var SolveMedia_Iframe_Animation_OR_Canvas = ElementByXPath ("//div[contains(@id,'adcopy-puzzle-image-image')] | //canvas[contains(@id,'slog')] ");
+        if (IsVisible(SolveMedia_Iframe_Animation_OR_Canvas))
+        {
+          Log("SolveMedia_Iframe_Animation_OR_Canvas - visible - we select ReCaptcha - for protection");
+		  SelectOptionByValue(dropdown , "0"); //Choose to slolve with ReCaptcha - select ReCaptcha
+		}
 
         //for recaptcha popup after click on button - ("//button[contains(@class,'reload')] | //button[contains(@id,'reload')] ")
         var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]");
@@ -469,4 +476,4 @@ public class FocusGames : FaucetScript
 
 
 
-} //public class dogeto
+} //public class
