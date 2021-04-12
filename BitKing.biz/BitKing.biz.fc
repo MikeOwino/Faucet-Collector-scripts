@@ -1,0 +1,419 @@
+
+//==================//
+//script Written by: ••AviramDayan•• 12/04/2021 01:00AM - Version 1
+//Last Update: 12/04/2021 01:30AM - Version 1
+//==================//
+
+using System;
+using FaucetCollector.Script;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+//css_inc recaptchaUtilities
+
+public class BitKing : FaucetScript
+{
+    /// <summary>
+    /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
+    /// You can get the value the user entered with the methods: GetSetting("[Name of the FaucetSetting]"), GetBoolSetting and GetDateTimeSetting
+    /// You can also create a new setting value using SetSetting("[Name you want to use]", "value")
+    /// </summary>
+    public override FaucetSettings Settings
+    {
+        get
+        {
+			
+            return new FaucetSettings("https://BitKing.biz/")
+            {
+                new FaucetSetting(){Name="Email",Display="Email",Type=EditorType.TextBox,Required=false},
+                new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=false},
+ 
+                new FaucetSetting() { Name = "FaucetClaim", Display = "FaucetClaim", Type = EditorType.CheckBox, Default = true},	
+				
+            };
+        }
+    }
+
+	
+//============================================================//
+//the number of "successes" in the script - when are finished  
+//============================================================//
+    public override void Start()
+    {
+        ad = false;
+       
+        //Title that shows in the browser. Is used to identify and close popup windows
+        Title = "BitKing.biz";
+
+		SuccessXPath = "//div[@id='myModal' and contains(@style,'block')]//h6";  //*[@id='']
+        FailXPath = "//*"; //*[text()='']
+	
+        //TimerIsCountingUp = true;
+		
+        //Let Faucet Collector start up everything
+        base.Start();
+    }
+//============================================================//
+//the number of "successes" in the script - when are finished  
+//============================================================//
+
+	
+    bool ad; //custom bool
+
+
+    public override int DoInit()
+    {
+
+        //Let Faucet Collector continue.
+        return base.DoInit();
+    }
+
+	
+//==================//
+//save Login Cookies 
+//==================//
+    public override bool IsLoggedIn()
+    {
+	    //save Login Cookies - Check if the "Logout" exist
+        return ElementByXPath("//a[contains(@href,'logout')]") != null;
+	 
+	    //return true;
+	 
+        //return base.IsLoggedIn();
+    }
+//==================//
+//save Login Cookies 
+//==================//	
+
+
+
+
+//=============//
+//BeforeLogin
+//=============//
+    public override int BeforeLogin()
+    {
+	
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeLogin();
+    }
+//=============//
+//BeforeLogin
+//=============//
+
+	
+
+
+	
+//========//
+//DoLogin
+//========//
+    public override int DoLogin()
+    {
+	
+     var ExitButton = ElementByXPath("//a[contains(@href,'logout')]");
+
+	 //if i NOT Login - go to Login Page
+	 if (!IsVisible(ExitButton))
+	 {
+
+		GoToUrl("https://BitKing.biz/login");
+		Wait();		
+		Wait(5);
+
+        var box_user = ElementByXPath("//input[@name='email']");
+        SetText(box_user, GetSetting("Email"));
+		
+		Wait(2);
+		
+        var box_pass = ElementByXPath("//input[@name='password']");
+        SetText(box_pass, GetPassword("Password"));
+	
+		Wait(2);
+		
+        Recaptcha_Function(); //call
+
+		Wait(4);
+		
+        var ButtonLog = ElementByXPath("//button[@type='submit']");
+        Click(ButtonLog);
+		
+		Wait(2);
+
+		
+		Wait();	
+
+	 } // end ExitButton
+
+        
+       return base.DoLogin();
+    }
+//========//
+//DoLogin
+//========//
+ 
+
+
+//========//
+//AfterLogin
+//========//
+ public override int AfterLogin()
+ {
+ 
+  
+    //we are good to continue
+    return base.AfterLogin();
+
+ }
+//========//
+//AfterLogin
+//========//
+
+
+	
+
+//================//
+//GetFaucetWaitTime
+//================//
+    public override int GetFaucetWaitTime()
+    {
+
+        if (ad)
+        {
+			ad=false;
+        }
+
+
+		//let Faucet Collector continue.
+        return base.GetFaucetWaitTime();
+    }
+//================//
+//GetFaucetWaitTime
+//================//
+
+
+
+    public override int BeforeSolveCaptcha()
+    {
+ 
+        //Return we are ready to proceed
+        return base.BeforeSolveFaucet();
+    }
+
+	
+    public override int DoSolveCaptcha()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoSolveCaptcha();
+    }
+
+	
+    public override int AfterSolveCaptcha()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterSolveCaptcha();
+    }
+
+	
+    public override int BeforeSolveFaucet()
+    {
+        //Return we can continue
+        return base.BeforeSolveFaucet();
+    }
+  
+	
+	
+//==============//
+//DoSolveFaucet
+//==============//
+ public override int DoSolveFaucet()
+  {
+
+      //==============//
+      //FaucetClaim//
+      //==============//
+      if (GetBoolSetting("FaucetClaim"))
+      {
+
+        GoToUrl("https://BitKing.biz/");
+		Log("FaucetClaim");	
+		
+        Wait();
+        Wait(3);
+
+        var Time_VAR = ElementByXPath("//div[@id='show_countdown_clock']");	
+	    if (IsVisible(Time_VAR)) //if TIME visible
+	    {
+		return Time_Function(); //call to function time
+	    }	
+		
+	    if (!IsVisible(Time_VAR)) //if TIME NOT visible
+	    {
+	
+	      Log("do faucet");
+		  
+          Recaptcha_Function(); //call
+		  
+          Wait(3);
+          
+		  var RollButton = ElementByXPath("//div[@id='show_free_rolling_game']//input[3] | //input[contains(@id,'roll_button')] ");	
+	      if (IsVisible(RollButton))
+	      {	
+	       Click(RollButton);
+	       Log("RollButton"); 		   
+		  }
+
+          Wait(2);
+		  		  
+		  var SuccessMessage = ElementByXPath("//div[@id='myModal' and contains(@style,'block')]//h6");	
+	      if (IsVisible(SuccessMessage))
+	      {	
+ 	       Log(SuccessMessage.Text);	
+		   ClaimSuccess(); //Marks the claim as a success	
+		  }		
+		
+		} //end TIME NOT visible
+		
+      }// end FaucetClaim
+	
+	  return Time_Function(); //call to function time
+
+      //We are good to continue
+      return base.DoSolveFaucet();
+ }
+//==============//
+//DoSolveFaucet
+//==============///
+	
+	
+	
+	
+	
+//==============//
+//AfterSolveFaucet
+//==============//
+  public override int AfterSolveFaucet()
+  {
+
+   //This faucet has nothing to do here. We will let Faucet Collector handle it.
+   return base.AfterSolveFaucet();
+   
+  }
+	
+//==============//
+//AfterSolveFaucet
+//==============//
+
+
+
+    /// <summary>
+    /// This method gets called in the end after the BeforeSolveFaucet/DoSolveFaucet and AfterSolveFaucet methods were done.
+    /// The base.CheckFaucetResult will try to find a visible element on the page using the XPath from SuccessXPath and FailXPath (see the Start method)
+    /// These properties should contain XPath expressions to find certain elements on the page.
+    /// For example if it finds one of the elements from the SuccessXPath, and it is visible, then it will flag the claim attempt as a success.
+    /// Or if it finds one of the elements from the FailXPath, and it is visible, then it will flag the claim attempt as a failure.
+    /// </summary>
+    public override int CheckFaucetResult()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.CheckFaucetResult();
+    }
+	
+
+
+	
+
+        //=================//
+       //Time_Function
+        //=================//
+        public int Time_Function()
+        {
+			
+           var Minute_1_VAR = ElementByXPath("//ul[1]//li[@class='flip-clock-active']//div[2]//div[2]"); 
+		   var Minute_2_VAR = ElementByXPath("//ul[2]//li[@class='flip-clock-active']//div[2]//div[2]"); 	
+		   var Sec_1_VAR = ElementByXPath("//ul[3]//li[@class='flip-clock-active']//div[2]//div[2]"); 				
+		   var Sec_2_VAR = ElementByXPath("//ul[4]//li[@class='flip-clock-active']//div[2]//div[2]"); 	
+
+           if (IsVisible(Minute_1_VAR))
+           {
+	         Log("Time_Function - WaitTimerText apper - return to site time"); 
+             int MinuteINT = Convert.ToInt32(Minute_1_VAR.Text.Trim() + Minute_2_VAR.Text.Trim() )*60;    
+             int SecINT = Convert.ToInt32(Sec_1_VAR.Text.Trim() + Sec_2_VAR.Text.Trim() );    
+             return MinuteINT+SecINT;
+           } 
+
+           if (!IsVisible(Minute_1_VAR))
+           {
+	            Log("Time_Function - return to your time"); 
+		        return GetWaitSetting();
+           }
+
+           return 0;		
+        }//end Time_Function
+        //=================//	
+		
+	
+        //=================//
+       //Recaptcha_Function
+        //=================//
+
+        public int Recaptcha_Function()
+        {
+
+          //ImageBase
+          var ImageBase_Check = ElementByXPath("//img[@id='captcha_img']"); 
+          if (IsVisible(ImageBase_Check))
+		  {  
+            var ImageBase = DoSolveImageCaptcha(ElementByXPath("//img[@id='captcha_img']"),ElementByXPath("//input[@id='game_capt']")); 
+            Log("DO ImageBase");	  
+			if (ImageBase > 0)
+            {
+                return Fail("ImageBase - Fail solving captcha");
+            }
+		  }
+		  
+          //DoSolveImageCaptcha
+          var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
+          if (IsVisible(SolveMedia))
+		  {  
+            Log("DO SolveMedia");	  
+	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']")); 
+            if (result_2 > 0)
+            {
+                return Fail("SolveMedia - Fail solving captcha");
+            }
+		  }
+		  
+	     //for recaptcha popup after click on button - ("//button[contains(@class,'reload')] | //button[contains(@id,'reload')] ")
+          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
+          if (IsVisible(RecaptchaOpen_Iframe))
+		  {
+            //SolveCaptcha if apper
+            Log("DO Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		  }
+
+          //HCaptcha
+		  var HCaptcha_Check = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");	
+	      if (IsVisible(HCaptcha_Check))
+	      {	
+            var result=DoHCaptcha();
+            if ( result>0 )
+            {
+                return result;
+            }
+		  }
+
+		return 0;
+        }//end Recaptcha_Function
+        //=================//	
+
+
+	
+} //end public class
+
