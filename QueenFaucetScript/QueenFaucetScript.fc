@@ -1,0 +1,177 @@
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
+using FaucetCollector.Utilities;
+
+using System.Collections.Generic;
+using System.Linq;
+//css_ref FaucetCollector.Utilities
+//css_ref FaucetCollector.Captcha
+namespace FaucetCollectorScripts.Scripts
+{
+    public class QueenFaucetScript : FaucetScript
+    {
+        public override FaucetSettings Settings
+        {
+            get
+            {
+
+                return new FaucetSettings("about:blank")
+                {
+                    new FaucetSetting()
+                    {
+                        Name="User",
+                        Type=EditorType.TextBox,
+                        Required=true,
+                        Display="ExpressCrypto Id"
+                    },
+                    new FaucetSetting()
+                    {
+                        Name="UseSolvemedia",
+                        Type=EditorType.CheckBox,
+                        Default=true,
+                        Display="UseSolvemedia"
+                    },
+                    new FaucetSetting()
+                    {
+                        Name="Faucet",
+                        Type=EditorType.ComboBox,
+                        Default=AvailableFaucets.Keys.FirstOrDefault(),
+                        Items=AvailableFaucets.Keys.ToList()
+                    }
+                };
+            }
+        }
+
+
+        private readonly Dictionary<string, string> AvailableFaucets = new Dictionary<string, string>()
+        {
+            {"BTC","https://queenfaucet.website/btc/" },
+            {"BCN","https://queenfaucet.website/bcn" },
+            {"DASH","https://queenfaucet.website/dash" },
+            {"DGB","https://queenfaucet.website/dgb" },
+            {"DOGE","https://queenfaucet.website/doge" },
+            {"ETH","https://queenfaucet.website/eth" },
+            {"LSK","https://queenfaucet.website/lsk" },
+            {"LTC","https://queenfaucet.website/ltc" },
+            {"NEO","https://queenfaucet.website/neo" },
+            {"PPC","https://queenfaucet.website/ppc" },
+            {"POT","https://queenfaucet.website/pot" },
+            {"XRP","https://queenfaucet.website/xrp" },
+            {"STRAT","https://queenfaucet.website/strat" },
+            {"TRX","https://queenfaucet.website/trx" },
+            {"WAVES","https://queenfaucet.website/waves" },
+        };
+        private AntibotLinksMlUtils _antibotLinksMlUtils;
+        public override void Start()
+        {
+            Title = "Queen";
+            SuccessXPath = "//div[contains(@class,'alert alert-success')]";
+            FailXPath = "//div[contains(@class,'alert alert-danger')]";
+            _antibotLinksMlUtils = new AntibotLinksMlUtils(this);
+            base.Start();
+        }
+
+        public override bool IsLoggedIn()
+        {
+            return true;
+        }
+
+        public override int DoSolveCaptcha()
+        {
+            var switchCaptchaXPath = GetBoolSetting("UseSolvemedia") ? "//a[@id='switch' and contains(text(),'SolveMedia')]" : "//a[@id='switch' and contains(text(),'hCaptcha')]";
+
+            var switchCaptchaElement = ElementByXPath(switchCaptchaXPath);
+            if (IsVisible(switchCaptchaElement))
+            {
+                Click(switchCaptchaElement);
+                Wait(2);
+            }
+
+
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+
+            var antibotLinksResult = _antibotLinksMlUtils.DosolveAntibotLinks();
+
+            return antibotLinksResult + result;
+
+        }
+
+        public override int DoSolveFaucet()
+        {
+            var userBox = ElementByXPath("//input[@id='address']");
+            if (!IsVisible(userBox))
+            {
+                return Fail("User box is not visible or not found");
+            }
+            SetText(userBox, GetSetting("User"));
+
+            var openModalBtn = ElementByXPath("//button[@data-target='#captchaModal']");
+            if (!IsVisible(openModalBtn))
+            {
+                return Fail("Open modal btn is not visible or not found");
+            }
+            Click(openModalBtn);
+
+            var result = DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+
+            var submitClaimBtn = ElementByXPath("//input[@id='login']");
+            if (!IsVisible(submitClaimBtn))
+            {
+                return Fail("submit Claim btn is not visible or not found");
+            }
+            Click(submitClaimBtn);
+            Wait();
+
+            var sponsorBtn = ElementByXPath("//a[contains(text(),'Go to')]");
+            if (!IsVisible(sponsorBtn))
+            {
+                return Fail("Sponsor btn is not visible or not found");
+            }
+            ShortLinkBypasser shortLinkBypasser = new ShortLinkBypasser(this);
+
+            Click(sponsorBtn);
+
+            shortLinkBypasser.DoShortLink();
+
+
+            CheckFaucetResult();
+
+            if (IsSuccess)
+            {
+                return GetWaitSetting();
+            }
+
+            return base.DoSolveFaucet();
+        }
+
+        public override int GetFaucetWaitTime()
+        {
+            var claimBtn = ElementByXPath("//button[@data-target='#captchaModal']");
+            if (!IsVisible(claimBtn))
+            {
+                return 300;
+            }
+            return base.GetWaitSetting();
+        }
+
+        public override int CheckFaucetResult()
+        {
+            var failElement = ElementByXPath(FailXPath);
+            if (IsVisible(failElement) && failElement.Text.ToLower().Contains("invalid"))
+            {
+                _antibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+            }
+
+            return base.CheckFaucetResult();
+        }
+
+    }
+}
