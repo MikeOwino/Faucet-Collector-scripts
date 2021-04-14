@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 23/12/2019 01:30PM - Version 1
-//Last Update: 21/01/2021 22:30PM - Version 15
+//Last Update: 14/04/2021 23:10PM - Version 16
 //==================//
 
 using System;
@@ -382,76 +382,92 @@ public class GetZen : FaucetScript
       if (GetBoolSetting("FaucetClaim"))
       {
 
-        //go to CancelSecurity FaucetClaim page
-		GoToUrl("https://GetZen.Cash/");
-        Log("FaucetClaim");		
-	    Wait();
-	    Wait(2);
-
-
-        if (!IsVisible(ElementByXPath ("//div[contains(@class,'input-group')]//button[contains(text(),'Remove')] ") )) // Remove address not visible
+		GoToUrl("https://getzen.cash/user/history");
+        Log("FaucetClaim - check");	
+        Wait(2);
+		
+        var XpathTimeVAR = ElementByXPath("//table[contains(@class,'table-hover')]/tbody//tr[1]/td[1]");
+        var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US") ).ToLocalTime();
+        if (IsVisible(XpathTimeVAR) && TimeVAR < DateTime.Now.AddHours(+24)) //if +24 hours have not passed
 	    {
-
-           var inputAddress = ElementByXPath("//form[@id='form-claim-zen']//input[@name='zen_address']");
-           if (IsVisible(inputAddress))
+           Log("FaucetClaim - 24 hours have not passed - we return to local time");
+		   var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
+           return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
+		}
+		
+        if (IsVisible(XpathTimeVAR) && TimeVAR < DateTime.Now.AddHours(-24)) //if -24 hours passed - all good
+	    {
+           //go to CancelSecurity FaucetClaim page
+		   GoToUrl("https://GetZen.Cash/");
+           Log("FaucetClaim - here");		
+	       Wait();
+	       Wait(2);
+		   
+           if (!IsVisible(ElementByXPath ("//div[contains(@class,'input-group')]//button[contains(text(),'Remove')] ") )) // Remove address not visible
 	       {
-            Log("inputAddress");
-            SetText(inputAddress, GetSetting("Address"));
-           }
+		   
+              var inputAddress = ElementByXPath("//form[@id='form-claim-zen']//input[@name='zen_address']");
+              if (IsVisible(inputAddress))
+	          {
+               Log("inputAddress");
+               SetText(inputAddress, GetSetting("Address"));
+              }
+		      
+	          Wait(2);
+		      
+              var SaveAddress = ElementByXPath("//button[contains(@class,'btn btn-success') and contains(text(),'Save') ]");
+              if (IsVisible(SaveAddress))
+              {
+              Log("SaveAddress");
+              Click(SaveAddress);
+		      }
+		      
+		   } 
+		   
 		   
 	       Wait(2);
 		   
-           var SaveAddress = ElementByXPath("//button[contains(@class,'btn btn-success') and contains(text(),'Save') ]");
-           if (IsVisible(SaveAddress))
+           Recaptcha_Function(); //call
+		   
+	       Wait(2);
+		   
+           var Claim_Button = ElementByXPath("//form[@id='form-claim-zen']//button[@type='button']");       
+		   if (IsVisible(Claim_Button))
            {
-           Log("SaveAddress");
-           Click(SaveAddress);
+            Log("Claim_Button - 1");
+            Click(Claim_Button);
 		   }
 		   
-		} 
-	
+		   Wait(5);
+		   
+           var ProceedToClaimButton = ElementByXPath("//button[contains(@class,'js-Claim')]");       
+		   if (IsVisible(ProceedToClaimButton))
+           {
+            Log("ProceedToClaimButton");
+            Click(ProceedToClaimButton);
+		   }
+		   
+		   Wait(5);
+		   
+           if (!IsVisible(ElementByXPath ("//div[@class='modal-content']//div[@id='result1' and contains(text(),'claimed Zen in the last')] | //td[text()='You Won:']") )) 
+           {
+            Log("Claim_Button - 2 - again");
+            Click(Claim_Button);
+		   }
+		   
+		   Wait(5);
+		   
+           var StatusCheck_Success = ElementByXPath("//td[text()='You Won:']");       
+		   if (IsVisible(StatusCheck_Success))
+           {
+            var SuccessAmountMessage = ElementByXPath("//div[@id='result1']//tr[1]/td[2]");       
+            Log("success "+SuccessAmountMessage.Text);		
+            //ad = true; //success
+		    ClaimSuccess(); //Marks the claim as a success
+		   }
+		   
+	    }// end TimeVAR
 		
-	    Wait(2);
-
-        Recaptcha_Function(); //call
-
-	    Wait(2);
-		
-        var Claim_Button = ElementByXPath("//form[@id='form-claim-zen']//button[@type='button']");       
-		if (IsVisible(Claim_Button))
-        {
-         Log("Claim_Button - 1");
-         Click(Claim_Button);
-		}
-	
-		Wait(5);
-		
-        var ProceedToClaimButton = ElementByXPath("//button[contains(@class,'js-Claim')]");       
-		if (IsVisible(ProceedToClaimButton))
-        {
-         Log("ProceedToClaimButton");
-         Click(ProceedToClaimButton);
-		}
-
-		Wait(5);
-
-        if (!IsVisible(ElementByXPath ("//div[@class='modal-content']//div[@id='result1' and contains(text(),'claimed Zen in the last')] | //td[text()='You Won:']") )) 
-        {
-         Log("Claim_Button - 2 - again");
-         Click(Claim_Button);
-		}
-	
-		Wait(5);
-
-        var StatusCheck_Success = ElementByXPath("//td[text()='You Won:']");       
-		if (IsVisible(StatusCheck_Success))
-        {
-         var SuccessAmountMessage = ElementByXPath("//div[@id='result1']//tr[1]/td[2]");       
-         Log("success "+SuccessAmountMessage.Text);		
-         //ad = true; //success
-		 ClaimSuccess(); //Marks the claim as a success
-		}
-
       } //end FaucetClaim
       //=============//
 
@@ -540,28 +556,39 @@ public class GetZen : FaucetScript
 	
 
         //=================//
-       //Time_Function
+        //Time_Function
         //=================//
         public int Time_Function()
         {
-
 
            //site time with date - example 10:00 PM | 10:00 AM  OR UTC LocalTime
            var CheckAvailableGeneral = ElementByXPath("//div[contains(@id,'result') and contains(text(),'wait') or contains(text(),'UTC') ]");
            if (IsVisible(CheckAvailableGeneral))
            {
-	         Log("DateTime.ParseExact - here");             
-	         var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
-	         //var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //AM-PM -- t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  			   
-	         var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US") ).ToLocalTime(); //UTC -- yyyy-MM-dd HH:mm:ss =  LocalTime - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
-	         //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
-	 
-             var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
-             return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
-		  
-           } //end CheckAvailableGeneral
+	         Log("ParseExact - here - check ");   
 			 
-			
+	         var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
+			 if (IsVisible(XpathTimeVAR))
+             {
+	           Log("XpathTimeVAR - Element - LocalTime - Visible - return to site time"); 
+			   
+	           var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //AM-PM -- t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  			   
+	           //var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US") ).ToLocalTime(); //UTC -- yyyy-MM-dd HH:mm:ss =  LocalTime - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
+	           //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+			   
+               var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
+               return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
+		     }
+			 
+			 if (!IsVisible(XpathTimeVAR))
+             {
+	           Log("XpathTimeVAR - Element - LocalTime - NOT Visible");  
+		     }
+			 
+           } //end CheckAvailableGeneral
+
+			 
+		   //site time with normal counter
            var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
 		   var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
 
@@ -580,10 +607,12 @@ public class GetZen : FaucetScript
 		        return GetWaitSetting();
            }
 
+	       Log("Time_Function - return to your time - backup general"); 
+		   return GetWaitSetting(); //backup general
+
            return 0;		
         }//end Time_Function
-        //=================//	
-		
+        //=================//
 	
 	
         //=================//
