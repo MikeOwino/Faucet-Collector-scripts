@@ -20,7 +20,7 @@ using System.Globalization;
 //css_inc RecaptchaUtilities
 //css_inc IconCaptcha
 
-public class btcsamsity : FaucetScript
+public class FaucetSpinCom : FaucetScript
 {
     /// <summary>
     /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
