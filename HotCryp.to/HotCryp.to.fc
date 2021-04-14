@@ -1,0 +1,667 @@
+
+//==================//
+//script Written by: ••AviramDayan•• 14/04/2021 20:00PM - Version 1
+//Last Update: 14/04/2021 20:00PM - Version 1
+//==================//
+
+using System;
+using System.IO;
+using FaucetCollector.Script;
+using System.Text.RegularExpressions;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Globalization;
+
+//css_ref FaucetCollector.Utilities
+//css_inc RecaptchaUtilities
+/*  css_inc IconCaptcha  */
+//css_inc ShortLinkUtilities
+
+public class btcsamsity : FaucetScript
+{
+    /// <summary>
+    /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
+    /// You can get the value the user entered with the methods: GetSetting("[Name of the FaucetSetting]"), GetBoolSetting and GetDateTimeSetting
+    /// You can also create a new setting value using SetSetting("[Name you want to use]", "value")
+    /// </summary>
+    public override FaucetSettings Settings
+    {
+        get
+        {
+            return new FaucetSettings("https://HotCryp.to")
+            {
+                new FaucetSetting(){Name="Email",Display="UserName",Type=EditorType.TextBox,Required=true},
+                new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
+				
+                new FaucetSetting(){Name="ShortLink",Display="ShortLink",Type=EditorType.CheckBox,Default=true},		
+                //new FaucetSetting() { Name = "CaptchaChoose", Display = "ON SolveMedia / OFF ReCaptcha", Type = EditorType.CheckBox, Default = true },			
+                
+			
+                //insert user settings here
+                //new FaucetSetting { 
+                //    Name = "Name of your setting", 
+                //    Display = "Display shown in Faucet Collector", 
+                //    Type = EditorType.TextBox | EditorType.Password | EditorType.CheckBox | EditorType.Wallet | EditorType.Numeric | EditorType.ComboBox | EditorType.CheckComboBox, 
+                //    Required = true | false, 
+                //    Default = "Optionally a default value" | true | false | null.
+                //    Items = new List<string> { "item1", "item2" } (only valid for ComboBox or CheckComboBox)
+                //} 
+            };
+        }
+    }
+
+
+    //My DomainName
+    //string DomainName_String = "https://HotCryp.to";
+	//example - GoToUrl(DomainName_String);
+    //==========//
+	
+	
+//============================================================//
+//the number of "successes" in the script - when are finished  
+//============================================================//
+    public override void Start()
+    {
+		ad=false;
+		
+        //Title that shows in the browser. Is used to identify and close popup windows
+        Title = "HotCryp.to";
+
+        //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
+        SuccessXPath = "//*"; //*[text()='']
+        FailXPath = "//*"; //*[text()='']
+
+        //Let Faucet Collector start up everything
+        base.Start();
+    }
+//============================================================//
+//the number of "successes" in the script - when are finished  
+//============================================================//
+	
+
+	bool ad;
+
+
+//========//
+//DoInit
+//========//
+    public override int DoInit()
+    {
+
+
+        //Let Faucet Collector continue.
+        return base.DoInit();
+    }
+//========//
+//DoInit
+//========//
+	
+	
+	
+//==================//
+//save Login Cookies 
+//==================//
+    public override bool IsLoggedIn()
+    {
+
+        //In this case we check for en element with the class "loggedIn"
+		return ElementByXPath("//button[contains(text(),'Sign Out')]") != null;
+		//return true;
+    }
+//==================//
+//save Login Cookies 
+//==================//
+	
+	
+	
+	
+	
+    /// <summary>
+    /// This method gets called if IsLoggedIn returned false, right before the DoLogin method is called.
+    /// </summary>
+    public override int BeforeLogin()
+    {
+		
+		
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeLogin();
+    }
+	
+	
+	
+	//====================//
+    //Cloudflare HCaptcha Protection
+	//====================//	
+    public override string GetHCaptchaSiteKey()
+    {
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            string src = hcaptchaIframe.GetAttribute("src");
+
+            if (!string.IsNullOrEmpty(src))
+            {
+                // we find the sitekey 
+                var queryParams = src.Split('&').ToList();
+                // we remove the host part 
+
+                queryParams.RemoveAt(0);
+
+                //we find the sitekey 
+
+                string siteKey = queryParams.FirstOrDefault(param => param.ToLower().Contains("sitekey")).Split('=').LastOrDefault();
+
+
+                return siteKey;
+
+            }
+        }
+
+        return base.GetHCaptchaSiteKey();
+    }
+
+
+
+    public override bool SetHCaptchaResponse(string response)
+    {
+
+
+        if (ElementByXPath("//*[@name='g-recaptcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=g-recaptcha-response]').innerText = '" + response + "'");
+        }
+        if (ElementByXPath("//*[@name='h-captcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=h-captcha-response]').innerText = '" + response + "'");
+
+        }
+
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            ExecuteScript("arguments[0].setAttribute('data-hcaptcha-response','" + response + "');", hcaptchaIframe);
+        }
+
+        return true;
+    }
+
+	//====================//	
+	
+	
+
+//========//
+//DoLogin
+//========//
+ public override int DoLogin()
+ {
+	
+  var ExitButton = ElementByXPath ("//button[contains(text(),'Sign Out')]"); 
+
+  //if i NOT Login - go to Login Page
+  if (!IsVisible(ExitButton))
+  {
+
+        GoToUrl("https://HotCryp.to/#login");
+        Wait();		
+        Wait(2);
+
+        var ButtonStart = ElementByXPath("//a[contains(text(),'Get Start')]");
+        if (IsVisible(ButtonStart))
+	    {
+         Click(ButtonStart);
+        }
+		
+        Wait(3);
+		
+        var ButtonLogin = ElementByXPath("//a[contains(text(),'Login')]");
+        if (IsVisible(ButtonLogin))
+	    {
+         Click(ButtonLogin);
+        }
+
+        Wait(3);
+
+        var Email_VAR = ElementByXPath("//input[@id='Form-Username2']");      
+        if (IsVisible(Email_VAR))
+        {
+         SetText(Email_VAR, GetSetting("Email"));
+        }
+        
+        Wait(2);
+
+        var Password_VAR = ElementByXPath("//input[@id='Form-Pass3']");      
+        if (IsVisible(Password_VAR))
+        {
+         SetText(Password_VAR, GetPassword("Password"));
+        }
+		
+		Wait(2);
+		
+        var ButtonLog = ElementByXPath("//button[@type='submit' and contains(text(),'ogin')]");  
+        if (IsVisible(ButtonLog))
+        {
+         Click(ButtonLog);
+        }
+		
+		Wait();
+
+		Recaptcha_Function(); //call
+		
+		Wait();
+		
+  } // end ExitButton
+
+        
+       return base.DoLogin();
+    }
+//========//
+//DoLogin
+//========//
+	
+
+	
+	
+	
+	
+//==========//
+//AfterLogin
+//=========//
+ public override int AfterLogin()
+ {
+ 
+	 
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterLogin();
+ }
+//==========//
+//AfterLogin
+//=========//
+	
+	
+	
+
+	
+//=============//
+//GetFaucetWaitTime
+//=============//
+ public override int GetFaucetWaitTime()
+ {
+
+    if(ad)
+	{
+        ad=false; //solve the problem in start - after he return to script again
+        return GetWaitSetting();  
+    }	//end ad
+		
+   //let Faucet Collector continue.
+   return base.GetFaucetWaitTime();
+ }
+//=============//
+//GetFaucetWaitTime
+//=============//
+	
+	
+	
+	
+
+    public override int BeforeSolveCaptcha()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeSolveCaptcha();
+    }
+
+
+    public override int DoSolveCaptcha()
+    {
+
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoSolveCaptcha();
+    }
+
+
+    public override int AfterSolveCaptcha()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterSolveCaptcha();
+    }
+	
+	
+
+    public override int BeforeSolveFaucet()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeSolveCaptcha();
+    }
+	
+	
+	
+
+
+//=============//
+//DoSolveFaucet
+//=============//
+    public override int DoSolveFaucet()
+    {
+	
+      //=============//
+      //ShortLink
+      //=============//
+      if (GetBoolSetting("ShortLink"))
+      {
+
+         var TimeToWaitForBreak = DateTime.Now.AddSeconds(150);
+         while (true)
+         {
+         	
+           ShortLink_Tab(); //call
+         
+           var ShortLinkCheckGeneral = ElementByXPath("//button[contains(@id,'Shortlink') and contains(text(),'Visit')]");
+           if (IsVisible(ShortLinkCheckGeneral))
+           {
+             Title = "";
+         
+             Wait(2);
+         
+             var FaucetButton = ElementByXPath("//button[contains(@id,'Shortlink') and contains(text(),'Visit')]");
+             Click(FaucetButton);
+         
+             Wait(3);
+         
+             ShortLink_Function(); //call
+         
+             Wait(2);
+         
+             Title = "HotCryp.to";
+         
+             var SuccessMessage = ElementByXPath("//div[contains(@class,'SuccessMSG')]");
+             if (IsVisible(SuccessMessage))
+             {
+             Log(SuccessMessage.Text);
+             ClaimSuccess();
+             }
+         
+             Wait(2);
+         	
+             Driver.Navigate().Refresh(); //Refresh
+         
+             Wait(2);
+         
+             ShortLink_Tab(); //call
+         
+           }// end ShortLinkCheckGeneral
+         
+           if (!IsVisible(ShortLinkCheckGeneral))
+           {
+           Log("FaucetClaim - break - not Available");
+           break;
+           }
+         
+           if (DateTime.Now > TimeToWaitForBreak) //if the time above 65 sec 
+           {
+           Log("FaucetClaim - break - TimeToWaitForBreak");
+           break; //break the wait loop
+           }
+         
+         } //end while true	
+
+      } //end ShortLink
+      //=============//
+
+		return Time_Function(); //call to function time
+	
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoSolveFaucet();
+    }
+	
+	
+
+
+    public override int AfterSolveFaucet()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterSolveFaucet();
+    }
+	
+	
+	
+
+    /// <summary>
+    /// This method gets called in the end after the BeforeSolveFaucet/DoSolveFaucet and AfterSolveFaucet methods were done.
+    /// The base.CheckFaucetResult will try to find a visible element on the page using the XPath from SuccessXPath and FailXPath (see the Start method)
+    /// These properties should contain XPath expressions to find certain elements on the page.
+    /// For example if it finds one of the elements from the SuccessXPath, and it is visible, then it will flag the claim attempt as a success.
+    /// Or if it finds one of the elements from the FailXPath, and it is visible, then it will flag the claim attempt as a failure.
+    /// </summary>
+    public override int CheckFaucetResult()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.CheckFaucetResult();
+    }
+	
+
+        //=================//
+		//ShortLink_Tab
+        //=================//
+        public void ShortLink_Tab()
+        {
+
+		   GoToUrl("https://hotcryp.to/Dashboard");
+	       Wait();
+	       Wait(4);
+		   
+           var Tab_Shortlink = ElementByXPath("//a[contains(text(),'Shortlinks')]");
+           Click(Tab_Shortlink);
+		   
+	       Wait(2);
+
+        }//	ShortLink_Function
+        //=================//
+		   
+		   
+
+        //=================//
+		//ShortLink_Function
+        //=================//
+        public void ShortLink_Function()
+        {
+
+           //call to ShortLink
+           ShortLinkBypasser bypasser = new ShortLinkBypasser(this);
+           bool ShorBool = bypasser.DoShortLink();
+           if (!ShorBool)
+           {
+               Log("Fail shortlink");
+           }
+
+        }//	ShortLink_Function
+        //=================//
+		
+
+	
+        //=================//
+        //Time_Function
+        //=================//
+        public int Time_Function()
+        {
+
+           //site time with date - example 10:00 PM | 10:00 AM  OR UTC LocalTime
+           var CheckAvailableGeneral = ElementByXPath("//div[contains(@id,'result') and contains(text(),'wait') or contains(text(),'UTC') ]");
+           if (IsVisible(CheckAvailableGeneral))
+           {
+	         Log("ParseExact - here - check ");   
+			 
+	         var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
+			 if (IsVisible(XpathTimeVAR))
+             {
+	           Log("XpathTimeVAR - Element - LocalTime - Visible - return to site time"); 
+			   
+	           var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //AM-PM -- t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  			   
+	           //var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US") ).ToLocalTime(); //UTC -- yyyy-MM-dd HH:mm:ss =  LocalTime - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
+	           //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+			   
+               var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
+               return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
+		     }
+			 
+			 if (!IsVisible(XpathTimeVAR))
+             {
+	           Log("XpathTimeVAR - Element - LocalTime - NOT Visible");  
+		     }
+			 
+           } //end CheckAvailableGeneral
+
+			 
+		   //site time with normal counter
+           var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
+		   var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
+
+           if (IsVisible(MinVar))
+           {
+	         Log("Time_Function - WaitTimerText apper - return to site time"); 
+             int min,sec;
+             min = Convert.ToInt32(MinVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[0])*60;
+             sec = Convert.ToInt32(SecVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[1]);
+             return min+sec;
+           } 
+
+           if (!IsVisible(MinVar))
+           {
+	            Log("Time_Function - return to your time"); 
+		        return GetWaitSetting();
+           }
+
+	       Log("Time_Function - return to your time - backup general"); 
+		   return GetWaitSetting(); //backup general
+
+           return 0;		
+        }//end Time_Function
+        //=================//
+		
+	
+        //=================//
+       //invisible_Recaptcha_Function
+        //=================//
+        public int invisible_Recaptcha_Function()
+        {
+			
+          var RecaptchaOpen_Iframe = ElementByXPath ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]");  
+          if (RecaptchaOpen_Iframe !=null)          
+		  {
+            //SolveCaptcha if apper
+            Log("DO invisible_Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+		    RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		    
+            Wait();
+		    
+            //ExecuteScript("afterResolveCaptcha");
+		  }
+		
+		return 0;
+        }//end invisible_Recaptcha_Function
+        //=================//	
+
+
+
+        //=================//
+       //Recaptcha_Function
+        //=================//
+
+        public int Recaptcha_Function()
+        {
+			
+          /*
+          //CaptchaChoose
+          var dropdown = ElementByXPath("//select[contains(@name,'captcha_type')]");
+          if ( GetBoolSetting("CaptchaChoose") )
+          {
+              SelectOptionByValue(dropdown , "1"); //SolveMedia
+          }
+          if ( !GetBoolSetting("CaptchaChoose") )
+          {
+              SelectOptionByValue(dropdown , "0"); //ReCaptcha
+          }
+          */	
+		  
+          //DoSolveImageCaptcha
+          var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
+          if (IsVisible(SolveMedia))
+		  {  
+            Log("DO SolveMedia");	  
+	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']")); 
+            if (result_2 > 0)
+            {
+                return Fail("SolveMedia - Fail solving captcha");
+            }
+		  }
+
+          /*
+          var SolveMedia_Iframe_Animation_OR_Canvas = ElementByXPath ("//div[contains(@id,'adcopy-puzzle-image-image')] | //canvas[contains(@id,'slog')] ");
+          if (IsVisible(SolveMedia_Iframe_Animation_OR_Canvas))
+          {
+            Log("SolveMedia_Iframe_Animation_OR_Canvas - visible - we select ReCaptcha - for protection");
+		    SelectOptionByValue(dropdown , "0"); //Choose to slolve with ReCaptcha - select ReCaptcha
+		  }
+          */
+		  
+	     //for recaptcha popup after click on button - ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]")   
+          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
+          if (IsVisible(RecaptchaOpen_Iframe))
+		  {
+            //SolveCaptcha if apper
+            Log("DO Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		  }
+
+          //HCaptcha
+		  var HCaptcha_Check = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");	
+	      if (IsVisible(HCaptcha_Check))
+	      {	
+            var result=DoHCaptcha();
+            if ( result>0 )
+            {
+                return result;
+            }
+		  }
+
+          //IconCaptcha
+		  /*
+          var IconCaptcha_Check = ElementByXPath("//div[@class='captcha-modal__icons']");  
+          if (IsVisible(IconCaptcha_Check))
+		  {
+		  Log("IconCaptcha - here");  
+          IconCaptchaSolver solver=new IconCaptchaSolver(this); //call
+		  
+			var IconCaptcha_Success = ElementByXPath("//div[@class='captcha-modal__icons-title' and contains(text(),'Great')]");  
+		    if (IsVisible(IconCaptcha_Success))
+		    {
+		     Log("IconCaptcha - Success_Claim ");  
+		     //ClaimSuccess(); //Marks the claim as a success
+			}
+			
+		  }	//end IconCaptcha
+		  */
+
+		return 0;
+        }//end Recaptcha_Function
+        //=================//	
+	
+	
+} //public class
