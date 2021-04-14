@@ -21,7 +21,7 @@ using System.Globalization;
 /*  css_inc IconCaptcha  */
 //css_inc ShortLinkUtilities
 
-public class btcsamsity : FaucetScript
+public class HotCryp : FaucetScript
 {
     /// <summary>
     /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
