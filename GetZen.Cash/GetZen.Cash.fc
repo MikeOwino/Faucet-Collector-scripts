@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 23/12/2019 01:30PM - Version 1
-//Last Update: 14/04/2021 23:00PM - Version 16
+//Last Update: 14/04/2021 23:10PM - Version 16
 //==================//
 
 using System;
@@ -388,14 +388,14 @@ public class GetZen : FaucetScript
 		
         var XpathTimeVAR = ElementByXPath("//table[contains(@class,'table-hover')]/tbody//tr[1]/td[1]");
         var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US") ).ToLocalTime();
-        if (TimeVAR < DateTime.Now.AddHours(+24)) //if +24 hours have not passed
+        if (IsVisible(XpathTimeVAR) && TimeVAR < DateTime.Now.AddHours(+24)) //if +24 hours have not passed
 	    {
            Log("FaucetClaim - 24 hours have not passed - we return to local time");
 		   var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
            return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
 		}
 		
-        if (TimeVAR < DateTime.Now.AddHours(-24)) //if -24 hours passed - all good
+        if (IsVisible(XpathTimeVAR) && TimeVAR < DateTime.Now.AddHours(-24)) //if -24 hours passed - all good
 	    {
            //go to CancelSecurity FaucetClaim page
 		   GoToUrl("https://GetZen.Cash/");
