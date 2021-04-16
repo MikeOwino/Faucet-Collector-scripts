@@ -12,7 +12,7 @@ using System;
 //css_ref FaucetCollector.Captcha
 
 
-public class SimpleBits : FaucetScript
+public class SimpleBitsScript : FaucetScript
 {
     /// <summary>
     /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
@@ -126,70 +126,48 @@ public class SimpleBits : FaucetScript
     public override int DoLogin( )
     {
 
-        var ExitButton = ElementByXPath ("//a[contains(text(),'Logout')]");
+        var ExitButton = ElementByXPath("//a[contains(text(),'Logout')]");
 
         //if i NOT Login - go to Login Page
-        if ( !IsVisible(ExitButton) )
+        if (!IsVisible(ExitButton))
         {
 
             GoToUrl("https://simplebits.io/login");
-            Wait( );
             Wait(2);
 
-            var Email_VAR = ElementByXPath("//input[@type='username']");
-            if ( IsVisible(Email_VAR) )
+            var emailBox = ElementByXPath("//input[@placeholder='Username']");
+            if (!IsVisible(emailBox))
             {
-                SetText(Email_VAR , GetSetting("Email"));
+                return Fail("Email box not visible or not found");
             }
-
-            Wait(2);
-
-            var Password_VAR = ElementByXPath("//input[@type='password']");
-            if ( IsVisible(Password_VAR) )
-            {
-                SetText(Password_VAR , GetPassword("Password"));
-            }
-
-            Wait(4);
-
-            var MenuChoose = ElementByXPath("//div[contains(@class,'dropdown is-mobile-modal') ]");
-            if ( IsVisible(MenuChoose) )
-            {
-                Click(MenuChoose);
-            }
-
-            //CaptchaLogin
-            if ( GetBoolSetting("CaptchaLogin") ) //Recaptcha
-            {
-                var RadioRecaptcha = ElementByXPath("//h3[contains(text(),'Recaptcha')]");
-                Click(RadioRecaptcha);
-            }
-
-            if ( !GetBoolSetting("CaptchaLogin") ) //SolveMedia
-            {
-                var RadioSolveMedia = ElementByXPath("//h3[contains(text(),'SolveMedia')]");
-                Click(RadioSolveMedia);
-            }
-            //=======//
-
-            Wait(6);
-
-            Recaptcha_Function( ); //call
+            SetText(emailBox, GetSetting("Email"));
 
             Wait(2);
 
-            var ButtonLog = ElementByXPath("//button//span[contains(text(),'Login')]");
-            if ( IsVisible(ButtonLog) )
+            var passwordBox = ElementByXPath("//input[@type='password']");
+            if (!IsVisible(passwordBox))
             {
-                Click(ButtonLog);
+                return Fail("Email box not visible or not found");
+            }
+            SetText(passwordBox, GetPassword("Password"));
+
+
+            Recaptcha_Function();
+
+            Wait(2);
+
+            var loginBtn = ElementByXPath("//button[contains(@class,'baseBtn')]");
+            if (!IsVisible(loginBtn))
+            {
+                Click(loginBtn);
             }
 
-            Wait( );
+            Wait();
 
         } // end ExitButton
 
 
-        return base.DoLogin( );
+        return base.DoLogin();
     }
     //========//
     //DoLogin
