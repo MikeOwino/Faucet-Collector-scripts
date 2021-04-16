@@ -6,19 +6,16 @@
 //==================//
 
 using FaucetCollector.Script;
+
 using System;
 
-//css_ref FaucetCollector.utilities
+//css_ref FaucetCollector.Utilities
 //css_ref FaucetCollector.Captcha
 
 
 public class SimpleBits : FaucetScript
 {
-    /// <summary>
-    /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
-    /// You can get the value the user entered with the methods: GetSetting("[Name of the FaucetSetting]"), GetBoolSetting and GetDateTimeSetting
-    /// You can also create a new setting value using SetSetting("[Name you want to use]", "value")
-    /// </summary>
+  
     public override FaucetSettings Settings
     {
         get
@@ -29,17 +26,8 @@ public class SimpleBits : FaucetScript
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
 
                 new FaucetSetting(){Name="ShortLinks",Display="ShortLinks",Type=EditorType.CheckBox,Default=true},
-                new FaucetSetting(){Name="CaptchaLogin",Display="CaptchaLogin - Use Recaptcha (Unchecked will use SolveMedia) ",Type=EditorType.CheckBox,Default=false},		             
 		
-                //insert user settings here
-                //new FaucetSetting { 
-                //    Name = "Name of your setting", 
-                //    Display = "Display shown in Faucet Collector", 
-                //    Type = EditorType.TextBox | EditorType.Password | EditorType.CheckBox | EditorType.Wallet | EditorType.Numeric | EditorType.ComboBox | EditorType.CheckComboBox, 
-                //    Required = true | false, 
-                //    Default = "Optionally a default value" | true | false | null.
-                //    Items = new List<string> { "item1", "item2" } (only valid for ComboBox or CheckComboBox)
-                //} 
+            
             };
         }
     }
@@ -54,19 +42,19 @@ public class SimpleBits : FaucetScript
     //============================================================//
     //the number of "successes" in the script - when are finished  
     //============================================================//
-    public override void Start( )
+    public override void Start()
     {
-        ad=false;
+        ad = false;
 
         //Title that shows in the browser. Is used to identify and close popup windows
-        Title="SimpleBits";
+        Title = "SimpleBits";
 
         //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
-        SuccessXPath="//*"; //*[text()='']
-        FailXPath="//*"; //*[text()='']
+        SuccessXPath = "//*"; //*[text()='']
+        FailXPath = "//*"; //*[text()='']
 
         //Let Faucet Collector start up everything
-        base.Start( );
+        base.Start();
     }
     //============================================================//
     //the number of "successes" in the script - when are finished  
@@ -77,12 +65,12 @@ public class SimpleBits : FaucetScript
     bool ad;
 
 
-    public override int DoInit( )
+    public override int DoInit()
     {
 
 
         //Let Faucet Collector continue.
-        return base.DoInit( );
+        return base.DoInit();
     }
 
 
@@ -91,11 +79,11 @@ public class SimpleBits : FaucetScript
     //==================//
     //save Login Cookies 
     //==================//
-    public override bool IsLoggedIn( )
+    public override bool IsLoggedIn()
     {
 
         //In this case we check for en element with the class "loggedIn"
-        return ElementByXPath("//a[contains(text(),'Logout')]")!=null;
+        return ElementByXPath("//a[contains(text(),'Logout')]") != null;
         //return true;
     }
     //==================//
@@ -109,12 +97,12 @@ public class SimpleBits : FaucetScript
     /// <summary>
     /// This method gets called if IsLoggedIn returned false, right before the DoLogin method is called.
     /// </summary>
-    public override int BeforeLogin( )
+    public override int BeforeLogin()
     {
 
 
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.BeforeLogin( );
+        return base.BeforeLogin();
     }
 
 
@@ -123,73 +111,51 @@ public class SimpleBits : FaucetScript
     //========//
     //DoLogin
     //========//
-    public override int DoLogin( )
+    public override int DoLogin()
     {
 
-        var ExitButton = ElementByXPath ("//a[contains(text(),'Logout')]");
+        var ExitButton = ElementByXPath("//a[contains(text(),'Logout')]");
 
         //if i NOT Login - go to Login Page
-        if ( !IsVisible(ExitButton) )
+        if (!IsVisible(ExitButton))
         {
 
             GoToUrl("https://simplebits.io/login");
-            Wait( );
             Wait(2);
 
-            var Email_VAR = ElementByXPath("//input[@type='username']");
-            if ( IsVisible(Email_VAR) )
+            var emailBox = ElementByXPath("//input[@placeholder='Username']");
+            if (!IsVisible(emailBox))
             {
-                SetText(Email_VAR , GetSetting("Email"));
+                return Fail("Email box not visible or not found");
             }
-
-            Wait(2);
-
-            var Password_VAR = ElementByXPath("//input[@type='password']");
-            if ( IsVisible(Password_VAR) )
-            {
-                SetText(Password_VAR , GetPassword("Password"));
-            }
-
-            Wait(4);
-
-            var MenuChoose = ElementByXPath("//div[contains(@class,'dropdown is-mobile-modal') ]");
-            if ( IsVisible(MenuChoose) )
-            {
-                Click(MenuChoose);
-            }
-
-            //CaptchaLogin
-            if ( GetBoolSetting("CaptchaLogin") ) //Recaptcha
-            {
-                var RadioRecaptcha = ElementByXPath("//h3[contains(text(),'Recaptcha')]");
-                Click(RadioRecaptcha);
-            }
-
-            if ( !GetBoolSetting("CaptchaLogin") ) //SolveMedia
-            {
-                var RadioSolveMedia = ElementByXPath("//h3[contains(text(),'SolveMedia')]");
-                Click(RadioSolveMedia);
-            }
-            //=======//
-
-            Wait(6);
-
-            Recaptcha_Function( ); //call
+                SetText(emailBox, GetSetting("Email"));
 
             Wait(2);
 
-            var ButtonLog = ElementByXPath("//button//span[contains(text(),'Login')]");
-            if ( IsVisible(ButtonLog) )
+            var passwordBox = ElementByXPath("//input[@type='password']");
+            if (!IsVisible(passwordBox))
             {
-                Click(ButtonLog);
+                return Fail("Email box not visible or not found");
+            }
+                SetText(passwordBox, GetPassword("Password"));
+
+         
+            Recaptcha_Function(); 
+
+            Wait(2);
+
+            var loginBtn = ElementByXPath("//button[contains(@class,'baseBtn')]");
+            if (!IsVisible(loginBtn))
+            {
+                Click(loginBtn);
             }
 
-            Wait( );
+            Wait();
 
         } // end ExitButton
 
 
-        return base.DoLogin( );
+        return base.DoLogin();
     }
     //========//
     //DoLogin
@@ -203,12 +169,12 @@ public class SimpleBits : FaucetScript
     //==========//
     //AfterLogin
     //=========//
-    public override int AfterLogin( )
+    public override int AfterLogin()
     {
 
 
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.AfterLogin( );
+        return base.AfterLogin();
     }
     //==========//
     //AfterLogin
@@ -221,17 +187,17 @@ public class SimpleBits : FaucetScript
     //=============//
     //GetFaucetWaitTime
     //=============//
-    public override int GetFaucetWaitTime( )
+    public override int GetFaucetWaitTime()
     {
 
-        if ( ad )
+        if (ad)
         {
-            ad=false; //solve the problem in start - after he return to script again
-            return GetWaitSetting( );
+            ad = false; //solve the problem in start - after he return to script again
+            return GetWaitSetting();
         }   //end ad
 
         //let Faucet Collector continue.
-        return base.GetFaucetWaitTime( );
+        return base.GetFaucetWaitTime();
     }
     //=============//
     //GetFaucetWaitTime
@@ -241,33 +207,33 @@ public class SimpleBits : FaucetScript
 
 
 
-    public override int BeforeSolveCaptcha( )
+    public override int BeforeSolveCaptcha()
     {
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.BeforeSolveCaptcha( );
+        return base.BeforeSolveCaptcha();
     }
 
 
-    public override int DoSolveCaptcha( )
+    public override int DoSolveCaptcha()
     {
 
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.DoSolveCaptcha( );
+        return base.DoSolveCaptcha();
     }
 
 
-    public override int AfterSolveCaptcha( )
+    public override int AfterSolveCaptcha()
     {
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.AfterSolveCaptcha( );
+        return base.AfterSolveCaptcha();
     }
 
 
 
-    public override int BeforeSolveFaucet( )
+    public override int BeforeSolveFaucet()
     {
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.BeforeSolveCaptcha( );
+        return base.BeforeSolveCaptcha();
     }
 
 
@@ -277,69 +243,47 @@ public class SimpleBits : FaucetScript
     //=============//
     //DoSolveFaucet
     //=============//
-    public override int DoSolveFaucet( )
+    public override int DoSolveFaucet()
     {
 
         //=============//
         //ShortLinks
         //=============//
-        if ( GetBoolSetting("ShortLinks") )
+        if (GetBoolSetting("ShortLinks"))
         {
 
             //else go to normal login
             GoToUrl("https://simplebits.io/shortlinks");
 
+            Wait();
             Wait(4);
 
-            var VisitButton = ElementByXPath("//td[@data-label='Claim']//button[@class='button is-info is-small is-outlined']");
-            if ( IsVisible(VisitButton) )
+            var VisitButton = ElementByXPath("//tr[contains(@draggable,'false')]//span[contains(text(),'Visit')]");
+            if (IsVisible(VisitButton))
             {
-
-                // Is not necessary delete the title
-                //Title="";
+                Wait(3);
+                Title = "";
                 Log("ShortLinks- VisitButton");
-                CheckForPopupsEnabled=false; //disable	
-                FaucetCollector.Utilities.ShortLinkBypasser bypasser = new FaucetCollector.Utilities.ShortLinkBypasser(this);
-                Click(VisitButton,false);
+                CheckForPopupsEnabled = false; //disable	
+                Click(VisitButton);
                 Wait(2);
-                // Check if we have two windows 
-                if ( Driver.WindowHandles.Count==2 )
-                {
-                    // Go to main window
-                    Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
-                    // Close the main window
-                    Driver.Close( );
-                    Wait(1);
-                    // Go to default content
-                    Driver.SwitchTo( ).DefaultContent( );
-                    
-                    Wait(5);
-                    if ( !bypasser.IsValidShortLink( ) )
-                    {
-                        Log("Something is wrong we are not in a shortlink");
-                    }
-                    else
-                    {
-                        // Do the shortlink
-                      bool result=  bypasser.DoShortLink( );
-                        if ( result )
-                        {
-                            Log("ShortLinks - Success_Claim ");
-                            ClaimSuccess( ); //Marks the claim as a success 
-                        }
-                    }
-                }
-                else
-                {
-                    Log("Shortlink window didn't opened");
-                }
-                
+                Driver.Close();
+                Driver.SwitchTo().Window(Driver.WindowHandles[0]);
+                Wait(2);
+                //ShortLinkBypasser bypasser = new ShortLinkBypasser(this);	//do ShortLink
+                FaucetCollector.Utilities.ShortLinkBypasser bypasser = new FaucetCollector.Utilities.ShortLinkBypasser(this);
+                Wait(5);
+                Log("ShortLinks - Success_Claim ");
+                ClaimSuccess(); //Marks the claim as a success 
             } // end VisitButton
 
         } //end ShortLinks
           //=============//
 
-        return Time_Function( ); //call to function time
+        return Time_Function(); //call to function time
+
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoSolveFaucet();
     }
     //=============//
     //DoSolveFaucet
@@ -350,10 +294,10 @@ public class SimpleBits : FaucetScript
 
 
 
-    public override int AfterSolveFaucet( )
+    public override int AfterSolveFaucet()
     {
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.AfterSolveFaucet( );
+        return base.AfterSolveFaucet();
     }
 
 
@@ -366,10 +310,10 @@ public class SimpleBits : FaucetScript
     /// For example if it finds one of the elements from the SuccessXPath, and it is visible, then it will flag the claim attempt as a success.
     /// Or if it finds one of the elements from the FailXPath, and it is visible, then it will flag the claim attempt as a failure.
     /// </summary>
-    public override int CheckFaucetResult( )
+    public override int CheckFaucetResult()
     {
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.CheckFaucetResult( );
+        return base.CheckFaucetResult();
     }
 
 
@@ -377,25 +321,25 @@ public class SimpleBits : FaucetScript
     //=================//
     //Time_Function
     //=================//
-    public int Time_Function( )
+    public int Time_Function()
     {
 
-        var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
-        var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
+        var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]");
+        var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]");
 
-        if ( IsVisible(MinVar) )
+        if (IsVisible(MinVar))
         {
             Log("ClaimBTC - WaitTimerText apper - return to site time");
-            int min,sec;
-            min=Convert.ToInt32(MinVar.Text.Trim( ).Replace("m." , "").Replace("s." , "").Split(' ')[0])*60;
-            sec=Convert.ToInt32(SecVar.Text.Trim( ).Replace("m." , "").Replace("s." , "").Split(' ')[1]);
-            return min+sec;
+            int min, sec;
+            min = Convert.ToInt32(MinVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[0]) * 60;
+            sec = Convert.ToInt32(SecVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[1]);
+            return min + sec;
         }
 
-        if ( !IsVisible(MinVar) )
+        if (!IsVisible(MinVar))
         {
             Log("ClaimBTC - return to your time");
-            return GetWaitSetting( );
+            return GetWaitSetting();
         }
 
         return 0;
@@ -407,30 +351,30 @@ public class SimpleBits : FaucetScript
     //Recaptcha_Function
     //=================//
 
-    public int Recaptcha_Function( )
+    public int Recaptcha_Function()
     {
 
         //DoSolveImageCaptcha
-        var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]");
-        if ( IsVisible(SolveMedia) )
+        var SolveMedia = ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]");
+        if (IsVisible(SolveMedia))
         {
             Log("DO SolveMedia");
-            var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']"));
+            var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"), ElementByXPath("//input[@name='adcopy_response']"));
         }
 
         //for recaptcha popup after click on button - ("//button[contains(@class,'reload')] | //button[contains(@id,'reload')] ")
-        var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]");
-        if ( IsVisible(RecaptchaOpen_Iframe) )
+        var RecaptchaOpen_Iframe = ElementByXPath("//iframe[contains(@src,'recaptcha/api2/anchor')]");
+        if (IsVisible(RecaptchaOpen_Iframe))
         {
             //SolveCaptcha if apper
             Log("DO Recaptcha");
             var result = base.DoSolveCaptcha();
-            if ( result>0 )
+            if (result > 0)
             {
                 return Fail("Fail solving captcha");
             }
             FaucetCollector.Captcha.RecaptchaUtility utility = new FaucetCollector.Captcha.RecaptchaUtility(this);
-            utility.DoSolve( );
+            utility.DoSolve();
         }
 
         return 0;
