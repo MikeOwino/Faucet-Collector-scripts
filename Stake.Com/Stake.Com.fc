@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 15/02/2020 01:00AM - Version 30
+//Last Update: 17/04/2021 20:00PM - Version 31
 //==================//
 
 using System;
@@ -157,10 +157,8 @@ public class stake : FaucetScript
 //========//
     public override int DoLogin()
     {
-		
 
      Set_English_Language_Function(); //call
-
 	
      var ExitButton = ElementByXPath("//span[contains(text(),'Deposit')] | //span[contains(text(),'Wallet')]");
 	
@@ -206,7 +204,7 @@ public class stake : FaucetScript
         Click(ButtonLog);
 		Wait();	
 
-		Wait(3);
+		Wait(6);
 		
         var RecaptchaOpen_Iframe = ElementByXPath ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]"); 
         if (IsVisible(RecaptchaOpen_Iframe))
@@ -220,18 +218,21 @@ public class stake : FaucetScript
           }
           RecaptchaUtility utility = new RecaptchaUtility(this);
           utility.DoSolve();
+		  
         }
 
         Click(ButtonLog); //click again
-		
-        var EmailCode = ElementByXPath("//span[contains(text(),'Email Code')]"); 
-        if (IsVisible(EmailCode))
-        {		
+
+		Wait(4);
+	
+        //var EmailCode = ElementByXPath("//input[@name='code']"); 
+        //if (EmailCode != null)
+        //{		
 		  Log("Login: we waiting " + GetSetting("CustomWaitForCode") + " sec - Please enter the code that sent to your email " + GetSetting("Email") );			  
           int MyCustomTimeINT;
           MyCustomTimeINT = GetIntSetting("CustomWaitForCode"); 
           Wait(MyCustomTimeINT);
-        }
+        //}
 		
 		Wait();	
 
@@ -327,9 +328,7 @@ public class stake : FaucetScript
  public override int DoSolveFaucet()
   {
 
-
      Set_English_Language_Function(); //call
-	 
 
      //=======//
      //Vault
