@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 17/04/2021 21:00PM - Version 1
-//Last Update: 17/04/2021 21:00PM - Version 1
+//Last Update: 17/04/2021 22:00PM - Version 1
 //==================//
 
 using System;
@@ -32,11 +32,13 @@ public class BitGameCom : FaucetScript
         get
         {
 			
-            return new FaucetSettings("https://www.BitGame.com")
+            return new FaucetSettings("https://BitGame.com")
             {
                 new FaucetSetting(){Name="Email",Display="Email",Type=EditorType.TextBox,Required=false},
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=false},
                 new FaucetSetting() { Name = "GetActivityToken", Display = "GetActivityToken - on/off to play in casino games (it's recommended to set the time every 360 min '6 hours') ", Type = EditorType.CheckBox, Default = true},				
+
+                new FaucetSetting() { Name = "ExclusiveBonusDrop_Telegram", Display = "Exclusive Bonus Drop - ON/OFF - in Telegram - 'bitsler.com - Play Smarter' - Public Channel", Type = EditorType.CheckBox, Default =true},	
 				
                 //new FaucetSetting() { Name = "FaucetClaim", Display = "FaucetClaim", Type = EditorType.CheckBox, Default = true},	
  
@@ -103,7 +105,7 @@ public class BitGameCom : FaucetScript
     public override int BeforeLogin()
     {
 
-     GoToUrl("https://www.BitGame.com/");
+     GoToUrl("https://BitGame.com/");
 		
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.BeforeLogin();
@@ -128,7 +130,7 @@ public class BitGameCom : FaucetScript
 	 if (!IsVisible(ExitButton))
 	 {
 
-		GoToUrl("https://www.BitGame.com/Account/Login");
+		GoToUrl("https://BitGame.com/Account/Login");
 		Wait();		
 		Wait(2);
 
@@ -251,18 +253,71 @@ public class BitGameCom : FaucetScript
  public override int DoSolveFaucet()
   {
 
+
+		//======//
+		//ExclusiveBonusDrop_Telegram//
+		//======//
+        if (GetBoolSetting("ExclusiveBonusDrop_Telegram"))
+        {
+	      CheckForPopupsEnabled = false;    //disable
+
+	      Title="Bitgame";		
+		  
+          GoToUrl("https://t.me/s/Bitgame02");
+	      Log("Go to try - ExclusiveBonusDrop_Telegram");	
+	      Wait();
+	      Wait(5);	
+
+            //Vertical - scrollHeight | scrollTop   //Horizontal - | scrollWidth | scrollLeft
+            ExecuteScript("window.scrollTo(0, document.body.scrollTop)"); //if some elements not found in html - just before need to do `scrollTop` to find some elements
+            Wait(3);
+            ExecuteScript("window.scrollTo(0, document.body.scrollTop)"); //again
+            Wait(3);
+			
+            var ExclusiveBonusDrop_Telegram_Last = ElementsByXPath("//div[contains(@class,'tgme_widget_message_text js-message_text') and contains(., 'activity') ]//a[1]");
+            var ElementsToCheck = ExclusiveBonusDrop_Telegram_Last.LastOrDefault();
+
+            if (ElementsToCheck ==null) // Not Visible
+            {
+	           Log("ElementsToCheck - NOT found");
+			}
+			
+            if (ElementsToCheck !=null) //Visible  
+            {
+			   Click(ElementsToCheck);
+	           Log("ElementsToCheck - here");
+			   
+               Driver.SwitchTo().Window(Driver.WindowHandles[1]); 
+			   
+			   Wait(5);
+			   
+               Driver.SwitchTo().Window(Driver.WindowHandles[0]); 
+			   
+               CheckForPopupsEnabled = true;     //enable
+               CheckForPopups();    //call		
+			   
+	           Title="Bitgame";		  
+               GoToUrl("https://BitGame.com");	  
+            }
+	
+        } //end ExclusiveBonusDrop_Telegram
+		//==============//
+
+
 		//==============//
 		//GetActivityToken//
 		//==============//
         if (GetBoolSetting("GetActivityToken"))
         {
 
-        GoToUrl("https://www.bitgame.com/activityCenter");
+        GoToUrl("https://bitgame.com/activityCenter");
 		Log("GetActivityToken - Go to promotions , we just waiting 20 seconds, to act normal and get the bounos daily");	
 		
         Wait();
         Wait(20);
         }	
+		//==============//
+		
 		
         return Time_Function();	
 
