@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 15/02/2020 01:00AM - Version 15
+//Last Update: 17/04/2021 20:00PM - Version 16
 //==================//
 
 using System;
@@ -210,7 +210,7 @@ public class Primedice : FaucetScript
         Click(ButtonLog);
 		Wait();	
 
-		Wait(3);
+		Wait(6);
 		
         var RecaptchaOpen_Iframe = ElementByXPath ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]"); 
         if (IsVisible(RecaptchaOpen_Iframe))
@@ -228,14 +228,14 @@ public class Primedice : FaucetScript
 
         Click(ButtonLog); //click again
 		
-        var EmailCode = ElementByXPath("//span[contains(text(),'Email Code')]"); 
-        if (IsVisible(EmailCode))
-        {		
+        //var EmailCode = ElementByXPath("//input[@name='code']"); 
+        //if (EmailCode != null)
+        //{		
 		  Log("Login: we waiting " + GetSetting("CustomWaitForCode") + " sec - Please enter the code that sent to your email " + GetSetting("Email") );			  
           int MyCustomTimeINT;
           MyCustomTimeINT = GetIntSetting("CustomWaitForCode"); 
           Wait(MyCustomTimeINT);
-        }
+        //}
 		
 		Wait();	
 
