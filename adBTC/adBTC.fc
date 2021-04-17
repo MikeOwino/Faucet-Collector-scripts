@@ -41,7 +41,7 @@ namespace Adbtc
 
         public override void Start()
         {
-            Title = "adbtc.top|DO|YOUH|You|Please solve the|satoshi|Bitcoin|Just a moment|adbtc|Сатоши|YES!|Active Window";
+            Title = "adbtc.top|DO|YOUH|You|Please solve the|satoshi|Bitcoin|Just a moment|adbtc|YES!|Сатоши|Active Window";
 
             SuccessXPath = "//p[@class='white-text flow-text']";
             FailXPath = "//a[@class='btn-large light-blue darken-4']";
@@ -267,10 +267,9 @@ namespace Adbtc
             }
 
 
-            GoToUrl("about:blank");
+            GoToUrl(surfHref);
 
 
-            CheckCloudFlare(surfHref);
 
 
             return base.BeforeSolveFaucet();
