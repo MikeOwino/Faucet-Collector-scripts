@@ -38,7 +38,7 @@ public class BitGameCom : FaucetScript
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=false},
                 new FaucetSetting() { Name = "GetActivityToken", Display = "GetActivityToken - on/off to play in casino games (it's recommended to set the time every 360 min '6 hours') ", Type = EditorType.CheckBox, Default = true},				
 
-                new FaucetSetting() { Name = "ExclusiveBonusDrop_Telegram", Display = "Exclusive Bonus Drop - ON/OFF - in Telegram - 'bitsler.com - Play Smarter' - Public Channel", Type = EditorType.CheckBox, Default =true},	
+                new FaucetSetting() { Name = "ExclusiveBonusDrop_Telegram", Display = "Exclusive Bonus Drop - ON/OFF - in Telegram - 'BitGame.com - Bitgame02' - Public Channel", Type = EditorType.CheckBox, Default =true},	
 				
                 //new FaucetSetting() { Name = "FaucetClaim", Display = "FaucetClaim", Type = EditorType.CheckBox, Default = true},	
  
