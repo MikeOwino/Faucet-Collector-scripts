@@ -225,16 +225,25 @@ class RollerCoin : FaucetScript
 
     public override int DoSolveCaptcha()
     {
-        RecaptchaUtility utility = new RecaptchaUtility(this);
-
-        var result = base.DoSolveCaptcha();
-        if (result > 0)
+        GetestCaptcha getestCaptchaSolver = new GetestCaptcha(this);
+        if (getestCaptchaSolver.IsVisibleGeetest())
         {
+            return getestCaptchaSolver.DoInitSolve() ? 1 : 0;
+        }
+        else
+        {
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+            utility.DoSolve();
+
+
             return result;
         }
-        utility.DoSolve();
-
-        return result;
     }
     public override int DoSolveFaucet()
     {
