@@ -273,6 +273,7 @@ class RollerCoin : FaucetScript
             Click(GameElem);
             Wait();
 
+            CheckForCaptchaModal();
 
             Wait();
             if (GameSelected == Games.Coins_2048)
@@ -284,18 +285,13 @@ class RollerCoin : FaucetScript
 
             Wait(15, 20);
 
-            var captchaModalBody = ElementByXPath("//div[@class='captcha-body modal-body']");
-            if (IsVisible(captchaModalBody))
+
+            var captchaResult =CheckForCaptchaModal();
+
+            if (!captchaResult)
             {
-                var result = DoSolveCaptcha();
-                if (result > 0)
-                {
-                    return Fail("There is a problem solving the captcha");
-                }
-
-
+                return Fail("There is a problem solving captcha"); 
             }
-
 
             Log("Game successfully played");
             IsSuccess = true;
@@ -312,6 +308,22 @@ class RollerCoin : FaucetScript
         return base.DoSolveFaucet();
     }
 
+    private bool CheckForCaptchaModal()
+    {
+        var captchaModalBody = ElementByXPath("//div[@class='captcha-body modal-body']");
+        if (IsVisible(captchaModalBody))
+        {
+            var result = DoSolveCaptcha();
+            if (result > 0)
+            {
+                return false;
+            }
+            Wait(5, 10);
+
+        }
+        return true;
+        
+    }
     private void TryClickOnEnergyButton()
     {
         var rechargeButton = ElementByXPath("//button[contains(@class,'electricity-recharge-btn')]|//button[contains(@id,'recharge-btn')]");
