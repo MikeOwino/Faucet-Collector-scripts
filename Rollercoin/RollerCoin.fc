@@ -228,7 +228,7 @@ class RollerCoin : FaucetScript
         GetestCaptcha getestCaptchaSolver = new GetestCaptcha(this);
         if (getestCaptchaSolver.IsVisibleGeetest())
         {
-            return getestCaptchaSolver.DoInitSolve() ? 1 : 0;
+            return getestCaptchaSolver.DoInitSolve() ? 0 : 1;
         }
         else
         {
