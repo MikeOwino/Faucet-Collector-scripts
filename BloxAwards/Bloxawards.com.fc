@@ -1,0 +1,239 @@
+using FaucetCollector.Script;
+
+using System.Linq;
+
+public class BloxawardsScript : FaucetScript
+{
+
+    private const string HostName = "https://bloxawards.com/";
+    private const string FaucetUrl = HostName + "giveaway";
+    public override FaucetSettings Settings
+    {
+        get
+        {
+            return new FaucetSettings(HostName)
+            {
+                new FaucetSetting() { Name = "Email", Display = "E-mail", Type = EditorType.TextBox, Required = true },
+                new FaucetSetting() { Name = "Password", Display = "Password", Type = EditorType.Password, Required = true },
+            };
+        }
+    }
+
+
+
+    public override void Start()
+    {
+        //Title that shows in the browser. Is used to identify and close popup windows
+        Title = "Bloxawards.com";
+
+        //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
+        SuccessXPath = "//*[@id='entered_note']";
+        FailXPath = "//*[text()='']";
+
+        //Let Faucet Collector start up everything
+        base.Start();
+    }
+
+
+
+
+    public override int DoInit()
+    {
+        //Let Faucet Collector continue.
+        return base.DoInit();
+    }
+
+    public override bool IsLoggedIn()
+    {
+        return ElementByXPath("//a[@href='/logout']") != null;
+        //return true;
+    }
+
+
+    //=============//
+    //BeforeLogin
+    //=============//
+    public override int BeforeLogin()
+    {
+
+        //if we already login go to here
+        GoToUrl(HostName);
+
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeLogin();
+    }
+
+    public override int DoLogin()
+    {
+
+        var loginModalOpenBtn = ElementsByXPath("//a[@data-target='#login-modal']")
+            .FirstOrDefault(button => IsVisible(button));
+        if (!IsVisible(loginModalOpenBtn))
+        {
+            return Fail("Login modal button is not visible or not found");
+        }
+
+        Click(loginModalOpenBtn);
+
+        Wait(2);
+
+        var emailBox = ElementByXPath("//input[@id='email_login_email']");
+        if (!IsVisible(emailBox))
+        {
+            return Fail("user box is not visible or not found");
+        }
+
+        SetText(emailBox, GetSetting("Email"));
+
+
+
+        var passwordBox = ElementByXPath("//input[@id='email_login_password']");
+        if (!IsVisible(passwordBox))
+        {
+            return Fail("Password box is not visible or not found");
+        }
+        SetText(passwordBox, GetPassword("Password"));
+
+        Wait(2);
+
+        var captchaResult = base.DoSolveCaptcha();
+        if (captchaResult > 0)
+        {
+            return captchaResult;
+        }
+
+
+        Wait();
+
+        var LoginButton = ElementById("emailLoginBtn");
+        if (!IsVisible(LoginButton))
+        {
+            return Fail("Login button is not visible or not found");
+        }
+        Click(LoginButton);
+
+        Wait(2);
+
+        return base.DoLogin();
+    }
+
+
+
+
+
+
+
+
+
+
+    public override int GetFaucetWaitTime()
+    {
+        GoToUrl(FaucetUrl);
+        Wait(2);
+
+        var alreadyClaimed = ElementById("entered_note");
+        if (!IsVisible(alreadyClaimed))
+        {
+            return 0;
+        }
+
+        var timerElement = ElementByXPath("//strong[@id='giveaway_time_remainder']");
+        if (IsVisible(timerElement))
+        {
+            string timeText = timerElement.Text.Split(' ')[0];
+            int waitMinutes;
+            if (int.TryParse(timeText, out waitMinutes))
+            {
+                return waitMinutes * 60;
+            }
+
+        }
+
+        //let Faucet Collector continue.
+        return base.GetFaucetWaitTime();
+    }
+
+    public override string GetHCaptchaSiteKey()
+    {
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            string src = hcaptchaIframe.GetAttribute("src");
+
+            if (!string.IsNullOrEmpty(src))
+            {
+                // we find the sitekey 
+                var queryParams = src.Split('&').ToList();
+                // we remove the host part 
+
+                queryParams.RemoveAt(0);
+
+                //we find the sitekey 
+
+                string siteKey = queryParams.FirstOrDefault(param => param.ToLower().Contains("sitekey")).Split('=').LastOrDefault();
+
+
+                return siteKey;
+
+            }
+        }
+
+        return base.GetHCaptchaSiteKey();
+    }
+
+    public override bool SetHCaptchaResponse(string response)
+    {
+
+
+        if (ElementByXPath("//*[@name='g-recaptcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=g-recaptcha-response]').innerText = '" + response + "'");
+        }
+        if (ElementByXPath("//*[@name='h-captcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=h-captcha-response]').innerText = '" + response + "'");
+
+        }
+
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            ExecuteScript("arguments[0].setAttribute('data-hcaptcha-response','" + response + "');", hcaptchaIframe);
+        }
+
+        ExecuteScript("enterGiveaway('" + response + "')");
+
+        return true;
+    }
+
+
+    public override int DoSolveFaucet()
+    {
+
+        GoToUrl(FaucetUrl);
+        Wait(2);
+
+
+        var hcaptchaContainer = ElementById("hcaptcha");
+
+        if (!IsVisible(hcaptchaContainer))
+        {
+            return Fail("HCaptcha container is not visible");
+        }
+
+        var captchaResult = DoHCaptcha();
+        if (captchaResult > 0)
+        {
+            return captchaResult;
+        }
+
+        Wait(3);
+
+
+        return base.DoSolveFaucet();
+    }
+
+
+}
