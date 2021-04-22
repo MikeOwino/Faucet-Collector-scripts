@@ -14,6 +14,7 @@ public class ContractMiner : FaucetScript
             {
 
                 new FaucetSetting(){Name="User",Display="Username",Type=EditorType.TextBox,Required=true},
+                new FaucetSetting(){Name="UseRecaptcha",Display="Use Recaptcha",Type=EditorType.CheckBox,Default=true},
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
                 new FaucetSetting(){Name="LoginW",Display="Login With",Type=EditorType.ComboBox,Items=new System.Collections.Generic.List<string>{"Solvemedia","Recaptcha"},Default="Recaptcha"},
                 new FaucetSetting(){Name="MinerTap",Display="MinerTap",Type=EditorType.CheckBox,Default=true},
@@ -331,9 +332,12 @@ public class ContractMiner : FaucetScript
             }
         }
 
+
         if (GetBoolSetting("RewardPoints"))
         {
-            GoToUrl("https://www.contract-miner.com/index.php?captcha=recaptcha");
+            string urlPrefix = GetBoolSetting("UseRecaptcha") ? "recaptcha" : "hcaptcha";
+
+            GoToUrl("https://www.contract-miner.com/index.php?captcha=" + urlPrefix);
             Wait(1, 2);
             var claimRpBtn = ElementByXPath("//button[@name='claim_rp_sub']");
             if (IsVisible(claimRpBtn))
