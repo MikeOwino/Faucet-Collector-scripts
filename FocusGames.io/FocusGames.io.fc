@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 15/07/2020 17:00AM - Version 1
-//Last Update: 20/09/2020 05:30AM - Version 3
+//Last Update: 09/04/2021 19:00PM - Version 5
 //==================//
 
 using FaucetCollector.Script;
@@ -29,7 +29,10 @@ public class FocusGames : FaucetScript
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim",Type=EditorType.CheckBox,Default=true},
                 new FaucetSetting(){Name="DailyActiveClaim",Display="DailyActiveClaim",Type=EditorType.CheckBox,Default=true},
                 new FaucetSetting() { Name = "CaptchaChoose", Display = "ON SolveMedia / OFF ReCaptcha", Type = EditorType.CheckBox, Default = true },			
-			
+
+                new FaucetSetting(){Name="AutoWithdraw",Display="AutoWithdraw",Type=EditorType.CheckBox,Default=true},
+				new FaucetSetting() { Name = "Limit_Withdraw", Display = "Limit_Withdraw", Type = EditorType.TextBox, Default = 18600 }, //if there is a problem with "Numeric" so cahnge to "TextBox"                
+                new FaucetSetting(){Name="Address",Display="Address TRX",Type=EditorType.TextBox,Required=true},			
 			
                 //insert user settings here
                 //new FaucetSetting { 
@@ -257,6 +260,52 @@ public class FocusGames : FaucetScript
     public override int DoSolveFaucet( )
     {
 
+      //=============//
+      //AutoWithdraw
+      //=============//
+      if (GetBoolSetting("AutoWithdraw"))
+      {
+          GoToUrl("https://focusgames.io/wallet/withdraw");
+          Wait();
+          Wait(4);
+		  
+          var BalanceVAR = ElementByXPath("//div[contains(@class,'btn-group')]//label[1]//div[2]/div");
+          string BalanceSTRING = BalanceVAR.Text.Trim().Replace(",", "").Replace("FGN", "").Split('.')[0];
+          int BalanceINT = Convert.ToInt32(BalanceSTRING);
+		  
+          int MyAmount;
+          Int32.TryParse(GetSetting("Limit_Withdraw"), out MyAmount);
+		  
+          if (IsVisible(BalanceVAR) && BalanceINT < MyAmount) // under 10000
+          {
+             Log("Limit_Withdraw - the balance under < " + MyAmount + " not good");
+             //do all stuff
+          }
+		  
+          if (IsVisible(BalanceVAR) && BalanceINT > MyAmount) // above 10000
+          {
+
+              Log("Limit_Withdraw - the balance above > " + MyAmount + " good your amount is " + BalanceVAR.Text );
+              Wait(2);
+              var InputAmount = ElementByXPath("//input[@name='amount']");		
+              SetText(InputAmount, GetSetting("Limit_Withdraw"));
+              Wait(2);
+              var AddressVAR = ElementByXPath("//input[@name='address']");		
+              SetText(AddressVAR, GetSetting("Address"));
+              Wait(2);
+              var WithdrawButton = ElementByXPath("//button[contains(text(),'ithdraw')]");		
+              Click(WithdrawButton);
+              Wait(2);		  
+              ClaimSuccess(); //Marks the claim as a success
+              Log("Limit_Withdraw - Success");	
+              Wait();
+			  
+          }
+
+      } //end AutoWithdraw
+      //=============//
+
+
         //=============//
         //DailyActiveClaim
         //=============//
@@ -359,7 +408,6 @@ public class FocusGames : FaucetScript
         } //end FaucetClaim
           //=============//
 
-        //ad = true; //call to timer / and do success		
         return Time_Function( );
 
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
@@ -441,12 +489,19 @@ public class FocusGames : FaucetScript
         }
 
         //DoSolveImageCaptcha
-        var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]");
-        if ( IsVisible(SolveMedia) )
+        var SolveMediaNormal = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]");
+        if (IsVisible(SolveMediaNormal))
         {
             Log("DO SolveMedia");
             var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']"));
         }
+
+        var SolveMedia_Iframe_Animation_OR_Canvas = ElementByXPath ("//div[contains(@id,'adcopy-puzzle-image-image')] | //canvas[contains(@id,'slog')] ");
+        if (IsVisible(SolveMedia_Iframe_Animation_OR_Canvas))
+        {
+          Log("SolveMedia_Iframe_Animation_OR_Canvas - visible - we select ReCaptcha - for protection");
+		  SelectOptionByValue(dropdown , "0"); //Choose to slolve with ReCaptcha - select ReCaptcha
+		}
 
         //for recaptcha popup after click on button - ("//button[contains(@class,'reload')] | //button[contains(@id,'reload')] ")
         var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]");
@@ -469,4 +524,4 @@ public class FocusGames : FaucetScript
 
 
 
-} //public class dogeto
+} //public class

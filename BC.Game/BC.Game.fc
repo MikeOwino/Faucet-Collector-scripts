@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 30/04/2019 21:09PM - Version 1
-//Last Update: 25/03/2021 10:00AM - Version 41
+//Last Update: 23/04/2021 00:05AM - Version 42
 //==================//
 
 using System;
@@ -170,12 +170,12 @@ public class bcgame : FaucetScript
 		Wait();		
 		Wait(2);
 		 
-        var box_user = ElementByXPath("//input[@placeholder='Email']");
+        var box_user = ElementByXPath("//input[contains(@placeholder,'mail')]");
         SetText(box_user, GetSetting("UserName"));
 		
 		Wait(2);
 		
-        var box_pass = ElementByXPath("//input[@placeholder='Password']");
+        var box_pass = ElementByXPath("//input[contains(@placeholder,'assword')]");
         SetText(box_pass, GetPassword("Pass"));
 		
 		Wait(2);

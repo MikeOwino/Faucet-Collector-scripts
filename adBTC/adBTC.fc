@@ -10,7 +10,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 //css_ref FaucetCollector.Utilities
 //css_ref FaucetCollector.Captcha
 namespace Adbtc
@@ -41,7 +40,7 @@ namespace Adbtc
 
         public override void Start()
         {
-            Title = "adbtc.top|DO|YOUH|You|Please solve the|satoshi|Bitcoin|Just a moment|adbtc|Сатоши|YES!|Active Window";
+            Title = "adbtc.top|DO|YOUH|You|Please solve the|satoshi|Bitcoin|Just a moment|adbtc|YES!|Сатоши|Active Window";
 
             SuccessXPath = "//p[@class='white-text flow-text']";
             FailXPath = "//a[@class='btn-large light-blue darken-4']";
@@ -134,21 +133,25 @@ namespace Adbtc
             return base.BeforeLogin();
         }
 
-        private void CheckCloudFlare(string href="")
+        private void CheckCloudFlare(string href = "")
         {
-         
+
             FaucetCollector.Utilities.CloudFlareUtilities cloudUtils = new FaucetCollector.Utilities.CloudFlareUtilities(this);
             bool haveParam = !string.IsNullOrEmpty(href);
 
             if (cloudUtils.IsVisibleCloudflare() || haveParam)
             {
-                cloudUtils.TryGetCloudflareCookieUsingChrome(!haveParam? Driver.Url:href);
+                cloudUtils.TryGetCloudflareCookieUsingChrome(!haveParam ? Driver.Url : href);
 
             }
         }
         public override int DoLogin()
         {
             CheckCloudFlare();
+            if (Driver.Url != "https://adbtc.top/index/enter" && Driver.Url != "https://adbtc.top/index/authorize")
+            {
+                GoToUrl("https://adbtc.top/index/authorize");
+            }
 
             var AddressBox = ElementsByXPath("//input[@type='text' and @required]|//label[contains(text(), 'Email')]//..//input").FirstOrDefault(X => IsVisible(X));
             if (AddressBox == null)
@@ -238,13 +241,13 @@ namespace Adbtc
             else
             {
                 var winSectionOpen = ElementByXPath("//div[contains(@class,'collapsible-header')]");
-                if(IsVisible(winSectionOpen))
+                if (IsVisible(winSectionOpen))
                 {
                     Click(winSectionOpen);
                     Wait();
                 }
             }
-            
+
         }
         public override int BeforeSolveFaucet()
         {
@@ -258,7 +261,7 @@ namespace Adbtc
                 return Fail("Go to ad area button is not visible");
             }
 
-            
+
             string surfHref = surf.GetAttribute("href");
 
             if (string.IsNullOrEmpty(surfHref))
@@ -267,10 +270,9 @@ namespace Adbtc
             }
 
 
-            GoToUrl("about:blank");
+            GoToUrl(surfHref);
 
 
-            CheckCloudFlare(surfHref);
 
 
             return base.BeforeSolveFaucet();
