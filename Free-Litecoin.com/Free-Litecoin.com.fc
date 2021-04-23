@@ -195,7 +195,38 @@ public class freeLitecoinScript : FaucetScript
 
         return base.DoSolveFaucet();
     }
+    
+    /// <summary>
+    /// Balance of the account
+    /// </summary>
+    public double AccountBalance
+    {
+        get {
 
+            var BalanceBox = ElementByXPath("//a[@id='money']");
+            if (BalanceBox == null)
+            {
+                return -1;
+            }
+            double Balance;
+            if (double.TryParse(BalanceBox.Text, out Balance))
+            {
+                return Balance;
+            }
+            return -1;
+
+        }
+    }
+    public override int AfterSolveFaucet()
+    {
+
+        double Balance = AccountBalance;
+        if (Balance != -1)
+        {
+            Log("Balance in the account is: " + Balance.ToString());
+        }
+        return base.AfterSolveFaucet();
+    }
 
 
     public override int CheckFaucetResult()
@@ -208,7 +239,7 @@ public class freeLitecoinScript : FaucetScript
         }
 
         return result;
-    }
+    }  
 
     public override bool SetHCaptchaResponse(string response)
     {
