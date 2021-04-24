@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 14/03/2021 05:00AM - Version 1
-//Last Update: 26/03/2021 09:00AM - Version 2
+//Last Update: 24/04/2021 14:30PM - Version 4
 //==================//
 
 using System;
@@ -120,25 +120,26 @@ public class graviex : FaucetScript
 //==============//
  public override int DoLogin()
  {
-	 Wait(15);
+
 	 var LoginVar = ElementByXPath("//a[contains(@href,'logout') or contains(@href,'signout') ]"); //Login
 
      if (!IsVisible(LoginVar))
      {	
- 	    // go to login page
-		var FlareCheck = ElementByXPath("//a[contains(text(),'CloudFlare')] | //a[contains(text(),'Cloudflare')] | //a[contains(text(),'cloudflare')]");
-		if (FlareCheck !=null)
-		{
-			Log("Waiting / Solving CloudFlare ... Hold on" );
-			FaucetCollector.Utilities.CloudFlareUtilities cloudUtils = new FaucetCollector.Utilities.CloudFlareUtilities(this);
-			cloudUtils.DoSolve();
-		}
+ 
+        var CloudFlareCheck = ElementByXPath("//h1[@data-translate='challenge_headline'] | //iframe[contains(@src,'hcaptcha.com/captcha')]");
+        if (CloudFlareCheck !=null)
+        {
+	      Log("CloudFlare - Here " );
+	      Captcha_All_Function(); //call
+        }
 
-        Wait(3);
+	    Wait(3);
+
+ 	    // go to login page
 	    Log("Login: go to login page");
 	    GoToUrl("https://graviex.net/signin");	
 	    Wait();		
-	    Wait(15);
+	    Wait(5);
 				
 	    var UserNameVar = ElementByXPath("//input[contains(@id,'email')]");
         Log("Login: set Email");
@@ -152,7 +153,7 @@ public class graviex : FaucetScript
 		
 		Wait(2);			
 		
-        Recaptcha_Function(); // call to solve
+        Captcha_All_Function(); // call to solve
 		
 	    Wait(2);
 
@@ -270,22 +271,13 @@ public class graviex : FaucetScript
     //=============//
     if (GetBoolSetting("FaucetCollect"))
     { 
-		var FlareCheck = ElementByXPath("//a[contains(text(),'CloudFlare')] | //a[contains(text(),'Cloudflare')] | //a[contains(text(),'cloudflare')]");
-		if (FlareCheck !=null)
-		{
-			Log("Waiting / Solving CloudFlare ... Hold on" );
-			FaucetCollector.Utilities.CloudFlareUtilities cloudUtils = new FaucetCollector.Utilities.CloudFlareUtilities(this);
-			cloudUtils.DoSolve();
-		}
 
-        Wait(3);
 		//go to faucet
         GoToUrl("https://graviex.net/faucets/list");
 		Log("FaucetCollect: Collect All" );
 	    Wait();		
 	    Wait(5);	
-          
-		
+          		
         var TimeToWaitForBreak = DateTime.Now.AddSeconds(360);
         while (true)
         {
@@ -309,7 +301,7 @@ public class graviex : FaucetScript
 			  
 			  Wait(2);	
 			  
-		      Recaptcha_Function(); //call to check
+		      Captcha_All_Function(); //call to check
 			  
               var ClaimInside = ElementByXPath("//div[@class='modal fade in']//button[contains(@class,'btn-default')]");
               if (IsVisible(ClaimInside))
@@ -460,10 +452,10 @@ return 0;
 
 	
         //=================//
-       //Recaptcha_Function
+       //Captcha_All_Function
         //=================//
 
-        public int Recaptcha_Function()
+        public int Captcha_All_Function()
         {
 
           //DifferentImageCaptcha
@@ -500,8 +492,20 @@ return 0;
             utility.DoSolve();
 		  }
 
+          //HCaptcha
+		  var HCaptcha_Check = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");	
+	      if (IsVisible(HCaptcha_Check))
+	      {	
+		    Log("Cloudflare HCaptcha Protection - Start ");
+            var result=DoHCaptcha();
+            if ( result>0 )
+            {
+                return result;
+            }
+		  }
+
 		return 0;
-        }//end Recaptcha_Function
+        }//end Captcha_All_Function
         //=================//	
  
  
