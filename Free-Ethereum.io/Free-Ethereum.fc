@@ -24,12 +24,10 @@ public class FreeEthereumScript : FaucetScript
             {
                 new FaucetSetting(){Name="User",Type=EditorType.TextBox,Required=true,Display="Email"},
                 new FaucetSetting(){Name="Pass",Type=EditorType.Password,Required=true,Display="Password"},
-
+                // new FaucetSetting(){Name="AutoLotto",Display="Buy a Lotto Ticket Each Roll",Type=EditorType.CheckBox,Default=false},	
             };
         }
     }
-
-
     public override void Start()
     {
         //Title that shows in the browser. Is used to identify and close popup windows
@@ -104,7 +102,6 @@ public class FreeEthereumScript : FaucetScript
 
         }
 
-
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.DoLogin();
     }
@@ -117,12 +114,8 @@ public class FreeEthereumScript : FaucetScript
         actions.Click().Build().Perform();
 
     }
-
     public override int DoSolveCaptcha()
     {
-
-
-
         if (IsVisible(ElementByXPath("//div[@class='h-captcha']")))
         {
             var result = base.DoSolveCaptcha();
@@ -135,10 +128,6 @@ public class FreeEthereumScript : FaucetScript
             {
                 return result;
             }
-
-            
-        
-
             Wait(1);
             return result;
         }
@@ -195,7 +184,54 @@ public class FreeEthereumScript : FaucetScript
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.DoSolveFaucet();
     }
+    /// <summary>
+    /// Balance of the account
+    /// </summary>
+    public double AccountBalance
+    {
+        get {
 
+            var BalanceBox = ElementByXPath("//a[@id='cryptovalue']");
+            if (BalanceBox == null)
+            {
+                return -1;
+            }
+            double Balance;
+            if (double.TryParse(BalanceBox.Text, out Balance))
+            {
+                return Balance;
+            }
+            return -1;
+
+        }
+    }
+    public override int AfterSolveFaucet()
+    {
+
+        double Balance = AccountBalance;
+        if (Balance != -1)
+        {
+            Log("Balance in the account is: " + Balance.ToString());
+        }
+        //if (GetBoolSetting("AutoLotto"))
+        //{
+            //Log("Attempting to buy lottery ticket...");
+            
+            // Click(ElementByLinkText("Lottery"));
+            // Wait(3);
+            // var tickets = ElementByXPath("//*[@id="numberofticket"]");
+            // var buyButton = ElementById("buttonbuyticket");
+
+            // if (IsVisible(tickets))
+            // {
+            //     SetText(tickets, "1"));
+            //     Wait(1);
+            //     Click(buyButton);
+            // }
+
+        //}
+        return base.AfterSolveFaucet();
+    }
 
     public override bool SetHCaptchaResponse(string response)
     {
