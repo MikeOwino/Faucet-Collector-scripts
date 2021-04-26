@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 30/04/2019 21:09PM - Version 1
-//Last Update: 23/04/2021 00:05AM - Version 42
+//Last Update: 26/04/2021 17:20PM - Version 43
 //==================//
 
 using System;
@@ -301,7 +301,7 @@ public class bcgame : FaucetScript
 		Wait(5);
 		
 
-		var Timer = ElementByXPath("//div[contains(@class,'enter-animate active')]//img[contains(@src,'EIg9Dof0Cqg5CoRxGf4xCHL')]");
+		var Timer = ElementByXPath("//button[contains(@class,'bonus-item')]/div[contains(@class,'enter-animate active')]");
 
 		if (Timer ==null ) //NOT visible
 		{
@@ -312,7 +312,7 @@ public class bcgame : FaucetScript
 		{
 		    Log("FaucetClaim - Timer not visible - go to LuckySpin");
 
-		    var OpenLuckySpin_Button = ElementByXPath("//div[contains(@class,'enter-animate active')]//img[contains(@src,'EIg9Dof0Cqg5CoRxGf4xCHL')]");
+		    var OpenLuckySpin_Button = ElementByXPath("//button[contains(@class,'bonus-item')]/div[contains(@class,'enter-animate active')]");
             Click(OpenLuckySpin_Button);
 		    Wait(4);
 			   
@@ -320,7 +320,7 @@ public class bcgame : FaucetScript
 			var canvas_VAR = Driver.FindElement(By.TagName("canvas")); 
 			var size = canvas_VAR.Size;
 
-			var Timer_2 = ElementByXPath("//div[contains(@class,'enter-animate active')]//img[contains(@src,'EIg9Dof0Cqg5CoRxGf4xCHL')]");		
+			var Timer_2 = ElementByXPath("//button[contains(@class,'bonus-item')]/div[contains(@class,'enter-animate active')]");		
 
 			if (Timer_2 !=null) //visible
 		    {	
