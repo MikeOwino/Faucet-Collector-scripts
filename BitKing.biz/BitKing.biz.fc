@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 12/04/2021 01:00AM - Version 1
-//Last Update: 12/04/2021 01:30AM - Version 1
+//Last Update: 26/04/2021 20:30PM - Version 2
 //==================//
 
 using System;
@@ -62,6 +62,17 @@ public class BitKing : FaucetScript
 
     public override int DoInit()
     {
+
+		  //====================//
+          //CloudFlareCheck
+		  //====================//	  
+           var CloudFlareCheck = ElementByXPath("//h1[@data-translate='challenge_headline'] | //iframe[contains(@src,'hcaptcha.com/captcha')]");
+           if (CloudFlareCheck !=null)
+           {
+	         Log("CloudFlare - Here " );
+	         Captcha_All_Function(); //call
+           }		  	  
+		  //====================//
 
         //Let Faucet Collector continue.
         return base.DoInit();
@@ -130,7 +141,7 @@ public class BitKing : FaucetScript
 	
 		Wait(2);
 		
-        Recaptcha_Function(); //call
+        Captcha_All_Function(); //call
 
 		Wait(4);
 		
@@ -251,7 +262,7 @@ public class BitKing : FaucetScript
 	
 	      Log("do faucet");
 		  
-          Recaptcha_Function(); //call
+          Captcha_All_Function(); //call
 		  
           Wait(3);
           
@@ -353,10 +364,10 @@ public class BitKing : FaucetScript
 		
 	
         //=================//
-       //Recaptcha_Function
+       //Captcha_All_Function
         //=================//
 
-        public int Recaptcha_Function()
+        public int Captcha_All_Function()
         {
 
           //ImageBase
@@ -410,7 +421,7 @@ public class BitKing : FaucetScript
 		  }
 
 		return 0;
-        }//end Recaptcha_Function
+        }//end Captcha_All_Function
         //=================//	
 
 
