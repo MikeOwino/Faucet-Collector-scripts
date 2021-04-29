@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 13/11/2019 09:00AM - Version 1
-//Last Update: 31/03/2021 14:48PM - Version 13
+//Last Update: 29/04/2021 03:50AM - Version 14
 //==================//
 
 using System;
@@ -84,6 +84,7 @@ public class TrustDice : FaucetScript
 
     public override int DoInit()
     {
+
 	
         //Let Faucet Collector continue.
         return base.DoInit();
@@ -117,6 +118,11 @@ public class TrustDice : FaucetScript
         //if we already login go to here
         GoToUrl("https://www.TrustDice.win/");
 
+        var CloudFlareHostError = ElementByXPath("//div[contains(@class,'clearfix')]");
+        if (IsVisible(CloudFlareHostError))
+        {
+		  return Time_Function();
+        }
 		
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.BeforeLogin();
@@ -176,7 +182,7 @@ public class TrustDice : FaucetScript
 		
 		Wait(4);
 		
-        SolveCaptcha_Function(); // call to SolveCaptcha
+        invisible_Recaptcha_Function(); // call to SolveCaptcha
 
 		Wait();	
 
@@ -313,13 +319,13 @@ public class TrustDice : FaucetScript
         var DailyActiveClaim_Check = ElementByXPath ("//span[contains(@class,'jss')]//span[contains(@class,'dot')]");  //("//span[contains(@class,'jss')]//span[contains(@class,'invisible')]")
         if (IsVisible(DailyActiveClaim_Check)) //if this class "MuiBadge-invisible" - NOT Visible - do stuff
 	    {
-         var DailyActiveClaim = ElementByXPath("//span[contains(@class,'jss')]//span[contains(text(),'Task')]");
+         var DailyActiveClaim = ElementByXPath("//span[contains(@class,'jss')]//span[contains(text(),'Task') or contains(text(),'REWARD') ]"); 
          Click(DailyActiveClaim);
 		 Log("DailyActiveClaim - available - do stuff");
 
 		 Wait(6);
 
-         var ClaimButton = ElementByXPath("//button//span[contains(text(),'Claim')]");
+         var ClaimButton = ElementByXPath("//div[contains(@class,'MuiDialogContent')]//button//span[contains(text(),'Claim')]");
 		 
 		 if (IsVisible(ClaimButton))
 	     {
@@ -550,7 +556,7 @@ public class TrustDice : FaucetScript
 			 
              Wait(2);
 			 
-             SolveCaptcha_Function(); // call to SolveCaptcha
+             invisible_Recaptcha_Function(); // call to SolveCaptcha
 			 
              Wait(4);
 			 
@@ -624,29 +630,29 @@ public class TrustDice : FaucetScript
 
 
 
- //=========================//
- //SolveCaptcha_Function
- //=========================//
- public int SolveCaptcha_Function()
- {	
-		
-     Log("SolveCaptcha_Function");
-
-     var IframeCap = ElementByXPath("//iframe[contains(@src,'google.com/recaptcha/api2/bframe')]"); 
-     if (IsVisible(IframeCap))
-     {
-      var result = base.DoSolveCaptcha();
-      RecaptchaUtility utility = new RecaptchaUtility(this);
-      utility.DoSolve();
-      if (result > 0)
-      {
-          return Fail("Fail solving captcha");
-      }
-     }//end IframeCap
-	 
-  return 0;  
-  }// end SolveCaptcha_Function
-  //=========//
+    //=================//
+    //invisible_Recaptcha_Function
+    //=================//
+    public int invisible_Recaptcha_Function()
+    {
+       var RecaptchaOpen_Iframe = ElementByXPath ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]");  
+       if (RecaptchaOpen_Iframe !=null)          
+	   {
+         //SolveCaptcha if apper
+         Log("DO invisible_Recaptcha");	  
+         var result = base.DoSolveCaptcha();
+         if (result > 0)
+         {
+             return Fail("Recaptcha - Fail solving captcha");
+         }
+	     RecaptchaUtility utility = new RecaptchaUtility(this);
+         utility.DoSolve();
+         Wait();
+         //ExecuteScript("afterResolveCaptcha");
+	   }
+	 return 0;
+    }//end invisible_Recaptcha_Function
+    //=================//	
 
 
 	   	  
