@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 23/12/2019 01:30PM - Version 1
-//Last Update: 22/04/2021 19:30PM - Version 17
+//Last Update: 29/04/2021 23:15PM - Version 18
 //==================//
 
 using System;
@@ -440,8 +440,8 @@ public class GetZen : FaucetScript
 		   
 		   Wait(5);
 		   
-           var ProceedToClaimButton = ElementByXPath("//button[contains(@class,'js-Claim')]");       
-		   if (IsVisible(ProceedToClaimButton))
+           var ProceedToClaimButton = ElementByXPath("//div[@class='modal fade show']//button[contains(@class,'js-Claim')]");       
+		   if (ProceedToClaimButton !=null)
            {
             Log("ProceedToClaimButton");
             Click(ProceedToClaimButton);
@@ -449,11 +449,13 @@ public class GetZen : FaucetScript
 		   
 		   Wait(5);
 		   
+		   /*
            if (!IsVisible(ElementByXPath ("//div[@class='modal-content']//div[@id='result1' and contains(text(),'claimed Zen in the last')] | //td[text()='You Won:']") )) 
            {
             Log("Claim_Button - 2 - again");
             Click(Claim_Button);
 		   }
+		   */
 		   
 		   Wait(5);
 		   
