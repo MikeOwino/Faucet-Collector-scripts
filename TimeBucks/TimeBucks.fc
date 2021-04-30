@@ -1,9 +1,9 @@
 
-using System;
-using System.Linq;
-
 using FaucetCollector.Captcha;
 using FaucetCollector.Script;
+
+using System;
+using System.Linq;
 //css_ref FaucetCollector.Utilities
 public class TimeBucks : FaucetScript
 {
@@ -23,10 +23,10 @@ public class TimeBucks : FaucetScript
                 new FaucetSetting(){Name="Roll",Display="Claim Roll",Type=EditorType.CheckBox,Default=true},
                 new FaucetSetting(){Name="Watch",Display="WathAvaible Videos",Type=EditorType.CheckBox,Default=true},
                 new FaucetSetting(){Name="SlideShows",Display="SlideShows",Type=EditorType.CheckBox,Default=true},
-                new FaucetSetting(){Name="NightFallNews",Display="NightFallNews",Type=EditorType.CheckBox,Default=true},				
-                new FaucetSetting(){Name="Clicks",Display="Clicks",Type=EditorType.CheckBox,Default=true},				
+                new FaucetSetting(){Name="NightFallNews",Display="NightFallNews",Type=EditorType.CheckBox,Default=true},
+                new FaucetSetting(){Name="Clicks",Display="Clicks",Type=EditorType.CheckBox,Default=true},
                 new FaucetSetting(){Name="TT",Display="Time to wait",Type=EditorType.Numeric,Default=60},
-              
+
             };
         }
     }
@@ -37,7 +37,7 @@ public class TimeBucks : FaucetScript
     public override void Start()
     {
         //Title that shows in the browser. Is used to identify and close popup windows
-        Title = "";
+        Title = "Paid|To|Click|Earn";
         //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
         SuccessXPath = "//*"; // //span[@id='counter2']
         FailXPath = "//*"; // //span[@id='Failed']
@@ -62,15 +62,15 @@ public class TimeBucks : FaucetScript
 
     public override int DoLogin()
     {
-		
-        var StartLogin = ElementByXPath("//span[contains(@class,'btnLogin')]") ;
+
+        var StartLogin = ElementByXPath("//span[contains(@class,'btnLogin')]");
         if (IsVisible(StartLogin))
         {
-		    Click(StartLogin);
-		}
+            Click(StartLogin);
+        }
 
-        Wait(3);		
-		
+        Wait(3);
+
         var UsernameBox = ElementByXPath("//input[@id='username_box']");
         if (!IsVisible(UsernameBox))
         {
@@ -79,63 +79,64 @@ public class TimeBucks : FaucetScript
         SetText(UsernameBox, GetSetting("User"));
 
         Wait(2);
-		
+
         var PasswordBox = ElementByXPath("//input[@id='password_box']");
         if (!IsVisible(PasswordBox))
         {
             return Fail("Password Box isn't visible");
         }
         SetText(PasswordBox, GetPassword("Pass"));
-		
+
         Wait(2);
 
         Recaptcha_Function(); //call
-		
-        Wait(4);	
-		
+
+        Wait(4);
+
         var Button_Login = ElementByXPath("//input[@value='Log in Here']");
         if (!IsVisible(Button_Login))
         {
             return Fail("Login button not found");
         }
         Click(Button_Login);
-	
+
         Wait(1);
-		
+
         return base.DoLogin();
     }
 
 
     public override int DoSolveFaucet()
     {
-		
-		
+
+
         if (GetBoolSetting("Clicks"))
         {
-
+            GoToUrl("https://timebucks.com/publishers/index.php?pg=earn&tab=view_content_ads");
+            Wait(1, 2);
             var recaptchaContainer = ElementByXPath("//div[@class='g-recaptcha']");
 
             if (IsVisible(recaptchaContainer))
             {
                 var result = DoSolveCaptcha();
-                if (result>0)
+                if (result > 0)
                 {
                     return result;
                 }
                 RecaptchaUtility utility = new RecaptchaUtility(this);
                 utility.DoSolve();
-                Wait(2,3);
+                Wait(2, 3);
 
             }
             var Ads = ElementsByXPath("//a[@class='btnClickAdd']").Where(ad => IsVisible(ad)).ToList();
 
-            int AdsViewed = 0; 
+            int AdsViewed = 0;
             while (Ads.Count > 0)
             {
                 try
                 {
                     CheckForPopupsEnabled = false;
-                    Click(Ads[0],false);
+                    Click(Ads[0], false);
                     Driver.SwitchTo().Window(Driver.WindowHandles[1]);
 
                     Wait(2);
@@ -143,7 +144,7 @@ public class TimeBucks : FaucetScript
                     var title = Driver.Title;
 
                     int timer;
-                    if(!int.TryParse(title,out timer))
+                    if (!int.TryParse(title, out timer))
                     {
                         timer = 60;
                     }
@@ -156,190 +157,190 @@ public class TimeBucks : FaucetScript
                     Driver.SwitchTo().Window(Driver.WindowHandles[0]);
                     CheckForPopupsEnabled = true;
                     CheckForPopups();
-                       Ads = ElementsByXPath("//a[@class='btnClickAdd']").Where(ad => IsVisible(ad)).ToList();
+                    Ads = ElementsByXPath("//a[@class='btnClickAdd']").Where(ad => IsVisible(ad)).ToList();
                     AdsViewed++;
                 }
 
             }
             Log("You have viewed " + AdsViewed.ToString() + " Ads");
-		   
-        } 
-		
 
-		
-		//==========//
-		//SlideShows//
-		//==========//
+        }
+
+
+
+        //==========//
+        //SlideShows//
+        //==========//
         if (GetBoolSetting("SlideShows"))
         {
 
-           Title = "Earn";
-           GoToUrl("https://timebucks.com/publishers/index.php?pg=earn&tab=view_content_timecave_slideshows");
-	
-           Wait(6);
-		
-		   var CheckAll = ElementByXPath("//input[@value='View']");
-           if (IsVisible(CheckAll))
-		   {
+            Title = "Earn";
+            GoToUrl("https://timebucks.com/publishers/index.php?pg=earn&tab=view_content_timecave_slideshows");
 
-             var TimeToWaitForBreak = DateTime.Now.AddSeconds(420); //420sec = 7min
-             while (true)
-             {
-				 
-               CheckForPopupsEnabled = false;	
-				 
-               Title = "thetimecave.com";
-			   
-		       var ViewButtons = ElementByXPath("//input[@value='View']");
-			   if (IsVisible(ViewButtons))
-		       {
-               Log("SlideShows - View button - start");
-			   Click(ViewButtons);
-			   }
-			   
-			   Wait(7);
-		   		   
-               Driver.SwitchTo().Window(Driver.WindowHandles[1]);
-			   
-               Wait(); //Wait for NEXT button
-               Log("SlideShows - Wait for NEXT button");
-			   
-		       var Next_VAR = ElementByXPath("//a[contains(text(),'Next')]");
-               if (IsVisible(Next_VAR))
-		       {
-                Log("SlideShows - click NEXT");
-                Click(Next_VAR);
-			   }
-			   
-               if (Driver.Url.Contains("https://timebucks.com/publishers/index.php?pg=earn&tab=view_content_timecave_slideshows"))	   			   
-               {
-               Log("SlideShows - break - end season - success");
-			   ClaimSuccess(); //Marks the claim as a success
-               break; //break the wait loop
-               }
-	   
-		       var Captcha_Check = ElementByXPath("//iframe[contains(@src,'google.com/recaptcha')]");
-               if (IsVisible(Captcha_Check))
-		       {
-                 Log("SlideShows - do recaptcha");
-                 Recaptcha_Function(); //call
-               }
+            Wait(6);
 
-               if (DateTime.Now > TimeToWaitForBreak) //if the time above 65 sec 
-               {
-               Log("SlideShows - break - TimeToWaitForBreak");
-               break; //break the wait loop
-               }
-		     
-		     } //end while
-		 
-		   } //end CheckAll
-		   
-           Title = "Earn";
-           CheckForPopupsEnabled = true; //enable
-           CheckForPopups();    //call
-		   
+            var CheckAll = ElementByXPath("//input[@value='View']");
+            if (IsVisible(CheckAll))
+            {
+
+                var TimeToWaitForBreak = DateTime.Now.AddSeconds(420); //420sec = 7min
+                while (true)
+                {
+
+                    CheckForPopupsEnabled = false;
+
+                    Title = "thetimecave.com";
+
+                    var ViewButtons = ElementByXPath("//input[@value='View']");
+                    if (IsVisible(ViewButtons))
+                    {
+                        Log("SlideShows - View button - start");
+                        Click(ViewButtons);
+                    }
+
+                    Wait(7);
+
+                    Driver.SwitchTo().Window(Driver.WindowHandles[1]);
+
+                    Wait(); //Wait for NEXT button
+                    Log("SlideShows - Wait for NEXT button");
+
+                    var Next_VAR = ElementByXPath("//a[contains(text(),'Next')]");
+                    if (IsVisible(Next_VAR))
+                    {
+                        Log("SlideShows - click NEXT");
+                        Click(Next_VAR);
+                    }
+
+                    if (Driver.Url.Contains("https://timebucks.com/publishers/index.php?pg=earn&tab=view_content_timecave_slideshows"))
+                    {
+                        Log("SlideShows - break - end season - success");
+                        ClaimSuccess(); //Marks the claim as a success
+                        break; //break the wait loop
+                    }
+
+                    var Captcha_Check = ElementByXPath("//iframe[contains(@src,'google.com/recaptcha')]");
+                    if (IsVisible(Captcha_Check))
+                    {
+                        Log("SlideShows - do recaptcha");
+                        Recaptcha_Function(); //call
+                    }
+
+                    if (DateTime.Now > TimeToWaitForBreak) //if the time above 65 sec 
+                    {
+                        Log("SlideShows - break - TimeToWaitForBreak");
+                        break; //break the wait loop
+                    }
+
+                } //end while
+
+            } //end CheckAll
+
+            Title = "Earn";
+            CheckForPopupsEnabled = true; //enable
+            CheckForPopups();    //call
+
         } //end SlideShows
-		//==========//		
+          //==========//		
 
 
-		//==========//
-		//NightFallNews//
-		//==========//
+        //==========//
+        //NightFallNews//
+        //==========//
         if (GetBoolSetting("NightFallNews"))
         {
 
-           Title = "Earn";
-           GoToUrl("https://timebucks.com/publishers/index.php?pg=earn&tab=vote");
-	
-           Wait(6);
-		
-		   var CheckAll = ElementByXPath("//input[contains(@value,'View Showshows')]");
-           if (IsVisible(CheckAll))
-		   {
+            Title = "Earn";
+            GoToUrl("https://timebucks.com/publishers/index.php?pg=earn&tab=vote");
 
-             var TimeToWaitForBreak = DateTime.Now.AddSeconds(420); //420sec = 7min
-             while (true)
-             {
-				 
-               CheckForPopupsEnabled = false;	
-				 
-               Title = "nightfallnews.com";
-			   
-		       var ViewButtons = ElementByXPath("//input[contains(@value,'View Showshows')]");
-			   if (IsVisible(ViewButtons))
-		       {
-               Log("NightFallNews - View button - start");
-			   Click(ViewButtons);
-			   }
-			   
-			   Wait(7);
-		   		   
-               Driver.SwitchTo().Window(Driver.WindowHandles[1]);
-			   
-               Wait(); //Wait for NEXT button
-               Log("NightFallNews - Wait for NEXT button");
+            Wait(6);
 
-		       var Article_Click = ElementByXPath("//div[contains(@class,'click_checker')]//div[@class='col-md-4']");
-               if (IsVisible(Article_Click))
-		       {
-                Log("NightFallNews - Click on Article");
-                Click(Article_Click);				
-			   }
+            var CheckAll = ElementByXPath("//input[contains(@value,'View Showshows')]");
+            if (IsVisible(CheckAll))
+            {
 
-		       var StartEndNewOne = ElementByXPath("//a[contains(text(),'START NEXT')]");
-               if (IsVisible(StartEndNewOne))
-		       {
-                ClaimSuccess(); //Marks the claim as a success
-                Log("NightFallNews - END - success - start new one");
-                Click(StartEndNewOne);			
-			   }
-			   
-		       var Time_check = ElementByXPath("//span[text()='10']");
-               if (IsVisible(Time_check))
-		       {
-                Log("NightFallNews - click NEXT");
-		        var Next_VAR = ElementByXPath("//button[contains(text(),'Next')]");
-                Click(Next_VAR);
-			   }
-			   
-               if (Driver.Url.Contains("https://timebucks.com/publishers/index.php?pg=earn&tab=vote"))	   			   
-               {
-               Log("NightFallNews - break - end season - succeed");
-               break; //break the wait loop
-               }
-	   
-		       var Captcha_Check = ElementByXPath("//iframe[contains(@src,'google.com/recaptcha')]");
-               if (IsVisible(Captcha_Check))
-		       {
-                 Log("NightFallNews - do recaptcha");
-                 Recaptcha_Function(); //call
-               }
+                var TimeToWaitForBreak = DateTime.Now.AddSeconds(420); //420sec = 7min
+                while (true)
+                {
 
-               if (DateTime.Now > TimeToWaitForBreak) //if the time above 65 sec 
-               {
-               Log("NightFallNews - break - TimeToWaitForBreak");
-               break; //break the wait loop
-               }
-		     
-		     } //end while
-		 
-		   } //end CheckAll
-		   
-           Title = "Earn";
-           CheckForPopupsEnabled = true; //enable
-           CheckForPopups();    //call
-		   
+                    CheckForPopupsEnabled = false;
+
+                    Title = "nightfallnews.com";
+
+                    var ViewButtons = ElementByXPath("//input[contains(@value,'View Showshows')]");
+                    if (IsVisible(ViewButtons))
+                    {
+                        Log("NightFallNews - View button - start");
+                        Click(ViewButtons);
+                    }
+
+                    Wait(7);
+
+                    Driver.SwitchTo().Window(Driver.WindowHandles[1]);
+
+                    Wait(); //Wait for NEXT button
+                    Log("NightFallNews - Wait for NEXT button");
+
+                    var Article_Click = ElementByXPath("//div[contains(@class,'click_checker')]//div[@class='col-md-4']");
+                    if (IsVisible(Article_Click))
+                    {
+                        Log("NightFallNews - Click on Article");
+                        Click(Article_Click);
+                    }
+
+                    var StartEndNewOne = ElementByXPath("//a[contains(text(),'START NEXT')]");
+                    if (IsVisible(StartEndNewOne))
+                    {
+                        ClaimSuccess(); //Marks the claim as a success
+                        Log("NightFallNews - END - success - start new one");
+                        Click(StartEndNewOne);
+                    }
+
+                    var Time_check = ElementByXPath("//span[text()='10']");
+                    if (IsVisible(Time_check))
+                    {
+                        Log("NightFallNews - click NEXT");
+                        var Next_VAR = ElementByXPath("//button[contains(text(),'Next')]");
+                        Click(Next_VAR);
+                    }
+
+                    if (Driver.Url.Contains("https://timebucks.com/publishers/index.php?pg=earn&tab=vote"))
+                    {
+                        Log("NightFallNews - break - end season - succeed");
+                        break; //break the wait loop
+                    }
+
+                    var Captcha_Check = ElementByXPath("//iframe[contains(@src,'google.com/recaptcha')]");
+                    if (IsVisible(Captcha_Check))
+                    {
+                        Log("NightFallNews - do recaptcha");
+                        Recaptcha_Function(); //call
+                    }
+
+                    if (DateTime.Now > TimeToWaitForBreak) //if the time above 65 sec 
+                    {
+                        Log("NightFallNews - break - TimeToWaitForBreak");
+                        break; //break the wait loop
+                    }
+
+                } //end while
+
+            } //end CheckAll
+
+            Title = "Earn";
+            CheckForPopupsEnabled = true; //enable
+            CheckForPopups();    //call
+
         } //end NightFallNews
-		//==========//		
+          //==========//		
 
 
-		//======//
-		//Watch//
-		//======//
+        //======//
+        //Watch//
+        //======//
         if (GetBoolSetting("Watch"))
         {
-		    Title = "Earn";
+            Title = "Earn";
             GoToUrl("https://timebucks.com/publishers/index.php?pg=earn&tab=watch_video");
 
             Wait(4);
@@ -349,14 +350,14 @@ public class TimeBucks : FaucetScript
             while (Watch.Count > n)
             {
                 CheckForPopupsEnabled = false;
-                Click(Watch[n],false);
+                Click(Watch[n], false);
                 Driver.SwitchTo().Window(Driver.WindowHandles[1]);
                 Wait(4);
                 var Watch_ = ElementByXPath("//a[contains(@href,'check-watchVideo')]");
                 if (IsVisible(Watch_))
                 {
                     Click(Watch_);
-                    Wait(5,9);
+                    Wait(5, 9);
                 }
                 else
                 {
@@ -388,15 +389,15 @@ public class TimeBucks : FaucetScript
 
 
         } //end Watch
-		//==========//
-		
-		
-		//==========//
-		//ClaimRoll//
-		//==========//
+          //==========//
+
+
+        //==========//
+        //ClaimRoll//
+        //==========//
         if (GetBoolSetting("Roll"))
         {
-			Title = "Earn";
+            Title = "Earn";
             GoToUrl("https://timebucks.com/publishers/index.php?pg=earn&tab=catpcha_new");
 
             try
@@ -405,12 +406,12 @@ public class TimeBucks : FaucetScript
                 Driver.SwitchTo().Frame(iframe);
                 Wait();
                 var result = DoSolveCaptcha();
-                if (result>0)
+                if (result > 0)
                 {
                     return result;
                 }
 
-          
+
 
                 var captchaSolvedBtn = ElementByXPath("//a[@class='btnCaptcha']//input[@class='gradient install-btn']");
                 if (!IsVisible(captchaSolvedBtn))
@@ -434,9 +435,9 @@ public class TimeBucks : FaucetScript
     public override bool SetHCaptchaResponse(string response)
     {
         try
-        { 
-                ExecuteScript("$('.h-captcha').find('iframe').attr('data-hcaptcha-response','"+response+"');");
-   
+        {
+            ExecuteScript("$('.h-captcha').find('iframe').attr('data-hcaptcha-response','" + response + "');");
+
         }
         catch (Exception)
         {
@@ -447,22 +448,22 @@ public class TimeBucks : FaucetScript
     }
 
     public int Recaptcha_Function()
+    {
+
+        //DoSolveImageCaptcha
+        var SolveMedia = ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]");
+        if (IsVisible(SolveMedia))
         {
-			
-          //DoSolveImageCaptcha
-          var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
-          if (IsVisible(SolveMedia))
-		  {  
-            Log("DO SolveMedia");	  
-	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']")); 
-		  }
-		  
-	     //for recaptcha popup after click on button - ("//button[contains(@class,'reload')] | //button[contains(@id,'reload')] ")
-          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
-          if (IsVisible(RecaptchaOpen_Iframe))
-		  {
+            Log("DO SolveMedia");
+            var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"), ElementByXPath("//input[@name='adcopy_response']"));
+        }
+
+        //for recaptcha popup after click on button - ("//button[contains(@class,'reload')] | //button[contains(@id,'reload')] ")
+        var RecaptchaOpen_Iframe = ElementByXPath("//iframe[contains(@src,'recaptcha/api2/anchor')]");
+        if (IsVisible(RecaptchaOpen_Iframe))
+        {
             //SolveCaptcha if apper
-            Log("DO Recaptcha");	  
+            Log("DO Recaptcha");
             var result = base.DoSolveCaptcha();
             if (result > 0)
             {
@@ -470,13 +471,13 @@ public class TimeBucks : FaucetScript
             }
             RecaptchaUtility utility = new RecaptchaUtility(this);
             utility.DoSolve();
-		  }
+        }
 
-		return 0;
-        }//end Recaptcha_Function
-        //=================//	
-	
-	
-	
-	
+        return 0;
+    }//end Recaptcha_Function
+     //=================//	
+
+
+
+
 } //end class
