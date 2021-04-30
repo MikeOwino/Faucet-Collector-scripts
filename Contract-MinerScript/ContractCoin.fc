@@ -16,7 +16,7 @@ public class ContractMiner : FaucetScript
                 new FaucetSetting(){Name="User",Display="Username",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="UseRecaptcha",Display="Use Recaptcha",Type=EditorType.CheckBox,Default=true},
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
-                new FaucetSetting(){Name="LoginW",Display="Login With",Type=EditorType.ComboBox,Items=new System.Collections.Generic.List<string>{"Solvemedia","Recaptcha"},Default="Recaptcha"},
+                new FaucetSetting(){Name="LoginW",Display="Login With",Type=EditorType.ComboBox,Items=new System.Collections.Generic.List<string>{"HCaptcha","Recaptcha"},Default="Recaptcha"},
                 new FaucetSetting(){Name="MinerTap",Display="MinerTap",Type=EditorType.CheckBox,Default=true},
                 new FaucetSetting()
                 {
@@ -102,43 +102,22 @@ public class ContractMiner : FaucetScript
     }
     public void SelectCorrectCaptcha()
     {
-        var LoginW = GetSetting("LoginW");
-        if (LoginW == "Recaptcha")
+     
+       var loginCaptchaSetting = GetSetting("LoginW");
+       bool isChangeCaptchaNeeded = (loginCaptchaSetting == "Recaptcha" && !IsVisible(ElementByXPath("//iframe[contains(@src,'google.com/recaptcha')]")))
+            || (loginCaptchaSetting == "HCaptcha" && !IsVisible(ElementByXPath("//div[@class='h-captcha']")));
+
+        if (isChangeCaptchaNeeded)
         {
-            if (!IsVisible(ElementByXPath("//iframe[contains(@src,'google.com/recaptcha')]")))
+
+            var buttonSwitchCaptcha = ElementByXPath("//a[contains(@href,'captcha')]");
+            if (IsVisible(buttonSwitchCaptcha))
             {
-                var SelectCaptchaButton = ElementByXPath("//a[@data-target='#change-captcha-solution']");
-                if (IsVisible(SelectCaptchaButton))
-                {
-                    Click(SelectCaptchaButton);
-                    Wait(1);
-                    var SelectRecaptcha = ElementByXPath("//a[contains(text(),'ReCaptcha')]");
-                    if (IsVisible(SelectRecaptcha))
-                    {
-                        Click(SelectRecaptcha);
-                        Wait(1);
-                    }
-                }
+                Click(buttonSwitchCaptcha);
+                Wait(2, 3);
             }
         }
-        else
-        {
-            if (!IsVisible(ElementByXPath("//img[@id='adcopy-puzzle-image-image']")))
-            {
-                var SelectCaptchaButton = ElementByXPath("//a[@data-target='#change-captcha-solution']");
-                if (IsVisible(SelectCaptchaButton))
-                {
-                    Click(SelectCaptchaButton);
-                    Wait(1);
-                    var SelectSolvemedia = ElementByXPath("//a[contains(text(),'SolveMedia')]");
-                    if (IsVisible(SelectSolvemedia))
-                    {
-                        Click(SelectSolvemedia);
-                        Wait(1);
-                    }
-                }
-            }
-        }
+
     }
     public override int BeforeLogin()
     {
