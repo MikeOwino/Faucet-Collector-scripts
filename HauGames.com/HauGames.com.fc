@@ -90,7 +90,7 @@ public class HaugamesScript : FaucetScript
         {
 
 
-            var emailBox = ElementByXPath("//input[contains(@name,'email')] | //input[contains(@id,'email')] ");
+            var emailBox = ElementByXPath("//input[@name='user_email']");
             if (!IsVisible(emailBox))
             {
                 return Fail("Email box is not visible or not found");
@@ -99,7 +99,7 @@ public class HaugamesScript : FaucetScript
 
             Wait(2);
 
-            var passwordBox = ElementByXPath("//input[contains(@name,'pass')] | //input[contains(@id,'pass')] ");
+            var passwordBox = ElementByXPath("//input[@type='password'] ");
             if (IsVisible(passwordBox))
             {
                 return Fail("Password box is not visible or not found");
@@ -113,7 +113,7 @@ public class HaugamesScript : FaucetScript
                 return captchaResult;
             }
 
-            var loginButton = ElementByXPath("//input[@type='submit'] | //button[@type='submit']");
+            var loginButton = ElementByXPath("//input[@name='user_login']");
             if (!IsVisible(loginButton))
             {
                 return Fail("Login button is not visible or not found");
