@@ -10,6 +10,7 @@ using System;
 using System.Globalization;
 
 //css_ref FaucetCollector.Utilities
+//css_ref FaucetCollector.Captcha
 
 
 public class FaucetSpinCom : FaucetScript
