@@ -1,14 +1,18 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 12/04/2021 01:00AM - Version 1
-//Last Update: 26/04/2021 20:30PM - Version 2
+//Last Update: 01/05/2021 04:30PM - Version 3
 //==================//
 
 using System;
 using FaucetCollector.Script;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
+using FaucetCollector.Utilities;
+
 //css_inc recaptchaUtilities
+//css_ref FaucetCollector.Captcha
+
 
 public class BitKing : FaucetScript
 {
@@ -63,16 +67,8 @@ public class BitKing : FaucetScript
     public override int DoInit()
     {
 
-		  //====================//
-          //CloudFlareCheck
-		  //====================//	  
-           var CloudFlareCheck = ElementByXPath("//h1[@data-translate='challenge_headline'] | //iframe[contains(@src,'hcaptcha.com/captcha')]");
-           if (CloudFlareCheck !=null)
-           {
-	         Log("CloudFlare - Here " );
-	         Captcha_All_Function(); //call
-           }		  	  
-		  //====================//
+          //CloudFlareCheck      
+		   CloudFlare_Function(); //call to check
 
         //Let Faucet Collector continue.
         return base.DoInit();
@@ -130,6 +126,11 @@ public class BitKing : FaucetScript
 		GoToUrl("https://BitKing.biz/login");
 		Wait();		
 		Wait(5);
+
+        //CloudFlareCheck      
+		CloudFlare_Function(); //call to check
+		
+		Wait(3);
 
         var box_user = ElementByXPath("//input[@name='email']");
         SetText(box_user, GetSetting("Email"));
@@ -259,7 +260,7 @@ public class BitKing : FaucetScript
 		
 	    if (!IsVisible(Time_VAR)) //if TIME NOT visible
 	    {
-	
+
 	      Log("do faucet");
 		  
           Captcha_All_Function(); //call
@@ -330,7 +331,22 @@ public class BitKing : FaucetScript
     }
 	
 
+        //=================//
+        //CloudFlare_Function
+        //=================//
+        public int CloudFlare_Function() 
+        {
+			
+          CloudFlareUtilities cloudFlareUtilities = new CloudFlareUtilities(this);
+          if (cloudFlareUtilities.IsVisibleCloudflare())
+          {
+		    Log("CloudFlare - Here " );
+            cloudFlareUtilities.DoSolve();
+          }
 
+          return 0;		
+        }//end CloudFlare_Function
+        //=================//
 	
 
         //=================//
