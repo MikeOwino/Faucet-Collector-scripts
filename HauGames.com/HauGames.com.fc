@@ -24,9 +24,9 @@ public class HaugamesScript : FaucetScript
                 new FaucetSetting(){Name="Email",Display="Your Email (important not UserName)",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
 
-                new FaucetSetting(){Name="FaucetClaim",Display="Selected Faucet",Type=EditorType.ComboBox,Items = AvailableFaucets.Keys.ToList(), Default=AvailableFaucets.Keys.FirstOrDefault()},		
-                
-			
+                new FaucetSetting(){Name="FaucetClaim",Display="Selected Faucet",Type=EditorType.ComboBox,Items = AvailableFaucets.Keys.ToList(), Default=AvailableFaucets.Keys.FirstOrDefault()},
+
+
 
             };
         }
@@ -58,12 +58,12 @@ public class HaugamesScript : FaucetScript
     public override void Start()
     {
 
-      
-        Title = "haugames";
 
-      
-        SuccessXPath = "//h2[contains(text(),'Rewards Table')]"; 
-        FailXPath = "//*[@class='alert alert-danger']]"; 
+        Title = "haugames|tpkom";
+
+
+        SuccessXPath = "//h2[contains(text(),'Rewards Table')]";
+        FailXPath = "//*[@class='alert alert-danger']]";
 
 
         base.Start();
@@ -72,7 +72,7 @@ public class HaugamesScript : FaucetScript
     public override bool IsLoggedIn()
     {
 
-      
+
         return ElementByXPath("//a[contains(@href,'logout')]") != null;
 
     }
@@ -100,14 +100,14 @@ public class HaugamesScript : FaucetScript
             Wait(2);
 
             var passwordBox = ElementByXPath("//input[@type='password'] ");
-            if (IsVisible(passwordBox))
+            if (!IsVisible(passwordBox))
             {
                 return Fail("Password box is not visible or not found");
             }
             SetText(passwordBox, GetPassword("Password"));
 
 
-            var captchaResult = Recaptcha_Function(); 
+            var captchaResult = Recaptcha_Function();
             if (captchaResult > 0)
             {
                 return captchaResult;
@@ -122,7 +122,7 @@ public class HaugamesScript : FaucetScript
 
             Wait();
 
-        } 
+        }
 
 
         return base.DoLogin();
@@ -138,13 +138,13 @@ public class HaugamesScript : FaucetScript
         var countDownElements = ElementsByXPath("//span[@class='countdown-amount']")
             .Where(el => IsVisible(el) && !string.IsNullOrEmpty(el.Text)).ToList();
 
-        if (countDownElements.Count == 3 )
+        if (countDownElements.Count == 3)
         {
             int hours, minutes, seconds;
 
-            if(int.TryParse(countDownElements[0].Text, out hours) &&
-                int.TryParse(countDownElements[1].Text,out minutes) 
-                && int.TryParse(countDownElements[2].Text,out seconds))
+            if (int.TryParse(countDownElements[0].Text, out hours) &&
+                int.TryParse(countDownElements[1].Text, out minutes)
+                && int.TryParse(countDownElements[2].Text, out seconds))
             {
                 return hours * 3600 + minutes * 60 + seconds;
             }
@@ -160,7 +160,6 @@ public class HaugamesScript : FaucetScript
 
 
 
-        Title = "haugames";
 
         GoToUrl(UrlFaucet);
 
@@ -173,7 +172,6 @@ public class HaugamesScript : FaucetScript
         }
 
         Click(claimButton);
-        Title = "tpkom";
 
         Wait(1);
 
@@ -193,7 +191,7 @@ public class HaugamesScript : FaucetScript
         Wait(3, 4);
 
 
-   
+
         return base.DoSolveFaucet();
     }
 
@@ -207,9 +205,9 @@ public class HaugamesScript : FaucetScript
     public int Recaptcha_Function()
     {
 
-     
-        var RecaptchaOpen_Iframe = ElementByXPath("//iframe[contains(@src,'recaptcha/api2/anchor')]");
-        if (IsVisible(RecaptchaOpen_Iframe))
+
+        var recaptchaIframe = ElementByXPath("//iframe[contains(@src,'recaptcha/api2/anchor')]");
+        if (IsVisible(recaptchaIframe))
         {
             //SolveCaptcha if apper
             var result = base.DoSolveCaptcha();
@@ -224,4 +222,4 @@ public class HaugamesScript : FaucetScript
         return 0;
     }
 
-} 
+}
