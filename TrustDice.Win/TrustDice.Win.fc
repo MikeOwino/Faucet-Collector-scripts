@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 13/11/2019 09:00AM - Version 1
-//Last Update: 29/04/2021 03:50AM - Version 14
+//Last Update: 01/05/2021 03:30AM - Version 15
 //==================//
 
 using System;
@@ -35,7 +35,8 @@ public class TrustDice : FaucetScript
                 new FaucetSetting(){Name="Email",Display="UserName",Type=EditorType.TextBox,Required=false},
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=false},
 
-                new FaucetSetting() { Name = "FaucetBtc", Display = "FaucetBtc - claim BTC ", Type = EditorType.CheckBox, Default =true},
+                new FaucetSetting() { Name = "Faucet_Claim", Display = "Faucet_Claim - claim BTC ", Type = EditorType.CheckBox, Default =true},
+                new FaucetSetting(){Name="Coin",Display="type your favorite Coin/Symbol (in Uppercase for example - BTC,ETH,LTC )",Default="BTC",Type=EditorType.TextBox},		
 
  				new FaucetSetting() { Name = "DailyActiveClaim", Display = "DailyActiveClaim - ON/OFF", Type = EditorType.CheckBox, Default =true},	               
 
@@ -383,15 +384,15 @@ public class TrustDice : FaucetScript
 
 				
 		//======//
-		//FaucetBtc//
+		//Faucet_Claim//
 		//======//
-        if (GetBoolSetting("FaucetBtc"))
+        if (GetBoolSetting("Faucet_Claim"))
         {	
           GoToUrl("https://TrustDice.win/faucet");
 		  Wait();
 		  Wait(2);	
 		
-		  Log("FaucetBtc - try to claim");	
+		  Log("Faucet_Claim - try to claim");	
           Faucet_Function(); //call
 		  
 	      Wait(2);
@@ -543,7 +544,7 @@ public class TrustDice : FaucetScript
 
            if (IsVisible(TimerRun)) //if "TimerRun" NOT visible
 		   {	
-	         Log("FaucetBtc - we return to site time");
+	         Log("Faucet_Claim - we return to site time");
              return Time_Function();
 		   } //end TimerRun - visible   
 		   
@@ -551,7 +552,7 @@ public class TrustDice : FaucetScript
 		   {		
              Wait(2);
 			 
-		     var ButtonFaucet = ElementByXPath("//div[3]/div[2]/div/button[contains(@class,'MuiButton-outlined MuiButton-outlinedSecondary')]");
+		     var ButtonFaucet = ElementByXPath("//div[contains(., '"+GetSetting("Coin")+"')]/div/button[contains(@class,'MuiButton-outlined MuiButton-outlinedSecondary')]");
 	         Click(ButtonFaucet);
 			 
              Wait(2);
@@ -561,8 +562,8 @@ public class TrustDice : FaucetScript
              Wait(4);
 			 
 			 ClaimSuccess(); //Marks the claim as a success	
-	         Log("FaucetBtc - Claim - Success");			 
-             Notification("FaucetBtc - Claim - Success");
+	         Log("Faucet_Claim - Claim - Success");			 
+             Notification("Faucet_Claim - Claim - Success");
 			 
 		   } //end TimerRun - NOT visible
 		  
