@@ -1,11 +1,10 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 14/04/2021 19:00PM - Version 1
-//Last Update: 27/04/2021 14:30AM - Version 2
+//Last Update: 01/05/2021 02:30AM - Version 5
 //==================//
 
 using FaucetCollector.Script;
-
 using System;
 using System.Globalization;
 
@@ -300,16 +299,16 @@ public class FaucetSpinCom : FaucetScript
                 Click(Button_Claim);
             }
 
-            Wait(2);
+            Wait(6);
 
             var Success_Claim = ElementByXPath("//div[@class='alert alert-success']"); //("//div[@class='alert alert-success']")
             if (IsVisible(Success_Claim))
             {
-                Log("FaucetClaim - Success_Claim ");
+                Log("FaucetClaim - Success - " + Success_Claim.Text);
                 ClaimSuccess(); //Marks the claim as a success
             }
 
-            Wait(2);
+            Wait(4);
 
             //Driver.Navigate().Refresh(); //Refresh
             GoToUrl("https://www.faucetspin.com/index.php");
@@ -503,9 +502,9 @@ public class FaucetSpinCom : FaucetScript
                 return result;
             }
         }
-        
+		
+        //IconCaptcha
         FaucetCollector.Captcha.IconCaptchaSolver solver = new FaucetCollector.Captcha.IconCaptchaSolver(this); //call
-
 
         if (solver.IsVisibleIconCaptcha())
         {
@@ -521,9 +520,6 @@ public class FaucetSpinCom : FaucetScript
                 }
             }
         }
-
-
-
 
         return 0;
     }//end Recaptcha_Function
