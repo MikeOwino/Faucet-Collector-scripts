@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 30/04/2019 21:09PM - Version 1
-//Last Update: 26/04/2021 17:20PM - Version 43
+//Last Update: 03/05/2021 00:30AM - Version 44
 //==================//
 
 using System;
@@ -12,6 +12,7 @@ using OpenQA.Selenium.Interactions;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+  
 
 //css_inc ShortLinkUtilities
 //css_inc RecaptchaUtilities
@@ -37,6 +38,12 @@ public class bcgame : FaucetScript
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=false},
                 //new FaucetSetting(){Name="DeleteCookies",Display="Delete Cookies - Sometimes solves problems (in login) if you have (Recommended)",Type=EditorType.CheckBox,Default=false},
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim - LuckySpin",Type=EditorType.CheckBox,Default=true},	
+                
+				new FaucetSetting(){Name="Auto_Withdraw_ALL_To_Vault",Display="Auto_Withdraw_ALL_To_Vault - also earn interest 5% for each coin",Type=EditorType.CheckBox,Default=true},            
+				new FaucetSetting() { Name = "Limit_Withdraw_To_Vault_FROM", Display = "Limit_Withdraw_To_Vault - in USD - FROM", Type = EditorType.TextBox, Default = 0.00990000 }, //if there is a problem with "Numeric" so cahnge to "TextBox"                
+				new FaucetSetting() { Name = "Limit_Withdraw_To_Vault_TO", Display = "Limit_Withdraw_To_Vault - in USD - TO", Type = EditorType.TextBox, Default = 0.00000001 }, //if there is a problem with "Numeric" so cahnge to "TextBox"                
+				new FaucetSetting() { Name = "Break_Vault", Display = "Break_Vault - in sec - when the while loop 'Withdraw to Vault' works - Choose after how much time you want to break inside 'while loop' - the default is 120sec = 2min", Type = EditorType.TextBox, Default = "120" },
+
                 //new FaucetSetting(){Name="ToiletPaper",Display="ToiletPaper - Claim Token",Type=EditorType.CheckBox,Default=false},	
                 //new FaucetSetting(){Name="Tredump_Bidgreen",Display="Tredump_Bidgreen - Claim Token",Type=EditorType.CheckBox,Default=true},
 				 
@@ -371,7 +378,8 @@ public class bcgame : FaucetScript
 		    
 		    Wait(4);
 
-			if (Timer_2 ==null ) //NOT visible 
+			var Timer_3 = ElementByXPath("//button[contains(@class,'bonus-item')]/div[contains(@class,'enter-animate active')]");
+			if (Timer_3 ==null ) //NOT visible 
 		    {	
 		    Log("FaucetClaim - LuckySpin - Success");
             Notification("FaucetClaim - LuckySpin - Success");
@@ -643,7 +651,7 @@ public class bcgame : FaucetScript
         if (GetBoolSetting("RollDaily"))
         {  
 		
-           GoToUrl("https://bc.game/user/level");
+           GoToUrl("https://bc.game/vip-club");
 		   Log("RollDaily: Go to bonus page");		
 	
            Wait();
@@ -767,7 +775,7 @@ public class bcgame : FaucetScript
      //=============//
      if (GetBoolSetting("Tredump_Bidgreen"))
      {
-
+        Log("Tredump_Bidgreen");
 		GoToUrl("https://tbbattle.bc.game/");
 		Wait();		
 		Wait(2);
@@ -798,6 +806,7 @@ public class bcgame : FaucetScript
      if (GetBoolSetting("ToiletPaper"))
      {
 
+        Log("ToiletPaper");
 		GoToUrl("https://campaign.bc.game/");
 		Wait();		
 		Wait(2);
@@ -879,6 +888,145 @@ public class bcgame : FaucetScript
 		
      } //end ToiletPaper
 		//===========================//
+
+
+
+     //=============//
+     //Auto_Withdraw_ALL_To_Vault
+     //=============//
+     if (GetBoolSetting("Auto_Withdraw_ALL_To_Vault"))
+     {
+		 
+        Log("Auto_Withdraw_ALL_To_Vault");
+		GoToUrl("https://bc.game/");
+		Wait(5);
+
+		var WalletButton = ElementByXPath("//span[contains(text(),'Wallet')]");
+        if (IsVisible(WalletButton)) 
+        { 
+          Log("WalletButton");
+          Click(WalletButton);
+		}
+		
+ 		Wait(2);		
+
+		var VaultTab = ElementByXPath("//div[@id='wallet']//div[contains(text(),'Vault')]");
+        if (IsVisible(VaultTab)) 
+        { 
+          Log("VaultTab");
+          Click(VaultTab);
+		}
+		
+		var Transfer_In = ElementByXPath("//div[@class='tabs-navs']/button[contains(text(),'Transfer In')]");
+        if (IsVisible(Transfer_In)) 
+        { 
+          Log("Transfer_In");
+          Click(Transfer_In);
+		}
+		
+ 		Wait(2);		
+	
+        var TimeToWaitForBreak = DateTime.Now.AddSeconds(GetIntSetting("Break_Vault")); //120sec = 2min 
+        while (true)
+        {
+
+          var Open_All_Coins = ElementByXPath("//div[contains(@class,'input-control')]//img[contains(@class,'coin-icon')]");
+          if (IsVisible(Open_All_Coins)) 
+          { 
+            Log("Open_All_Coins");
+		    Click(Open_All_Coins);
+		  }
+		
+          Wait(2);
+			
+          var See_in_USD = ElementByXPath("//div[contains(@class,'wrap')]//div[contains(@class,'switch open')]");
+          if (IsVisible(See_in_USD)) 
+          { 
+            Log("already set to USD");
+		  }
+          if (!IsVisible(See_in_USD)) 
+          { 
+            Log("we switch to see the all coins in USD");
+		    var Switch_To_USD = ElementByXPath("//div[contains(@class,'wrap')]//div[contains(@class,'switch')]");
+		    Click(Switch_To_USD);
+		  }	
+
+          Wait(2);
+	
+          var Balance_Elements = ElementsByXPath("//div[contains(@class,'normal')]//div[contains(@class,'amount-wrap')]/div[1]//span[contains(@class,'amount-str')]"); //elements
+		  //var Currency_Name_Elements = ElementsByXPath("//div[contains(@class,'normal')]//div[contains(@class,'currency-name')]"); //elements      
+
+          double MyAmount_FROM;        
+          double.TryParse(GetSetting("Limit_Withdraw_To_Vault_FROM"), out MyAmount_FROM);
+          //var MyAmount_FROM_VAR = Math.Round(MyAmount_FROM,10); //Math.Round - make sure to get the all decimal with 10 characters - 0.00000000 for ex --- || 0 = 1 || . = 1 || 00000000 = 8 || -- in total 10 characters
+          
+          double MyAmount_TO;        
+          double.TryParse(GetSetting("Limit_Withdraw_To_Vault_TO"), out MyAmount_TO);
+          //var MyAmount_TO_VAR = Math.Round(MyAmount_TO,10); //Math.Round - make sure to get the all decimal with 10 characters - 0.00000000 for ex --- || 0 = 1 || . = 1 || 00000000 = 8 || -- in total 10 characters
+
+          IWebElement CoinFound = null;
+
+          foreach(var BalanceVAR in Balance_Elements)
+          {
+		      Log("foreach");
+			
+              double BalanceDOUBLE;           
+              double.TryParse(BalanceVAR.Text.Trim(), out BalanceDOUBLE);
+
+              if (IsVisible(BalanceVAR) && BalanceDOUBLE < MyAmount_FROM && BalanceDOUBLE > MyAmount_TO )  // under < your minimum amount
+              {   
+		         Log("Your amount " + BalanceVAR.Text + " under < your minimum amount - all good ");
+		      
+                 CoinFound = BalanceVAR;
+		         
+			     Click(CoinFound);
+			     
+                 Wait(2);	 
+		         
+                 var Max_Amount = ElementByXPath("//div[contains(@class,'input-control')]//button[contains(text(),'Max')]");
+                 if (IsVisible(Max_Amount)) 
+                 { 
+                   Log("Max_Amount");
+		           Click(Max_Amount);
+		         }
+			     
+                 Wait(2);	 
+		      
+                 var End_Button_Transfer = ElementByXPath("//div[contains(@class,'button-inner') and contains(text(),'Transfer to Vault') ]");
+                 if (IsVisible(End_Button_Transfer)) 
+                 { 
+                   Log("End_Button_Transfer");
+		           Click(End_Button_Transfer);
+		         }
+			     
+                 Wait(2);	 
+		         
+				 Log("break");
+				 break; // break in the end that will go again to while true
+				 
+              } //end under <
+			  
+              if (IsVisible(BalanceVAR) && BalanceDOUBLE > MyAmount_FROM && BalanceDOUBLE < MyAmount_TO )  // above > your minimum amount
+              { 
+		         Log("Your amount " + BalanceVAR.Text + " above > your minimum amount - NOT good ");
+				 break; // break 
+			  }	//end above > 
+			  
+          } //end foreach
+			  		  	  
+          //protection
+          if (DateTime.Now > TimeToWaitForBreak) //if the time above 65 sec 
+          {
+          Log("FaucetClaim - break - TimeToWaitForBreak");
+          break; //break the wait loop
+          }
+		  
+		} //end while true
+		
+     }//end Auto_Withdraw_ALL_To_Vault
+
+     //====================//
+
 
      ClaimSuccess(); //Marks the claim as a success
      return GetWaitSetting();  
