@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 14/04/2021 19:00PM - Version 1
-//Last Update: 01/05/2021 02:30AM - Version 5
+//Last Update: 02/05/2021 22:15PM - Version 5
 //==================//
 
 using FaucetCollector.Script;
@@ -28,7 +28,11 @@ public class FaucetSpinCom : FaucetScript
                 new FaucetSetting(){Name="Email",Display="Email",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
 
-                new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim",Type=EditorType.CheckBox,Default=true},		
+                new FaucetSetting(){Name="btc",Display="btc",Type=EditorType.CheckBox,Default=true},		
+                new FaucetSetting(){Name="bch",Display="bch",Type=EditorType.CheckBox,Default=true},		
+                new FaucetSetting(){Name="ltc",Display="ltc",Type=EditorType.CheckBox,Default=true},		
+                new FaucetSetting(){Name="eth",Display="eth",Type=EditorType.CheckBox,Default=true},		
+
                 //new FaucetSetting() { Name = "CaptchaChoose", Display = "ON SolveMedia / OFF ReCaptcha", Type = EditorType.CheckBox, Default = true },			
                 
 			
@@ -259,16 +263,87 @@ public class FaucetSpinCom : FaucetScript
     public override int DoSolveFaucet()
     {
 
-        //=============//
-        //FaucetClaim
-        //=============//
-        if (GetBoolSetting("FaucetClaim"))
+        //btc
+        if (GetBoolSetting("btc"))
         {
 
-            GoToUrl("https://www.faucetspin.com/index.php");
-
+            GoToUrl("http://www.faucetspin.com/index.php?faucet=" + GetSetting("btc") );
             Wait();
             Wait(4);
+            Action_Function(); //call
+
+        } //end btc
+
+        //btc
+        if (GetBoolSetting("bch"))
+        {
+
+            GoToUrl("http://www.faucetspin.com/index.php?faucet=" + GetSetting("bch") );
+            Wait();
+            Wait(4);
+            Action_Function(); //call
+
+        } //end bch
+
+        //ltc
+        if (GetBoolSetting("bch"))
+        {
+
+            GoToUrl("http://www.faucetspin.com/index.php?faucet=" + GetSetting("ltc") );
+            Wait();
+            Wait(4);
+            Action_Function(); //call
+
+        } //end ltc
+
+        //eth
+        if (GetBoolSetting("bch"))
+        {
+
+            GoToUrl("http://www.faucetspin.com/index.php?faucet=" + GetSetting("eth") );
+            Wait();
+            Wait(4);
+            Action_Function(); //call
+
+        } //end eth
+		
+        return Time_Function(); //call to function time
+
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoSolveFaucet();
+    }
+
+
+
+
+    public override int AfterSolveFaucet()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterSolveFaucet();
+    }
+
+
+
+
+    /// <summary>
+    /// This method gets called in the end after the BeforeSolveFaucet/DoSolveFaucet and AfterSolveFaucet methods were done.
+    /// The base.CheckFaucetResult will try to find a visible element on the page using the XPath from SuccessXPath and FailXPath (see the Start method)
+    /// These properties should contain XPath expressions to find certain elements on the page.
+    /// For example if it finds one of the elements from the SuccessXPath, and it is visible, then it will flag the claim attempt as a success.
+    /// Or if it finds one of the elements from the FailXPath, and it is visible, then it will flag the claim attempt as a failure.
+    /// </summary>
+    public override int CheckFaucetResult()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.CheckFaucetResult();
+    }
+
+
+    //=================//
+    //Action_Function
+    //=================//
+    public int Action_Function()
+    {
 
             var WaitTimerText = ElementByXPath("//span[@id='countdown']");
             if (IsVisible(WaitTimerText))
@@ -312,39 +387,11 @@ public class FaucetSpinCom : FaucetScript
 
             //Driver.Navigate().Refresh(); //Refresh
             GoToUrl("https://www.faucetspin.com/index.php");
-
-        } //end FaucetClaim
-
-        return Time_Function(); //call to function time
-
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.DoSolveFaucet();
-    }
+        return 0;
+    }//end Action_Function
+     //=================//
 
 
-
-
-    public override int AfterSolveFaucet()
-    {
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.AfterSolveFaucet();
-    }
-
-
-
-
-    /// <summary>
-    /// This method gets called in the end after the BeforeSolveFaucet/DoSolveFaucet and AfterSolveFaucet methods were done.
-    /// The base.CheckFaucetResult will try to find a visible element on the page using the XPath from SuccessXPath and FailXPath (see the Start method)
-    /// These properties should contain XPath expressions to find certain elements on the page.
-    /// For example if it finds one of the elements from the SuccessXPath, and it is visible, then it will flag the claim attempt as a success.
-    /// Or if it finds one of the elements from the FailXPath, and it is visible, then it will flag the claim attempt as a failure.
-    /// </summary>
-    public override int CheckFaucetResult()
-    {
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.CheckFaucetResult();
-    }
 
 
     //=================//
