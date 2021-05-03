@@ -63,7 +63,7 @@ public class HaugamesScript : FaucetScript
 
 
         SuccessXPath = "//h2[contains(text(),'Rewards Table')]";
-        FailXPath = "//*[@class='alert alert-danger']]";
+        FailXPath = "//*[@class='alert alert-danger']";
 
 
         base.Start();
@@ -173,11 +173,13 @@ public class HaugamesScript : FaucetScript
 
         Click(claimButton);
 
-        Wait(1);
+        Wait(3, 5);
 
         DateTime timeout = DateTime.Now.AddSeconds(20);
         var nextButton = ElementByXPath("//button[contains(@class,'timer_v')]");
-        while (IsVisible(nextButton) && !nextButton.Enabled && DateTime.Now < timeout)
+        while (IsVisible(nextButton) && (!nextButton.Enabled || nextButton
+            .GetAttribute("class")
+            .Contains("disabled")) && DateTime.Now < timeout)
         {
             Wait(1);
         }
