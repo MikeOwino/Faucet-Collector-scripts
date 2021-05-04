@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 14/04/2021 19:00PM - Version 1
-//Last Update: 02/05/2021 22:15PM - Version 5
+//Last Update: 05/05/2021 02:00AM - Version 7
 //==================//
 
 using FaucetCollector.Script;
@@ -267,42 +267,46 @@ public class FaucetSpinCom : FaucetScript
         if (GetBoolSetting("btc"))
         {
 
-            GoToUrl("http://www.faucetspin.com/index.php?faucet=" + GetSetting("btc") );
+            GoToUrl("http://www.faucetspin.com/index.php?faucet=btc");
             Wait();
             Wait(4);
+			Log("btc");
             Action_Function(); //call
 
         } //end btc
 
-        //btc
+        //bch
         if (GetBoolSetting("bch"))
         {
 
-            GoToUrl("http://www.faucetspin.com/index.php?faucet=" + GetSetting("bch") );
+            GoToUrl("http://www.faucetspin.com/index.php?faucet=bch");
             Wait();
             Wait(4);
+			Log("bch");
             Action_Function(); //call
 
         } //end bch
 
         //ltc
-        if (GetBoolSetting("bch"))
+        if (GetBoolSetting("ltc"))
         {
 
-            GoToUrl("http://www.faucetspin.com/index.php?faucet=" + GetSetting("ltc") );
+            GoToUrl("http://www.faucetspin.com/index.php?faucet=ltc");
             Wait();
             Wait(4);
+			Log("ltc");
             Action_Function(); //call
 
         } //end ltc
 
         //eth
-        if (GetBoolSetting("bch"))
+        if (GetBoolSetting("eth"))
         {
 
-            GoToUrl("http://www.faucetspin.com/index.php?faucet=" + GetSetting("eth") );
+            GoToUrl("http://www.faucetspin.com/index.php?faucet=eth");
             Wait();
             Wait(4);
+			Log("eth");
             Action_Function(); //call
 
         } //end eth
