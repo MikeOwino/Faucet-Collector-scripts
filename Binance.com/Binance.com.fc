@@ -1,19 +1,26 @@
-﻿
 
 //==================//
 //script Written by: ••AviramDayan•• 22/08/2019 04:00PM - Version 1
-//Last Update: 22/08/2019 04:00PM - Version 2
+//Last Update: 04/05/2021 08:10AM - Version 5
 //==================//
 
 using System;
-using System.Drawing;
+using System.IO;
 using FaucetCollector.Script;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Globalization;
 
-//css_inc recaptchaUtilities
+//css_ref FaucetCollector.FaucetTemplates
+//css_ref FaucetCollector.Utilities
+//css_inc RecaptchaUtilities
+/*  css_inc IconCaptcha  */
+/*  css_inc ShortLinkUtilities  */
 //css_inc GetestCaptcha
 
 
@@ -33,8 +40,25 @@ public class Binance : FaucetScript
             {
                 new FaucetSetting(){Name="Email",Display="Email",Type=EditorType.TextBox,Required=false},
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=false},
-                new FaucetSetting() { Name = "GetActivityToken", Display = "GetActivityToken - on/off (it's recommended to set the time every 360 min '6 hours') ", Type = EditorType.CheckBox, Default = true},				
+                new FaucetSetting(){Name="CustomWaitForCode",Display="Custom Wait For Code in Login - in sec ",Type=EditorType.Numeric,Default=60},               
 				
+				new FaucetSetting() { Name = "GetActivityToken", Display = "GetActivityToken - on/off (it's recommended to set the time every 360 min '6 hours') ", Type = EditorType.CheckBox, Default = true},				
+
+                new FaucetSetting() { Name = "AutoTrade", Display = "AutoTrade - on/off", Type = EditorType.CheckBox, Default = false},				             
+				
+                new FaucetSetting() { Name = "Sell_OR_Buy", Display = "Sell_OR_Buy - on/off | if OFF - Sell | if ON - Buy", Type = EditorType.CheckBox, Default = false},				             
+				
+				new FaucetSetting(){Name="From_Coin",Display="From_Coin (type your favorite coin)",Default="DOGE",Type=EditorType.TextBox,Required=false},
+                new FaucetSetting(){Name="To_Coin",Display="To_Coin (type your favorite coin)",Default="BTC",Type=EditorType.TextBox,Required=false},
+
+				new FaucetSetting(){Name="Menu_Sell_ALL",Display="Menu_Sell_ALL (choose how much % you want to Sell) ",Type=EditorType.ComboBox,Default="100",Items=new System.Collections.Generic.List<string>{"25","50","75","100"}},
+				new FaucetSetting(){Name="Menu_Buy_ALL",Display="Menu_Buy_ALL (choose how much % you want to Buy) ",Type=EditorType.ComboBox,Default="100",Items=new System.Collections.Generic.List<string>{"25","50","75","100"}},
+
+                new FaucetSetting() { Name = "Price_Option", Display = "Price_Option - on/off | if OFF - Market Price | if ON - Custom Price ", Type = EditorType.CheckBox, Default = false},				             
+
+                new FaucetSetting(){Name="Price_Buy",Display="Price_Buy",Default="0.00000001",Type=EditorType.TextBox,Required=false},
+                new FaucetSetting(){Name="Price_Sell",Display="Price_Sell",Default="0.00000001",Type=EditorType.TextBox,Required=false},
+
                 //new FaucetSetting() { Name = "FaucetClaim", Display = "FaucetClaim", Type = EditorType.CheckBox, Default = true},	
  
 				
@@ -72,8 +96,7 @@ public class Binance : FaucetScript
     public override int DoInit()
     {
 			
-
-		
+	
         //Let Faucet Collector continue.
         return base.DoInit();
     }
@@ -85,7 +108,7 @@ public class Binance : FaucetScript
     public override bool IsLoggedIn()
     {
 	    //save Login Cookies - Check if the "Logout" exist
-        return ElementByXPath("//span[contains(text(),'Logout')]") != null;
+        return ElementByXPath("//a[contains(@id,'logout')]") != null;
 	 
         //return base.IsLoggedIn();
     }
@@ -102,10 +125,8 @@ public class Binance : FaucetScript
     public override int BeforeLogin()
     {
 		
-
-     GoToUrl("https://www.binance.com/userCenter/myAccount.html");
-
-		
+        GoToUrl("https://www.binance.com/en/my/dashboard");
+	
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.BeforeLogin();
     }
@@ -123,31 +144,31 @@ public class Binance : FaucetScript
     public override int DoLogin()
     {
 	
-      var ExitButton = ElementByXPath("//span[contains(text(),'Logout')]");
+      var ExitButton = ElementByXPath("//a[contains(@id,'logout')]");
 
 	
 	 //if i NOT Login - go to Login Page
 	 if (!IsVisible(ExitButton))
 	 {
 
-		GoToUrl("https://www.binance.com/login.html");
+		GoToUrl("https://accounts.binance.com/en/login");
 		Wait();		
-		Wait(2);
-/*    
-        var StartOpenLogin = ElementByXPath("//div[@class='AuthPage___controls']/button[contains(text(),'Sign In')]");
-	    if (IsVisible(StartOpenLogin))
+		Wait(4);
+ 
+        var Tab_Email = ElementByXPath("//div[@id='tab-email']");
+	    if (IsVisible(Tab_Email))
 	    { 
-        Click(StartOpenLogin);
+        Click(Tab_Email);
 		}
-*/
+
 		Wait(2);
 		
-        var box_user = ElementByXPath("//input[@id='email']");
+        var box_user = ElementByXPath("//input[@name='email']");
         SetText(box_user, GetSetting("Email"));
 		
 		Wait(2);
 		
-        var box_pass = ElementByXPath("//input[@id='pwd']");
+        var box_pass = ElementByXPath("//input[@name='password']");
         SetText(box_pass, GetPassword("Password"));
 		
 /*			
@@ -160,14 +181,14 @@ public class Binance : FaucetScript
             return Fail("Fail solving captcha");
         }
 */		
-		Wait(4);
+		Wait(3);
 		
-        var ButtonLog = ElementByXPath("//input[@id='login-btn']");
+        var ButtonLog = ElementByXPath("//button[@type='submit']");
         Click(ButtonLog);
 		
 		Wait(10);
 
-        SolveCaptcha_RightSquare_Function(); // call to SolveCaptcha
+        Recaptcha_Function(); // call 
 		
 /*		
         var Error_Message = ElementByXPath ("//div[@id='add_err']/div/div[@class='message' and contains(text(),'fille' | 'captcha' ) ]");
@@ -180,6 +201,15 @@ public class Binance : FaucetScript
 		//Wait();	
 
         //Title = "Likecoin Wallet";
+
+        var EmailCode = ElementByXPath("//input[contains(@aria-label,'oogle')]"); 
+        if (IsVisible(EmailCode))
+        {		
+		  Log("Login: we waiting " + GetSetting("CustomWaitForCode") + " sec - Please enter the code that sent to your email " + GetSetting("Email") );			  
+          int MyCustomTimeINT;
+          MyCustomTimeINT = GetIntSetting("CustomWaitForCode"); 
+          Wait(MyCustomTimeINT);
+        }
 		
 		Wait();	
 
@@ -220,11 +250,7 @@ public class Binance : FaucetScript
 
         if (ad)
         {
-		    //Log("return ad");
 			ad=false;
-			Driver.Close();  // Close specific chrome window
-            Driver.Quit();  // also Close the console app, that was used to kick off the chrome window
-            Driver.Dispose();  // Close the chromedriver.exe
             return GetWaitSetting();
         }
 
@@ -274,20 +300,92 @@ public class Binance : FaucetScript
   {
 
 		//==============//
+		//AutoTrade//
+		//==============//
+        if (!GetBoolSetting("AutoTrade"))
+        {
+           Log("AutoTrade - OFF"); 
+		}
+		
+        if (GetBoolSetting("AutoTrade"))
+        {
+           GoToUrl("https://www.binance.com/en/trade/" + GetSetting("From_Coin") + "_" + GetSetting("To_Coin") );
+           Log("AutoTrade - ON");        
+		   Wait(35);		   
+		   
+		   if (!GetBoolSetting("Sell_OR_Buy")) //OFF - Sell
+		   {   
+			   
+             var Sell_Balance = ElementByXPath("//div[@class='css-3j2kqe']/div[2]//span[contains(@class,'css-1gf5fsd')]");
+             var Sell_Amount_Minimum_Limit = ElementByXPath("//div[@class='css-3j2kqe']/div[2]//input[@name='quantity' and contains(@class,'css-1wlt96c')]");
+		     
+             double Sell_Balance_DOUBLE;
+             double.TryParse(Sell_Balance.Text.Trim().Split(' ')[0], out Sell_Balance_DOUBLE);  //double.TryParse - Does not related to dot "1.0" get any decimals  0.1  1.1  2.2 etc  //NOTE: if we have for example: "0.10000000 LTC" with TEXT after - use .Split(' ')[0] 		   
+               
+             double Sell_Amount_Minimum_Limit_DOUBLE;
+             double.TryParse(Sell_Amount_Minimum_Limit.GetAttribute("min"), out Sell_Amount_Minimum_Limit_DOUBLE);
+		     
+             if (Sell_Balance !=null && Sell_Amount_Minimum_Limit !=null && Sell_Balance_DOUBLE < Sell_Amount_Minimum_Limit_DOUBLE)  // under < -1000
+             {
+                 Log("Your amount " + Sell_Balance.Text + " under < the Minimum amount " + Sell_Amount_Minimum_Limit_DOUBLE + " not good");
+             }
+		     
+             if (Sell_Balance !=null && Sell_Amount_Minimum_Limit !=null && Sell_Balance_DOUBLE > Sell_Amount_Minimum_Limit_DOUBLE)  // above > +1000
+             {
+                 Log("Your amount " + Sell_Balance.Text + " above > the Minimum amount " + Sell_Amount_Minimum_Limit_DOUBLE + " all good do stuff");
+                 Sell_OR_Buy_Function(); //call			   
+             } 
+			 
+		   }// end Sell_OR_Buy - OFF
+
+
+		   if (GetBoolSetting("Sell_OR_Buy")) //ON - Buy
+		   {  
+		   
+             var Buy_Balance = ElementByXPath("//div[@class='css-3j2kqe']/div[1]//span[contains(@class,'css-1gf5fsd')]");
+             var Buy_Amount_Minimum_Limit = ElementByXPath("//div[@class='css-3j2kqe']/div[1]//input[@name='quantity' and contains(@class,'css-1wlt96c')]");
+		     
+             double Buy_Balance_DOUBLE;
+             double.TryParse(Buy_Balance.Text.Trim().Split(' ')[0], out Buy_Balance_DOUBLE);  //double.TryParse - Does not related to dot "1.0" get any decimals  0.1  1.1  2.2 etc  //NOTE: if we have for example: "0.10000000 LTC" with TEXT after - use .Split(' ')[0] 		   
+               
+             double Buy_Amount_Minimum_Limit_DOUBLE;
+             double.TryParse(Buy_Amount_Minimum_Limit.GetAttribute("min"), out Buy_Amount_Minimum_Limit_DOUBLE);
+		     
+             if (Buy_Balance !=null && Buy_Amount_Minimum_Limit !=null && Buy_Balance_DOUBLE < Buy_Amount_Minimum_Limit_DOUBLE)  // under < -1000
+             {
+                 Log("Your amount " + Buy_Balance.Text + " under < the Minimum amount " + Buy_Amount_Minimum_Limit_DOUBLE + " not good");
+             }
+		     
+             if (Buy_Balance !=null && Buy_Amount_Minimum_Limit !=null && Buy_Balance_DOUBLE > Buy_Amount_Minimum_Limit_DOUBLE)  // above > +1000
+             {
+                 Log("Your amount " + Buy_Balance.Text + " above > the Minimum amount " + Buy_Amount_Minimum_Limit_DOUBLE + " all good do stuff");
+                 Sell_OR_Buy_Function(); //call
+             } 
+		   
+		   }// end Sell_OR_Buy - ON		   
+
+		   
+        } //end AutoTrade
+		//==============//
+
+
+
+		//==============//
 		//GetActivityToken//
 		//==============//
         if (GetBoolSetting("GetActivityToken"))
         {
 
-        GoToUrl("https://www.binance.com/userCenter/myAccount.html");
-		Log("GetActivityToken - Go to promotions , we just waiting 20 seconds, to act normal and get the bounos daily");	
-		
-        Wait();
-        Wait(20);
+          GoToUrl("https://www.binance.com/en/my/dashboard");
+		  Log("GetActivityToken - Go to promotions , we just waiting 20 seconds, to act normal and get the bounos daily");	
+		  
+          Wait();
+          Wait(20);
         }	
-		
-		ad = true;    // if i do true - it report as succeed // only one time no multi and also required -> return GetWaitSetting();	
-        //return GetWaitSetting();	
+		//==============//
+
+
+        return Time_Function();	
 
 
         //We are good to continue
@@ -333,65 +431,339 @@ public class Binance : FaucetScript
 	
 	
 	
-	
-
- //=========================//
- //SolveCaptcha_RightSquare_Function
- //=========================//
- public int SolveCaptcha_RightSquare_Function()
- {	
-		
-        Log("SolveCaptcha_RightSquare_Function");
-		
-        /*
-        GetestCaptchaUtilities.GetestCaptcha getestCaptcha = new GetestCaptchaUtilities.GetestCaptcha(this);
-        bool res2=  getestCaptcha.DoInitSolve();
-        */
-		
-		
-/*
-        //SolveCaptcha_RightSquare
-        var Arrow = FindCorrectArrow();
-        if(IsVisible(Arrow))
-		{
-            Log("SolveCaptcha_RightSquare_Function - Arrow");	
-
-            var ToMove = ElementByXPath("//div[@class='verify-sub-block']");
-            if (IsVisible(ToMove))
-            {
-                Log("SolveCaptcha_RightSquare_Function - ToMove");	
-                Actions actions = new Actions(Driver);
-                actions.DragAndDrop(ToMove, Arrow).Build().Perform();
-                Wait();
-
-			}
-        }
-*/
-
-        //Geetest Captcha
-	    if (IsVisible(ElementByXPath("//div[@class='geetest_panel geetest_wind' and contains(@style,'display: block;')]")))
+        //=================//
+        //Sell_OR_Buy_Function
+        //=================//
+        public int Sell_OR_Buy_Function()
         {
-            int result = 0;
-            GetestCaptchaUtilities.GetestCaptcha getestCaptcha = new GetestCaptchaUtilities.GetestCaptcha(this);
-            bool res2=  getestCaptcha.DoInitSolve();
-            Wait(2);
-  
-                if (!res2)
-                {
-                    result = 1;
-                }
+
+           if (!GetBoolSetting("Sell_OR_Buy")) // if OFF - Sell
+           {	
+
+               if (GetBoolSetting("Price_Option")) // if ON - Custom Price - Sell
+               {
+                var Price_Sell_VAR = ElementByXPath("//div[@class='css-3j2kqe']/div[2]//input[@name='price']");
+                SetText(Price_Sell_VAR, GetSetting("Price_Sell"));
+				Log("Price_Option - Sell - Custom Price");
+		       }
+			   
+               if (!GetBoolSetting("Price_Option")) // if OFF - Market Price - Sell
+               {
+				 Log("Price_Option - Sell - Market Price");
+			   
+			     Wait(2);
+			     
+                 //========//
+                 //Menu_Sell_ALL
+                 //========//
+		         var Menu_Sell_All_Var =	GetSetting("Menu_Sell_ALL");	 
+		         string Menu_Sell_All_string = Menu_Sell_All_Var;
+		          
+                 if(Menu_Sell_All_Var=="25" && GetBoolSetting("AutoTrade"))  
+                 {			
+                   //25%
+                   var Sell_25 = ElementByXPath("//div[@class='css-3j2kqe']/div[2]//div[contains(@class,'css-r5qggc')]");
+                   Click(Sell_25);
+		           Log("Sell_25");
+                 }
+		          
+                 if(Menu_Sell_All_Var=="50" && GetBoolSetting("AutoTrade"))  
+		         {
+                   //50%
+                   var Sell_50 = ElementByXPath("//div[@class='css-3j2kqe']/div[2]//div[contains(@class,'css-nsqynb')]");
+                   Click(Sell_50);
+		           Log("Sell_50");
+                 }
+		          
+                 if(Menu_Sell_All_Var=="75" && GetBoolSetting("AutoTrade"))  
+		         {		
+                   //75%
+                   var Sell_75 = ElementByXPath("//div[@class='css-3j2kqe']/div[2]//div[contains(@class,'css-80wbqm')]");
+                   Click(Sell_75);
+		           Log("Sell_75");
+                 }
+		          
+                 if(Menu_Sell_All_Var=="100" && GetBoolSetting("AutoTrade"))  
+		         {
+                   //100%
+                   var Sell_100 = ElementByXPath("//div[@class='css-3j2kqe']/div[2]//div[contains(@class,'css-v6fymx')]");
+                   Click(Sell_100);
+		           Log("Sell_100");
+		         }
+                 //========//
+			     
+			     Wait(2);
+			     
+			     var Button_Sell = ElementByXPath("//div[@class='css-3j2kqe']/div[2]//button[@data-sensors-click='true']");
+			     //Click(Button_Sell);
+		         Log("Button_Sell");
+			     
+			     Wait();
+		
+               } //end OFF - Market Price - Sell
+	
+           } //end Sell_OR_Buy - OFF        
+
+
+           if (GetBoolSetting("Sell_OR_Buy")) // if ON - Buy
+           {	
+               if (GetBoolSetting("Price_Option")) // if ON - Custom Price - Buy
+               {
+                 var Price_Buy_VAR = ElementByXPath("//div[@class='css-3j2kqe']/div[1]//input[@name='price']");
+                 SetText(Price_Buy_VAR, GetSetting("Price_Buy"));
+				 Log("Price_Option - Buy - Custom Price");
+		       }
+			   
+               if (!GetBoolSetting("Price_Option")) // if OFF - Market Price - Buy
+               {
+				 Log("Price_Option - Buy - Market Price");
+			   
+			     Wait(2);
+			     
+                 //========//
+                 //Menu_Buy_ALL
+                 //========//
+		         var Menu_Buy_All_Var =	GetSetting("Menu_Buy_ALL");	 
+		         string Menu_Buy_All_string = Menu_Buy_All_Var;
+		          
+                 if(Menu_Buy_All_Var=="25" && GetBoolSetting("AutoTrade"))  
+                 {			
+                   //25%
+                   var Buy_25 = ElementByXPath("//div[@class='css-3j2kqe']/div[1]//div[contains(@class,'css-r5qggc')]");
+                   Click(Buy_25);
+		           Log("Buy_25");
+                 }
+		          
+                 if(Menu_Buy_All_Var=="50" && GetBoolSetting("AutoTrade"))  
+		         {
+                   //50%
+                   var Buy_50 = ElementByXPath("//div[@class='css-3j2kqe']/div[1]//div[contains(@class,'css-nsqynb')]");
+                   Click(Buy_50);
+		           Log("Buy_50");
+                 }
+		          
+                 if(Menu_Buy_All_Var=="75" && GetBoolSetting("AutoTrade"))  
+		         {		
+                   //75%
+                   var Buy_75 = ElementByXPath("//div[@class='css-3j2kqe']/div[1]//div[contains(@class,'css-80wbqm')]");
+                   Click(Buy_75);
+		           Log("Buy_75");
+                 }
+		          
+                 if(Menu_Buy_All_Var=="100" && GetBoolSetting("AutoTrade"))  
+		         {
+                   //100%
+                   var Buy_100 = ElementByXPath("//div[@class='css-3j2kqe']/div[1]//div[contains(@class,'css-v6fymx')]");
+                   Click(Buy_100);
+		           Log("Buy_100");
+		         }
+                 //========//	
+			     
+			     Wait(2);
+			     
+			     var Button_Buy = ElementByXPath("//div[@class='css-3j2kqe']/div[1]//button[@data-sensors-click='true']");
+			     //Click(Button_Buy);
+		         Log("Button_Buy");
+			     
+			     Wait();
+
+		       } //end OFF - Market Price - Buy
+			   
+           } //end Sell_OR_Buy - ON   
+		   
+           return 0;		
+        }//end Sell_OR_Buy_Function
+        //=================//	   
+	
+
+
+
+        //=================//
+        //Time_Function
+        //=================//
+        public int Time_Function()
+        {
+
+           //site time with date - example 10:00 PM | 10:00 AM  OR UTC LocalTime
+           var CheckAvailableGeneral = ElementByXPath("//div[contains(@id,'result') and contains(text(),'wait') or contains(text(),'UTC') ]");
+           if (IsVisible(CheckAvailableGeneral))
+           {
+	         Log("ParseExact - here - check ");   
+			 
+	         var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
+			 if (IsVisible(XpathTimeVAR))
+             {
+	           Log("XpathTimeVAR - Element - LocalTime - Visible - return to site time"); 
+			   
+	           var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //AM-PM -- t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  			   
+	           //var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US") ).ToLocalTime(); //UTC -- yyyy-MM-dd HH:mm:ss =  LocalTime - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
+	           //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+			   
+               var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
+               return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
+		     }
+			 
+			 if (!IsVisible(XpathTimeVAR))
+             {
+	           Log("XpathTimeVAR - Element - LocalTime - NOT Visible");  
+		     }
+			 
+           } //end CheckAvailableGeneral
+
+			 
+		   //site time with normal counter
+           var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
+		   var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
+
+           if (IsVisible(MinVar))
+           {
+	         Log("Time_Function - WaitTimerText apper - return to site time"); 
+             int min,sec;
+             min = Convert.ToInt32(MinVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[0])*60;
+             sec = Convert.ToInt32(SecVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[1]);
+             return min+sec;
+           } 
+
+           if (!IsVisible(MinVar))
+           {
+	            Log("Time_Function - return to your time"); 
+		        return GetWaitSetting();
+           }
+
+	       Log("Time_Function - return to your time - backup general"); 
+		   return GetWaitSetting(); //backup general
+
+           return 0;		
+        }//end Time_Function
+        //=================//
+		
+	
+        //=================//
+       //invisible_Recaptcha_Function
+        //=================//
+        public int invisible_Recaptcha_Function()
+        {
 			
-            return result;
+          var RecaptchaOpen_Iframe = ElementByXPath ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]");  
+          if (RecaptchaOpen_Iframe !=null)          
+		  {
+            //SolveCaptcha if apper
+            Log("DO invisible_Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+		    RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		    
+            Wait();
+		    
+            //ExecuteScript("afterResolveCaptcha");
+		  }
+		
+		return 0;
+        }//end invisible_Recaptcha_Function
+        //=================//	
+
+
+
+        //=================//
+       //Recaptcha_Function
+        //=================//
+
+        public int Recaptcha_Function()
+        {
+			
+          /*
+          //CaptchaChoose
+          var dropdown = ElementByXPath("//select[contains(@name,'captcha_type')]");
+          if ( GetBoolSetting("CaptchaChoose") )
+          {
+              SelectOptionByValue(dropdown , "1"); //SolveMedia
+          }
+          if ( !GetBoolSetting("CaptchaChoose") )
+          {
+              SelectOptionByValue(dropdown , "0"); //ReCaptcha
+          }
+          */	
+		  
+          //DoSolveImageCaptcha
+          var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
+          if (IsVisible(SolveMedia))
+		  {  
+            Log("DO SolveMedia");	  
+	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']")); 
+            if (result_2 > 0)
+            {
+                return Fail("SolveMedia - Fail solving captcha");
+            }
+		  }
+
+          /*
+          var SolveMedia_Iframe_Animation_OR_Canvas = ElementByXPath ("//div[contains(@id,'adcopy-puzzle-image-image')] | //canvas[contains(@id,'slog')] ");
+          if (IsVisible(SolveMedia_Iframe_Animation_OR_Canvas))
+          {
+            Log("SolveMedia_Iframe_Animation_OR_Canvas - visible - we select ReCaptcha - for protection");
+		    SelectOptionByValue(dropdown , "0"); //Choose to slolve with ReCaptcha - select ReCaptcha
+		  }
+          */
+		  
+	     //for recaptcha popup after click on button - ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]")   
+          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
+          if (IsVisible(RecaptchaOpen_Iframe))
+		  {
+            //SolveCaptcha if apper
+            Log("DO Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		  }
+
+          //HCaptcha
+		  var HCaptcha_Check = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");	
+	      if (IsVisible(HCaptcha_Check))
+	      {	
+            var result=DoHCaptcha();
+            if ( result>0 )
+            {
+                return result;
+            }
+		  }
+
+          //IconCaptcha
+		  /*
+          var IconCaptcha_Check = ElementByXPath("//div[@class='captcha-modal__icons']");  
+          if (IsVisible(IconCaptcha_Check))
+		  {
+		  Log("IconCaptcha - here");  
+          IconCaptchaSolver solver=new IconCaptchaSolver(this); //call
+		  
+			var IconCaptcha_Success = ElementByXPath("//div[@class='captcha-modal__icons-title' and contains(text(),'Great')]");  
+		    if (IsVisible(IconCaptcha_Success))
+		    {
+		     Log("IconCaptcha - Success_Claim ");  
+		     //ClaimSuccess(); //Marks the claim as a success
+			}
+			
+		  }	//end IconCaptcha
+		  */
+
+        //Geetest - Captcha		
+        var Geetest_OLD_OR_NEW = ElementByXPath("//script[contains(@src,'static.geetest.com/static/js/slide') or contains(@src,'static.geetest.com/static/js/fullpage')]"); // slide OLD or fullpage NEW
+        if (Geetest_OLD_OR_NEW != null) //visible
+        {
+          GetestCaptchaUtilities.GetestCaptcha getestCaptcha = new GetestCaptchaUtilities.GetestCaptcha(this); 
+          bool res2 = getestCaptcha.DoInitSolve(); //call
         }
-        //=============//
-	
-	
-  return 0;
-  
-  }// end SolveCaptcha_RightSquare_Function
-  //=========//
-
-
+         
+		return 0;
+        }//end Recaptcha_Function
+        //=================//	
 
 
 	
