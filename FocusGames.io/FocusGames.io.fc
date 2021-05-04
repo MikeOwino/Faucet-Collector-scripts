@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 15/07/2020 17:00AM - Version 1
-//Last Update: 09/04/2021 19:00PM - Version 5
+//Last Update: 04/05/2021 04:00AM - Version 6
 //==================//
 
 using FaucetCollector.Script;
@@ -25,13 +25,14 @@ public class FocusGames : FaucetScript
             {
                 new FaucetSetting(){Name="Email",Display="UserName",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
+                new FaucetSetting(){Name="CustomWaitForCode",Display="Custom Wait For Code in Login - in sec ",Type=EditorType.Numeric,Default=60},				
 
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim",Type=EditorType.CheckBox,Default=true},
                 new FaucetSetting(){Name="DailyActiveClaim",Display="DailyActiveClaim",Type=EditorType.CheckBox,Default=true},
                 new FaucetSetting() { Name = "CaptchaChoose", Display = "ON SolveMedia / OFF ReCaptcha", Type = EditorType.CheckBox, Default = true },			
 
-                new FaucetSetting(){Name="AutoWithdraw",Display="AutoWithdraw",Type=EditorType.CheckBox,Default=true},
-				new FaucetSetting() { Name = "Limit_Withdraw", Display = "Limit_Withdraw", Type = EditorType.TextBox, Default = 18600 }, //if there is a problem with "Numeric" so cahnge to "TextBox"                
+                new FaucetSetting(){Name="AutoWithdraw",Display="AutoWithdraw - Daily Amount",Type=EditorType.CheckBox,Default=true},
+				//new FaucetSetting() { Name = "Limit_Withdraw", Display = "Limit_Withdraw", Type = EditorType.TextBox, Default = 18600 }, //if there is a problem with "Numeric" so cahnge to "TextBox"                
                 new FaucetSetting(){Name="Address",Display="Address TRX",Type=EditorType.TextBox,Required=true},			
 			
                 //insert user settings here
@@ -163,8 +164,19 @@ public class FocusGames : FaucetScript
             {
                 Click(ButtonLog);
             }
-
-            Wait( );
+			
+            Wait();
+		    
+            var EmailCode = ElementByXPath("//input[contains(@placeholder,'code') or contains(@placeholder,'Code')]"); 
+            if (EmailCode != null)
+            {		
+		      Log("Login: we waiting " + GetSetting("CustomWaitForCode") + " sec - Please enter the code that sent to your email " + GetSetting("Email") );			  
+              int MyCustomTimeINT;
+              MyCustomTimeINT = GetIntSetting("CustomWaitForCode"); 
+              Wait(MyCustomTimeINT);
+            }
+		    
+            Wait();
 
         } // end ExitButton
 
@@ -273,23 +285,38 @@ public class FocusGames : FaucetScript
           string BalanceSTRING = BalanceVAR.Text.Trim().Replace(",", "").Replace("FGN", "").Split('.')[0];
           int BalanceINT = Convert.ToInt32(BalanceSTRING);
 		  
-          int MyAmount;
-          Int32.TryParse(GetSetting("Limit_Withdraw"), out MyAmount);
+          //int MyAmount;
+          //Int32.TryParse(GetSetting("Limit_Withdraw"), out MyAmount);
 		  
-          if (IsVisible(BalanceVAR) && BalanceINT < MyAmount) // under 10000
+          var MyAmountVAR = ElementByXPath("//div[contains(@class,'withdraw_selected_currency_holder')]//p/strong[1]");
+          string MyAmountSTRING = MyAmountVAR.Text.Trim().Replace(",", "").Replace("FGN", "").Split('.')[0];
+          int MyAmount = Convert.ToInt32(MyAmountSTRING);	  
+
+          var RemainingDailyVAR = ElementByXPath("//div[contains(@class,'withdraw_selected_currency_holder')]//p/strong[2]");
+          string RemainingDailySTRING = RemainingDailyVAR.Text.Trim().Replace(",", "").Replace("FGN", "").Replace("remaining", "").Split('.')[0];
+          int RemainingDaily = Convert.ToInt32(RemainingDailySTRING);
+
+		  
+          if (IsVisible(BalanceVAR) && BalanceINT < MyAmount && IsVisible(RemainingDailyVAR) && RemainingDaily < 1 ) // under <
           {
              Log("Limit_Withdraw - the balance under < " + MyAmount + " not good");
-             //do all stuff
           }
+
 		  
-          if (IsVisible(BalanceVAR) && BalanceINT > MyAmount) // above 10000
+          if (IsVisible(BalanceVAR) && BalanceINT > MyAmount && IsVisible(RemainingDailyVAR) && RemainingDaily > 1 ) // above >
           {
 
               Log("Limit_Withdraw - the balance above > " + MyAmount + " good your amount is " + BalanceVAR.Text );
+			  
+			  SetSetting("StoreMyAmount", MyAmountVAR.Text); //Store - Limit_Withdraw / MyAmount
+		  
               Wait(2);
+			  
               var InputAmount = ElementByXPath("//input[@name='amount']");		
-              SetText(InputAmount, GetSetting("Limit_Withdraw"));
+              SetText(InputAmount, GetSetting("StoreMyAmount")); ////Get - Limit_Withdraw / MyAmount
+			  
               Wait(2);
+			  
               var AddressVAR = ElementByXPath("//input[@name='address']");		
               SetText(AddressVAR, GetSetting("Address"));
               Wait(2);
