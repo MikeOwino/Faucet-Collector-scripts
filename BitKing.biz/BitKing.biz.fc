@@ -67,8 +67,13 @@ public class BitKing : FaucetScript
     public override int DoInit()
     {
 
-          //CloudFlareCheck      
-		   CloudFlare_Function(); //call to check
+		//CloudFlareCheck
+        var CloudFlareCheck = ElementByXPath("//h1[@data-translate='challenge_headline'] | //iframe[contains(@src,'hcaptcha.com/captcha')]");
+        if (CloudFlareCheck !=null)
+        {
+	      Log("CloudFlare - Here " );
+	      CloudFlare_Function(); //call
+        }
 
         //Let Faucet Collector continue.
         return base.DoInit();
@@ -128,7 +133,7 @@ public class BitKing : FaucetScript
 		Wait(5);
 
         //CloudFlareCheck      
-		CloudFlare_Function(); //call to check
+		//CloudFlare_Function(); //call to check
 		
 		Wait(3);
 
@@ -340,13 +345,17 @@ public class BitKing : FaucetScript
         public int CloudFlare_Function() 
         {
 			
-          CloudFlareUtilities cloudFlareUtilities = new CloudFlareUtilities(this);
-          if (cloudFlareUtilities.IsVisibleCloudflare())
-          {
-		    Log("CloudFlare - Here " );
-            cloudFlareUtilities.DoSolve();
-          }
-
+          //HCaptcha
+		  var HCaptcha_Check = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");	
+	      if (IsVisible(HCaptcha_Check))
+	      {	
+            var result=DoHCaptcha();
+            if ( result>0 )
+            {
+                return result;
+            }
+		  }
+		  
           return 0;		
         }//end CloudFlare_Function
         //=================//
