@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 12/04/2021 01:00AM - Version 1
-//Last Update: 01/05/2021 04:30PM - Version 3
+//Last Update: 06/05/2021 02:00PM - Version 4
 //==================//
 
 using System;
@@ -282,7 +282,10 @@ public class BitKing : FaucetScript
  	       Log(SuccessMessage.Text);	
 		   ClaimSuccess(); //Marks the claim as a success	
 		  }		
-		
+	
+	      Driver.Navigate().Refresh();
+          Wait(6);
+		  
 		} //end TIME NOT visible
 		
       }// end FaucetClaim
