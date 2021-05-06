@@ -115,7 +115,62 @@ public class FaucetCryptoScript : FaucetScript
         return ElementByXPath("//a[contains(@href,'faucet-claim')]|//a[contains(@href,'coin-balance')]") != null;
 
     }
-    
+
+    public override string GetHCaptchaSiteKey()
+    {
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com')]");
+
+        if (hcaptchaIframe != null)
+        {
+            string src = hcaptchaIframe.GetAttribute("src");
+
+            if (!string.IsNullOrEmpty(src))
+            {
+                // we find the sitekey 
+                var queryParams = src.Split('&').ToList();
+                // we remove the host part 
+
+                queryParams.RemoveAt(0);
+
+                //we find the sitekey 
+
+                string siteKey = queryParams.FirstOrDefault(param => param.ToLower().Contains("sitekey")).Split('=').LastOrDefault();
+
+
+                return siteKey;
+
+            }
+        }
+
+        return base.GetHCaptchaSiteKey();
+    }
+
+    public override bool SetHCaptchaResponse(string response)
+    {
+
+
+        if (ElementByXPath("//*[@name='g-recaptcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=g-recaptcha-response]').innerText = '" + response + "'");
+        }
+        if (ElementByXPath("//*[@name='h-captcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=h-captcha-response]').innerText = '" + response + "'");
+
+        }
+
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            ExecuteScript("arguments[0].setAttribute('data-hcaptcha-response','" + response + "');", hcaptchaIframe);
+        }
+
+        return true;
+    }
+
+
+
     public override int DoSolveCaptcha()
     {
 
@@ -131,6 +186,24 @@ public class FaucetCryptoScript : FaucetScript
                 return result;
             }
             utility.DoSolve();
+        }
+
+        try
+        {
+            var hcaptchaContainer = ElementsByXPath("//iframe[contains(@src,'hcaptcha.com')]").Where(fr => IsVisible(fr)).SingleOrDefault();
+            if (hcaptchaContainer !=null)
+            {
+                var result = DoSolveCaptcha();
+                if (result>0)
+                {
+                    return result;
+                }
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            Log("There is a problem solving hcaptcha with more than one hcaptcha frame", Level.Warning);
+
         }
 
         if (IsVisbileAntibotLinks)
