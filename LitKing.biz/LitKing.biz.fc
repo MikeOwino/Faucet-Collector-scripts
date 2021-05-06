@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 12/04/2021 01:00AM - Version 1
-//Last Update: 06/05/2021 02:20PM - Version 4
+//Last Update: 06/05/2021 05:20PM - Version 4
 //==================//
 
 using System;
@@ -132,11 +132,6 @@ public class LitKing : FaucetScript
 		Wait();		
 		Wait(5);
 
-        //CloudFlareCheck      
-		//CloudFlare_Function(); //call to check
-		
-		Wait(3);
-
         var box_user = ElementByXPath("//input[@name='email']");
         SetText(box_user, GetSetting("Email"));
 		
@@ -156,8 +151,8 @@ public class LitKing : FaucetScript
 		
 		Wait(2);
 
-		
-		Wait();	
+        //CloudFlareCheck      
+		CloudFlare_Function(); //call to check
 
 	 } // end ExitButton
 
@@ -344,7 +339,7 @@ public class LitKing : FaucetScript
         //=================//
         public int CloudFlare_Function() 
         {
-			
+		
           //HCaptcha
 		  var HCaptcha_Check = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");	
 	      if (IsVisible(HCaptcha_Check))
@@ -356,6 +351,46 @@ public class LitKing : FaucetScript
             }
 		  }
 		  
+		  
+          //CloudFlare_Checking_Browser_CheckExists
+          var CloudFlare_Checking_Browser_CheckExists = ElementByXPath("//span[@data-translate='checking_browser']");
+          if (CloudFlare_Checking_Browser_CheckExists !=null) //Visible
+          {
+			 Log("CloudFlare - checkin browser - HERE "); 
+
+             //start while loop
+             var TimeToWaitForBreak = DateTime.Now.AddSeconds(120);
+             while (true)
+             {
+                 var CloudFlare_Checking_Browser = ElementByXPath("//span[@data-translate='checking_browser']");
+                 if (CloudFlare_Checking_Browser !=null) //Visible
+                 {
+                    Log("Wait - CloudFlare - checkin browser - " + CloudFlare_Checking_Browser.Text); 
+                    Wait();	
+
+                    if (ElementByXPath ("//span[@data-translate='checking_browser']") ==null ) //NOT Visible
+                    {	
+                    Log("Login - CloudFlare - checkin browser - not here - good"); 
+                    break; //after break the while
+                    }	
+					
+					CloudFlareUtilities CloudFlareName = new CloudFlareUtilities(this);
+					CloudFlareName.DoSolve(); //Except solve Captcha - also solve the stucking "Checking_Browser" he go to "TryGetCloudflareCookieUsingChrome"
+				    
+                    //CloudFlareName.TryGetCloudflareCookieUsingChrome();
+
+                 }
+
+                 if (DateTime.Now > TimeToWaitForBreak) //if the time above 65 sec 
+                 {
+                 Log("Login - break - TimeToWaitForBreak");
+                 break; //break the wait loop
+                 }
+	
+             } //end while (true)
+				 
+          } //end CloudFlare_Checking_Browser_CheckExists
+ 
           return 0;		
         }//end CloudFlare_Function
         //=================//
