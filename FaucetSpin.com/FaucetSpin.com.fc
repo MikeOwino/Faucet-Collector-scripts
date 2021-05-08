@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 14/04/2021 19:00PM - Version 1
-//Last Update: 05/05/2021 02:00AM - Version 7
+//Last Update: 08/05/2021 04:00AM - Version 8
 //==================//
 
 using FaucetCollector.Script;
@@ -157,7 +157,7 @@ public class FaucetSpinCom : FaucetScript
 
             Wait(4);
 
-            Recaptcha_Function(); //call
+            Captcha_All_Function(); //call
 
             Wait(2);
 
@@ -310,6 +310,9 @@ public class FaucetSpinCom : FaucetScript
             Action_Function(); //call
 
         } //end eth
+
+        //Driver.Navigate().Refresh(); //Refresh
+        GoToUrl("https://www.faucetspin.com/index.php");
 		
         return Time_Function(); //call to function time
 
@@ -356,7 +359,7 @@ public class FaucetSpinCom : FaucetScript
 
             } // end WaitTimerText
 
-            Recaptcha_Function(); //call if apper
+            Captcha_All_Function(); //call if apper
 
             Wait(2);
 
@@ -367,7 +370,7 @@ public class FaucetSpinCom : FaucetScript
                 Click(Button_Next);
             }
 
-            Recaptcha_Function(); //call if apper
+            Captcha_All_Function(); //call if apper
 
             Wait(2);
 
@@ -381,7 +384,7 @@ public class FaucetSpinCom : FaucetScript
             Wait(6);
 
             var Success_Claim = ElementByXPath("//div[@class='alert alert-success']"); //("//div[@class='alert alert-success']")
-            if (IsVisible(Success_Claim))
+            if (Success_Claim !=null)
             {
                 Log("FaucetClaim - Success - " + Success_Claim.Text);
                 ClaimSuccess(); //Marks the claim as a success
@@ -390,7 +393,7 @@ public class FaucetSpinCom : FaucetScript
             Wait(4);
 
             //Driver.Navigate().Refresh(); //Refresh
-            GoToUrl("https://www.faucetspin.com/index.php");
+            //GoToUrl("https://www.faucetspin.com/index.php");
         return 0;
     }//end Action_Function
      //=================//
@@ -418,7 +421,6 @@ public class FaucetSpinCom : FaucetScript
                 var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(), "t", new CultureInfo("en-US")); //AM-PM -- t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  			   
                                                                                                             //var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US") ).ToLocalTime(); //UTC -- yyyy-MM-dd HH:mm:ss =  LocalTime - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
                                                                                                             //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
-
                 var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
                 return TimeNode > 0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
             }
@@ -488,10 +490,10 @@ public class FaucetSpinCom : FaucetScript
 
 
     //=================//
-    //Recaptcha_Function
+    //Captcha_All_Function
     //=================//
 
-    public int Recaptcha_Function()
+    public int Captcha_All_Function()
     {
 
         /*
@@ -560,6 +562,7 @@ public class FaucetSpinCom : FaucetScript
         if (solver.IsVisibleIconCaptcha())
         {
             Log("IconCaptcha - here");
+			Wait(6);
             bool success = solver.DoSolve();
             if (success)
             {
@@ -573,7 +576,7 @@ public class FaucetSpinCom : FaucetScript
         }
 
         return 0;
-    }//end Recaptcha_Function
+    }//end Captcha_All_Function
      //=================//	
 
 
