@@ -282,6 +282,7 @@ namespace Adbtc
             bool Finished = false;
             Wait(3);
             int ErrorCount = 0;
+            int creditedAdsCount = 0;
             do
             {
                 Wait(2, 3);
@@ -356,6 +357,7 @@ namespace Adbtc
                                 if (Reward != null)
                                 {
                                     Log("Viewing ad you will be credited with " + Reward.Text);
+                                    creditedAdsCount++;
                                 }
 
                                 Click(bt, false);
@@ -396,6 +398,12 @@ namespace Adbtc
 
                 }
             } while (!Finished);
+
+            if (creditedAdsCount > 0)
+            {
+                IsSuccess = true;
+                ClaimSuccess();
+            }
 
             if (GetBoolSetting("Faucet"))
             {
