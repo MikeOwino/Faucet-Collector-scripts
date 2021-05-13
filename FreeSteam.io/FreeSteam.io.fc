@@ -1,8 +1,7 @@
-﻿
 
 //============================================//
 //script Written first by: cgerabit
-//last update by: AviramDayan 08/07/2019 06:35AM - Version: 2
+//last update by: AviramDayan 13/05/2021 11:00AM - Version: 5
 //============================================//
 
 using System;
@@ -14,7 +13,7 @@ using System.Globalization;
 //css_inc RecaptchaUtilities
 
 
-public class FreeSteamScript : FaucetScript
+public class FreeSteam : FaucetScript
 {
     /// <summary>
     /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
@@ -25,7 +24,7 @@ public class FreeSteamScript : FaucetScript
     {
         get
         {
-            return new FaucetSettings("https://freesteam.io/")
+            return new FaucetSettings("https://FreeSteam.io/")
             {
                 new FaucetSetting() { Name = "Email", Display = "Email", Type = EditorType.TextBox, Required = true },
                 new FaucetSetting() { Name = "Password", Display = "Password", Type = EditorType.Password, Required = true },
@@ -35,7 +34,6 @@ public class FreeSteamScript : FaucetScript
                 new FaucetSetting(){Name="WalletAddress",Display="WalletAddress - only to remmber (Not required)",Type=EditorType.TextBox,Required=false},
                 new FaucetSetting(){Name="AutoSetWithdraw",Display="AutoSetWithdraw - on/off",Type=EditorType.CheckBox,Default=false},	
                 new FaucetSetting(){Name="AutoWithdraw",Display="AutoWithdraw - on/off",Type=EditorType.CheckBox,Default=false},	
-                new FaucetSetting() { Name = "LimiToWithdraw", Display = "LimiToWithdraw", Type = EditorType.Numeric, Default = 36},
 	
 				
                 //insert user settings here
@@ -52,7 +50,10 @@ public class FreeSteamScript : FaucetScript
     }
 
 	
-	
+    //My DomainName
+    string DomainName_String = "https://FreeSteam.io";
+	//example - GoToUrl(DomainName_String);
+    //==========//
 	
 	
 	
@@ -118,7 +119,7 @@ public class FreeSteamScript : FaucetScript
     public override int BeforeLogin()
     {
 		
-        GoToUrl("https://freesteam.io//free"); //go to faucet first
+        GoToUrl(DomainName_String+"/free"); //go to faucet first
 		
 		
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
@@ -234,9 +235,9 @@ public class FreeSteamScript : FaucetScript
  public override int GetFaucetWaitTime()
  {
 
-        if (!Driver.Url.Contains("https://freesteam.io//free"))
+        if (!Driver.Url.Contains(DomainName_String+"/free"))
         {
-            GoToUrl("https://freesteam.io//free");
+            GoToUrl(DomainName_String+"/free");
             Wait();
         }
         
@@ -307,7 +308,7 @@ public class FreeSteamScript : FaucetScript
         {			
 
 		   Log("AutoSetWithdraw");
-           GoToUrl("https://freesteam.io//settings");	
+           GoToUrl(DomainName_String+"/settings");	
 		   Wait();
 		
            var setwallet = ElementByXPath("//input[@class='form-control wallet-address']");
@@ -332,57 +333,67 @@ public class FreeSteamScript : FaucetScript
         //=============//
 
 
-	 
+
         //=============//
         //AutoWithdraw
         //=============//
-        if (GetBoolSetting("AutoWithdraw") && !string.IsNullOrEmpty(GetSetting("LimiToWithdraw")) && !string.IsNullOrEmpty(GetSetting("WalletAddress")))
+        if (GetBoolSetting("AutoWithdraw"))
         {
-           
-          var BalanceVAR = ElementByXPath("//li[@class='navbar-coins bg-1']//a");
-            if (IsVisible(BalanceVAR))
+			
+		    var WithdrawButton_Start = ElementByXPath("//button[contains(@class,'withdraw-button bg-2')]");
+            Click(WithdrawButton_Start);
+
+			Wait(2);
+
+            var ExistsSetAddress = ElementByXPath("//span[contains(@class,'withdrawal-span')]//a[contains(@href,'settings')]");      
+			if (ExistsSetAddress !=null) //if Visible
             {
-                double BalanceDOUBLE;
-                double.TryParse(BalanceVAR.Text.Split(' ')[0],NumberStyles.Any,CultureInfo.InvariantCulture, out BalanceDOUBLE); //decimals  0.1  1.1  2.2  etc
+				Log("ExistsSetAddress - Your Address NOT set - you need to set your Address to make any Withdraw");
+			}
 
-                double MyAmount= GetIntSetting("LimiToWithdraw");
-         
+            if (ExistsSetAddress ==null) //if not Visible
+            {
+                //do all stuff
+				Log("ExistsSetAddress - Your Address already set - we try to withdraw now");
 
-                if (BalanceDOUBLE > MyAmount) // the Default Limit to withdraw is 1000
+                //action
+                var MyBalance = ElementByXPath("//li[contains(@class,'navbar-coins')]/a");
+                var Amount_Minimum_Limit = ElementByXPath("//div[contains(@class,'withdraw')]/div[contains(@class,'bg-3')]");
+
+                double MyBalance_DOUBLE;
+                
+                double.TryParse(MyBalance.Text.Trim().Split(' ')[0], out MyBalance_DOUBLE);  //double.TryParse - Does not related to dot "1.0" get any decimals  0.1  1.1  2.2 etc  //NOTE: if we have for example: "0.10000000 LTC" with TEXT after - use .Split(' ')[0]        
+		        
+                double Amount_Minimum_Limit_DOUBLE;
+                double.TryParse(Amount_Minimum_Limit.Text.Replace("MIN. WITHDRAW: ", "").Split(' ')[0], out Amount_Minimum_Limit_DOUBLE);
+
+                if (MyBalance !=null && Amount_Minimum_Limit !=null && MyBalance_DOUBLE < Amount_Minimum_Limit_DOUBLE)  // under <
                 {
-                    Log("AutoWithdraw - visible");
-                    var FirstWithdrawButton = ElementByXPath("//button[@class='withdraw-button bg-2']");
-                    if (IsVisible(FirstWithdrawButton))
-                    {
-                        Click(FirstWithdrawButton);
-                        Wait();
-                        var SetNumberVAR = ElementByXPath("//input[@placeholder='Enter Withdrawal Amount']");
-                        if (IsVisible(SetNumberVAR))
-                        {
-                            SetText(SetNumberVAR, BalanceDOUBLE.ToString());
-                          
-                            var SetWalletVAR = ElementByXPath("//input[@placeholder='Enter Withdrawal Address']");
-                            if (IsVisible(SetWalletVAR))
-                            {
-                                SetText(SetWalletVAR, GetSetting("WalletAddress"));
-                               
-                                var EndWalletVAR = ElementByXPath("//button[@class='main-button-2 main-button-blue withdraw-now bg-3']");
-                                if (IsVisible(EndWalletVAR))
-                                {
-                                    Click(EndWalletVAR);
-                                }
-                                Wait(1);
-                            }
-                        }
-                    }
+                    Log("Your amount " + MyBalance.Text + " under < the Minimum amount " + Amount_Minimum_Limit_DOUBLE + " not good");
                 }
+		        
+                if (MyBalance !=null && Amount_Minimum_Limit !=null && MyBalance_DOUBLE > Amount_Minimum_Limit_DOUBLE)  // above >
+                {
+                    Log("Your amount " + MyBalance.Text + " above > the Minimum amount " + Amount_Minimum_Limit_DOUBLE + " all good do stuff");
+					
+		            var GetAllAmount = ElementByXPath("//div[contains(@class,'inner-col')]//a[contains(@class,'profile-amount')]");
+                    Click(GetAllAmount);
+					
+					Wait(2);
+					
+		            var WithdrawButton = ElementByXPath("//button[contains(@class,'main-button-2 main-button-blue')]");
+                    Click(WithdrawButton);
+					
+					Wait(2);
 
-                //if (BalanceDOUBLE < MyAmount) // - 1000
-                //{
-                //    Log("AutoWithdraw - disabled");
-                //}
+		            var Coin_Success = ElementByXPath("//h1[contains(@class,'color-1')]");
+                    Log("Success - " + Coin_Success);
+					
+                    //do all stuff
+                }
+				
             }
-            Wait(1);
+
         }//end AutoWithdraw
         //=============//	 
 	 		
@@ -393,26 +404,31 @@ public class FreeSteamScript : FaucetScript
         if (GetBoolSetting("FaucetClaim"))
         {
 
-            if (!Driver.Url.Contains("https://freesteam.io//free"))
+            GoToUrl(DomainName_String+"/free-rolls"); //first go to here to avoid BOT use 
+            Wait(4,7);
+
+            GoToUrl(DomainName_String+"/free");
+            Wait(2,8);
+
+		    Log("FaucetClaim - try");
+            Faucet_Roll_Function(); //call to try
+
+            Wait(8);
+
+            var TimeToCheck = ElementByXPath("//div[contains(@class,'timeout-wrapper') and @style ]"); 
+			if (TimeToCheck !=null) //if after that we click on Roll There is Alert that need to "Refresh" - do it 2 times and call again to do Roll to times
             {
-                GoToUrl("https://freesteam.io//free");
-                Wait();
+				Log("FaucetClaim - Alert appear - need to Refresh the Page");
+                Driver.Navigate().Refresh(); //Refresh
+				Wait(3,6);
+                Faucet_Roll_Function(); //call again
+				Wait(4,7);
+                Driver.Navigate().Refresh(); //Refresh
+				Wait(3,6);
+                Faucet_Roll_Function(); //call again
+				Wait(4,7);
             }
 
-            var ButtonClaim = ElementByXPath("//button[@class='main-button-2 roll-button bg-2']");
-            if (!IsVisible(ButtonClaim))
-            {
-                return Fail("Button claim not visible");
-            }
-            //var result = DoSolveCaptcha();
-            //if (result > 0)
-            //{
-            //    return Fail("Fail solving captcha");
-            //}
-            Click(ButtonClaim);
-            Wait();
-        
-				
         }//end FaucetClaim
 
     //==============//
@@ -426,7 +442,7 @@ public class FreeSteamScript : FaucetScript
 
 
             Log("DoShortLink");
-            GoToUrl("https://freesteam.io//free-rolls");
+            GoToUrl(DomainName_String+"/free-rolls");
 	        Wait();	  
 			
             int N = CheckIfShortLinkIsAvailable();
@@ -514,7 +530,30 @@ public class FreeSteamScript : FaucetScript
         return base.CheckFaucetResult();
     }
 	
-	
+
+        //=================//
+       //Faucet_Roll_Function
+        //=================//
+
+        public int Faucet_Roll_Function()
+        {
+			
+            var ButtonClaim = ElementByXPath("//button[@class='main-button-2 roll-button bg-2']");
+            if (!IsVisible(ButtonClaim))
+            {
+            Log("Button claim not visible");
+            }
+			
+            if (IsVisible(ButtonClaim))
+            {
+            Click(ButtonClaim);
+            Wait(5);
+            }
+					
+		return 0;
+        }//end Faucet_Roll_Function
+        //=================//	
+		
 
     public int CheckIfShortLinkIsAvailable()
     {
