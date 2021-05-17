@@ -18,7 +18,7 @@ using OpenQA.Selenium.Interactions;
 //css_ref ProcessingImagesUsingLockBits
 //css_inc GetestCaptcha
 
-public class FairMillions : FaucetScript
+public class WolfBet : FaucetScript
 {
     /// <summary>
     /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
