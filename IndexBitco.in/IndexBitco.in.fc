@@ -1,13 +1,27 @@
-﻿
+
 //============================================//
 //script Written first by: cgerabit 22/02/2019
-//last update by: AviramDayan 31/07/2019 19:37PM - Version: 12
+//last update by: AviramDayan 20/05/2021 16:00PM - Version: 16
 //============================================//
 
-
 using System;
+using System.IO;
 using FaucetCollector.Script;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+using System.Linq;
+using System.Collections.Generic;
+using System.Globalization;
+using FaucetCollector.Utilities;
+
+//css_ref FaucetCollector.FaucetTemplates
+//css_inc RecaptchaUtilities
+//css_ref FaucetCollector.Captcha
+/* css_inc GetestCaptcha */
+
 //css_inc ShortLinkUtilitiesV2
+
+
 public class IndexBitcoinSript : FaucetScript
 {
     /// <summary>
@@ -254,58 +268,50 @@ public class IndexBitcoinSript : FaucetScript
     {
 		
 
-		//============//
-		//ClaimFaucet//
-		//============//
+	   //============//
+	   //ClaimFaucet//
+	   //============//
        if (GetBoolSetting("ClaimFaucet"))
        {
-            if (!Driver.Url.Contains("http://indexbitco.in/faucet"))
-            {
-                GoToUrl("http://indexbitco.in/faucet");
-            }
-        Wait();
-		
-        var ButtonGo = ElementByXPath("//input[@value='Claim!']");
-        if (!IsVisible(ButtonGo))
-        {
-            return Fail("Fail, button go to shortlink not found");
-        }
-        var result = DoSolveCaptcha();
-        if (result > 0)
-        {
-            return Fail("Fail solving captcha");
-        }
-        ButtonGo = ElementByXPath("//input[@value='Claim!']");
-        if (!IsVisible(ButtonGo))
-        {
-            return Fail("Fail, button go to shortlink not found");
-        }
-        Click(ButtonGo);
-        Wait();
-        var Error = ElementByXPath("//font[@color='red']//b[contains(text(),'Error')]");
-        if (IsVisible(Error))
-        {
-            string ToLog = Error.Text;
-            Driver.Navigate().Refresh();
-            return Fail(ToLog);
-        }
-        ShortLinkBypasser bypasser = new ShortLinkBypasser(this);
-       bool B= bypasser.DoShortLink();
-        if (!B)
-        {
-            Log("Fail bypassing shortlink");
-        }
-        Wait();
-            CheckFaucetResult();
+
+          GoToUrl("http://indexbitco.in/faucet");
+          Wait();
+		  Log("ClaimFaucet - go to");
+		  
+          var ButtonGo = ElementByXPath("//input[@value='Claim!']");
+          if (IsVisible(ButtonGo))
+          {
+            Click(ButtonGo);
+		  	Log("ButtonGo");
+          }
+		  
+	      Wait();
+
+          Captcha_All_Function(); //call
+		  
+	      Wait();
+
+          var Error = ElementByXPath("//font[@color='red']//b[contains(text(),'Error')]");
+          if (IsVisible(Error))
+          {
+              Log(Error.Text);
+          }
+		  
        }
+	   //============// 
 	   
 	   
+
+	   //============//
+	   //AutoSurfAds//
+	   //============//
 	
         if (GetBoolSetting("AutoSurfAds"))
         {
 
             GoToUrl("http://indexbitco.in/ptc");
             Wait(2);
+		    Log("AutoSurfAds - go to");
 
             //if No ad available
             var SurfAdsGeneralTextCheck = ElementByXPath("//h1/b[contains(text(),'No ad available!')]  | //p/strong[contains(text(),'No ads are available right now')]");
@@ -380,14 +386,10 @@ public class IndexBitcoinSript : FaucetScript
             }
 
         } //end AutoSurfAds
+	   //============// 
 
-        
-        //if the start button apper
-        ClaimSuccess();
-        //register as success, so the script knows it can close
-        IsSuccess = true;
-        return GetWaitSetting();
 
+        return Time_Function();
 		
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.DoSolveFaucet();
@@ -427,6 +429,168 @@ public class IndexBitcoinSript : FaucetScript
     }
 	
 
-	
+
+
+        //=================//
+        //Time_Function
+        //=================//
+        public int Time_Function()
+        {
+
+           //site time with date - example 10:00 PM | 10:00 AM  OR UTC LocalTime
+           var CheckAvailableGeneral = ElementByXPath("//div[contains(@id,'result') and contains(text(),'wait') or contains(text(),'UTC') ]");
+           if (IsVisible(CheckAvailableGeneral))
+           {
+	         Log("ParseExact - here - check ");   
+			 
+	         var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
+			 if (IsVisible(XpathTimeVAR))
+             {
+	           Log("XpathTimeVAR - Element - LocalTime - Visible - return to site time"); 
+			   
+	           var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //AM-PM -- t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  			   
+	           //var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US") ).ToLocalTime(); //UTC -- yyyy-MM-dd HH:mm:ss =  LocalTime - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
+	           //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+			   
+               var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
+               return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
+		     }
+			 
+			 if (!IsVisible(XpathTimeVAR))
+             {
+	           Log("XpathTimeVAR - Element - LocalTime - NOT Visible");  
+		     }
+			 
+           } //end CheckAvailableGeneral
+
+			 
+		   //site time with normal counter
+           var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
+		   var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
+
+           if (IsVisible(MinVar))
+           {
+	         Log("Time_Function - WaitTimerText apper - return to site time"); 
+             int min,sec;
+             min = Convert.ToInt32(MinVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[0])*60;
+             sec = Convert.ToInt32(SecVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[1]);
+             return min+sec;
+           } 
+
+           if (!IsVisible(MinVar))
+           {
+	            Log("Time_Function - return to your time"); 
+		        return GetWaitSetting();
+           }
+
+	       Log("Time_Function - return to your time - backup general"); 
+		   return GetWaitSetting(); //backup general
+
+           return 0;		
+        }//end Time_Function
+        //=================//
+
+
+        //=================//
+       //Captcha_All_Function
+        //=================//
+
+        public int Captcha_All_Function()
+        {
+			
+          /*
+          //CaptchaChoose
+          var dropdown = ElementByXPath("//select[contains(@name,'captcha_type')]");
+          if ( GetBoolSetting("CaptchaChoose") )
+          {
+              SelectOptionByValue(dropdown , "1"); //SolveMedia
+          }
+          if ( !GetBoolSetting("CaptchaChoose") )
+          {
+              SelectOptionByValue(dropdown , "0"); //ReCaptcha
+          }
+          */	
+		  
+          //DoSolveImageCaptcha
+          var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
+          if (IsVisible(SolveMedia))
+		  {  
+            Log("DO SolveMedia");	  
+	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']")); 
+            if (result_2 > 0)
+            {
+                return Fail("SolveMedia - Fail solving captcha");
+            }
+		  }
+
+          /*
+          var SolveMedia_Iframe_Animation_OR_Canvas = ElementByXPath ("//div[contains(@id,'adcopy-puzzle-image-image')] | //canvas[contains(@id,'slog')] ");
+          if (IsVisible(SolveMedia_Iframe_Animation_OR_Canvas))
+          {
+            Log("SolveMedia_Iframe_Animation_OR_Canvas - visible - we select ReCaptcha - for protection");
+		    SelectOptionByValue(dropdown , "0"); //Choose to slolve with ReCaptcha - select ReCaptcha
+		  }
+          */
+		  
+	     //for recaptcha popup after click on button - ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]")   
+          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
+          if (IsVisible(RecaptchaOpen_Iframe))
+		  {
+            //SolveCaptcha if apper
+            Log("DO Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		  }
+
+          //HCaptcha
+		  var HCaptcha_Check = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");	
+	      if (IsVisible(HCaptcha_Check))
+	      {	
+            var result=DoHCaptcha();
+            if ( result>0 )
+            {
+                return result;
+            }
+		  }
+
+          //IconCaptcha
+          FaucetCollector.Captcha.IconCaptchaSolver solver = new FaucetCollector.Captcha.IconCaptchaSolver(this); //call
+		  
+          if (solver.IsVisibleIconCaptcha())
+          {
+              Log("IconCaptcha - here");
+			  Wait(6);
+              bool success = solver.DoSolve();
+              if (success)
+              {
+                  var IconCaptcha_Success = ElementByXPath("//div[@class='captcha-modal__icons-title' and contains(text(),'Great')]");
+                  if (IsVisible(IconCaptcha_Success))
+                  {
+                      Log("IconCaptcha - Success_Claim ");
+                      //ClaimSuccess(); //Marks the claim as a success
+                  }
+              }
+          }
+
+          //Geetest - Captcha	
+          /*		
+          var Geetest_OLD_OR_NEW = ElementByXPath("//script[contains(@src,'static.geetest.com/static/js/slide') or contains(@src,'static.geetest.com/static/js/fullpage')]"); // slide OLD or fullpage NEW
+          if (Geetest_OLD_OR_NEW != null) //visible
+          {
+            GetestCaptchaUtilities.GetestCaptcha getestCaptcha = new GetestCaptchaUtilities.GetestCaptcha(this); 
+            bool res2 = getestCaptcha.DoInitSolve(); //call
+          }
+          */
+
+		return 0;
+        }//end Captcha_All_Function
+        //=================//	
+
+
 	
 } //end class
