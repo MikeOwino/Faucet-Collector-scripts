@@ -1,17 +1,27 @@
 
 //============================================//
 //script Written first by: cgerabit
-//last update by: AviramDayan 13/05/2021 11:00AM - Version: 16
+//last update by: AviramDayan 21/05/2021 11:00AM - Version: 17
 //============================================//
 
 using System;
-using FaucetCollector.Script;
-using OpenQA.Selenium;
 using System.IO;
+using FaucetCollector.Script;
+using System.Text.RegularExpressions;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Globalization;
-//css_inc ShortLinkUtilities
-//css_inc RecaptchaUtilities
+using FaucetCollector.Utilities;
 
+//css_ref FaucetCollector.FaucetTemplates
+//css_inc RecaptchaUtilities
+//css_ref FaucetCollector.Captcha
+/* css_inc ShortLinkUtilities */
+/* css_inc GetestCaptcha */
 
 public class FreeCardano : FaucetScript
 {
@@ -171,21 +181,11 @@ public class FreeCardano : FaucetScript
             return Fail("Login button not found.");
         }
 
-        //solve the capthca on the login page.
-        //var result = SolveCaptcha();
-        //if (result > 0)
-        //{
-        //    return result;
-        //}
-
-        //RecaptchaUtility utility = new RecaptchaUtility(this);
-        //utility.DoSolve();
-        //Wait(1);
-
         //We are ready to click the login button.
         if (IsVisible(loginButton))
         {
             Click(loginButton);
+			Captcha_All_Function(); //call 
         }
 
         Wait();
@@ -411,7 +411,7 @@ public class FreeCardano : FaucetScript
 
 		    Log("FaucetClaim - try");
             Faucet_Roll_Function(); //call to try
-
+			Captcha_All_Function(); //call 
             Wait(8);
 
             var TimeToCheck = ElementByXPath("//div[contains(@class,'timeout-wrapper') and @style ]"); 
@@ -529,6 +529,107 @@ public class FreeCardano : FaucetScript
         return base.CheckFaucetResult();
     }
 	
+
+        //=================//
+       //Captcha_All_Function
+        //=================//
+
+        public int Captcha_All_Function()
+        {
+			
+          /*
+          //CaptchaChoose
+          var dropdown = ElementByXPath("//select[contains(@name,'captcha_type')]");
+          if ( GetBoolSetting("CaptchaChoose") )
+          {
+              SelectOptionByValue(dropdown , "1"); //SolveMedia
+          }
+          if ( !GetBoolSetting("CaptchaChoose") )
+          {
+              SelectOptionByValue(dropdown , "0"); //ReCaptcha
+          }
+          */	
+		  
+          //DoSolveImageCaptcha
+          var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
+          if (IsVisible(SolveMedia))
+		  {  
+            Log("DO SolveMedia");	  
+	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']")); 
+            if (result_2 > 0)
+            {
+                return Fail("SolveMedia - Fail solving captcha");
+            }
+		  }
+
+          /*
+          var SolveMedia_Iframe_Animation_OR_Canvas = ElementByXPath ("//div[contains(@id,'adcopy-puzzle-image-image')] | //canvas[contains(@id,'slog')] ");
+          if (IsVisible(SolveMedia_Iframe_Animation_OR_Canvas))
+          {
+            Log("SolveMedia_Iframe_Animation_OR_Canvas - visible - we select ReCaptcha - for protection");
+		    SelectOptionByValue(dropdown , "0"); //Choose to slolve with ReCaptcha - select ReCaptcha
+		  }
+          */
+		  
+	     //for recaptcha popup after click on button - ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]")   
+          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
+          if (IsVisible(RecaptchaOpen_Iframe))
+		  {
+            //SolveCaptcha if apper
+            Log("DO Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		  }
+
+          //HCaptcha
+		  var HCaptcha_Check = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");	
+	      if (IsVisible(HCaptcha_Check))
+	      {	
+            var result=DoHCaptcha();
+            if ( result>0 )
+            {
+                return result;
+            }
+		  }
+
+          //IconCaptcha
+          FaucetCollector.Captcha.IconCaptchaSolver solver = new FaucetCollector.Captcha.IconCaptchaSolver(this); //call
+		  
+          if (solver.IsVisibleIconCaptcha())
+          {
+              Log("IconCaptcha - here");
+			  Wait(6);
+              bool success = solver.DoSolve();
+              if (success)
+              {
+                  var IconCaptcha_Success = ElementByXPath("//div[@class='captcha-modal__icons-title' and contains(text(),'Great')]");
+                  if (IsVisible(IconCaptcha_Success))
+                  {
+                      Log("IconCaptcha - Success_Claim ");
+                      //ClaimSuccess(); //Marks the claim as a success
+                  }
+              }
+          }
+
+          //Geetest - Captcha	
+          /*		
+          var Geetest_OLD_OR_NEW = ElementByXPath("//script[contains(@src,'static.geetest.com/static/js/slide') or contains(@src,'static.geetest.com/static/js/fullpage')]"); // slide OLD or fullpage NEW
+          if (Geetest_OLD_OR_NEW != null) //visible
+          {
+            GetestCaptchaUtilities.GetestCaptcha getestCaptcha = new GetestCaptchaUtilities.GetestCaptcha(this); 
+            bool res2 = getestCaptcha.DoInitSolve(); //call
+          }
+          */
+
+		return 0;
+        }//end Captcha_All_Function
+        //=================//	
+		
 
         //=================//
        //Faucet_Roll_Function
