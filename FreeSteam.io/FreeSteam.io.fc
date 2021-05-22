@@ -1,7 +1,7 @@
 
 //============================================//
 //script Written first by: cgerabit
-//last update by: AviramDayan 21/05/2021 11:00AM - Version: 6
+//last update by: AviramDayan 23/05/2021 11:00AM - Version: 7
 //============================================//
 
 using System;
@@ -39,6 +39,7 @@ public class FreeSteam : FaucetScript
                 new FaucetSetting() { Name = "Email", Display = "Email", Type = EditorType.TextBox, Required = true },
                 new FaucetSetting() { Name = "Password", Display = "Password", Type = EditorType.Password, Required = true },
                 new FaucetSetting(){Name="DoShortLink",Display="DoShortLink",Type=EditorType.CheckBox,Default=false},
+                new FaucetSetting(){Name="Twitter_PromoCode",Display="Twitter_PromoCode",Type=EditorType.CheckBox,Default=true},
 				
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim - on/off",Type=EditorType.CheckBox,Default=true},	
                 new FaucetSetting(){Name="WalletAddress",Display="WalletAddress - only to remmber (Not required)",Type=EditorType.TextBox,Required=false},
@@ -64,9 +65,6 @@ public class FreeSteam : FaucetScript
     string DomainName_String = "https://FreeSteam.io";
 	//example - GoToUrl(DomainName_String);
     //==========//
-	
-	
-	
 	
 //============================================================//
 //the number of "successes" in the script - when are finished  
@@ -396,7 +394,40 @@ public class FreeSteam : FaucetScript
 
         }//end AutoWithdraw
         //=============//	 
-	 		
+
+
+       //==============//
+       //Twitter_PromoCode
+       //==============//
+       if (GetBoolSetting("Twitter_PromoCode"))
+       {
+    	 Title = "Twitter";
+    
+         GoToUrl("https://twitter.com/cryptosfaucets");
+         Wait();
+         Wait(3);
+		 
+		 /*
+         ExecuteScript("window.scrollTo(0, document.body.scrollHeight)"); //scroll
+         Wait(3);
+         ExecuteScript("window.scrollTo(0, document.body.scrollHeight)"); //scroll
+         Wait(3);
+         */
+
+         var GetCode = ElementByXPath("//div[contains(@aria-label,'Free Cryptos')]//span[contains(text(),'Promo Code')]"); //
+         
+         SetSetting("StoreCode", GetCode.Text.Trim().Replace("Valid","").Split(' ')[10] ); //
+         Log( "the promo code is: " + GetSetting("StoreCode") );
+
+		 Title = "Free";
+      
+         GoToUrl("https://FreeSteam.io/promotion/" + GetSetting("StoreCode") );		 
+         Wait(5);
+		 
+       } //end Twitter_PromoCode
+        //=============//
+
+	
 			
 		//===========//	
         //FaucetClaim
@@ -530,6 +561,67 @@ public class FreeSteam : FaucetScript
         return base.CheckFaucetResult();
     }
 	
+
+
+
+//============================//
+//SET & Get - HCaptchaSiteKey
+//============================//
+    public override bool SetHCaptchaResponse(string response)
+    {
+
+
+        if (ElementByXPath("//*[@name='g-recaptcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=g-recaptcha-response]').innerText = '" + response + "'");
+        }
+        if (ElementByXPath("//*[@name='h-captcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=h-captcha-response]').innerText = '" + response + "'");
+
+        }
+
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            ExecuteScript("arguments[0].setAttribute('data-hcaptcha-response','" + response + "');", hcaptchaIframe);
+        }
+
+        return true;
+    }
+
+
+    public override string GetHCaptchaSiteKey()
+    {
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            string src = hcaptchaIframe.GetAttribute("src");
+
+            if (!string.IsNullOrEmpty(src))
+            {
+                // we find the sitekey 
+                var queryParams = src.Split('&').ToList();
+                // we remove the host part 
+
+                queryParams.RemoveAt(0);
+
+                //we find the sitekey 
+
+                string siteKey = queryParams.FirstOrDefault(param => param.ToLower().Contains("sitekey")).Split('=').LastOrDefault();
+
+
+                return siteKey;
+
+            }
+        }
+
+        return base.GetHCaptchaSiteKey();
+    }
+//============================//
+
 
         //=================//
        //Captcha_All_Function
