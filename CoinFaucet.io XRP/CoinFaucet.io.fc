@@ -419,11 +419,12 @@ public class CoinFaucetXRP : FaucetScript
 
 		 Title = "Free";
       
-         GoToUrl("https://FreeSteam.io/promotion/" + GetSetting("StoreCode") );		 
+         GoToUrl(DomainName_String + "/promotion/" + GetSetting("StoreCode") ); 
          Wait(5);
 		 
        } //end Twitter_PromoCode
         //=============//
+		
 		
 		//===========//	
         //FaucetClaim
