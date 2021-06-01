@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 27/02/2021 23:46PM - Version 1
-//Last Update: 27/02/2021 23:46PM - Version 1
+//Last Update: 01/06/2021 23:00PM - Version 2
 //==================//
 
 using System;
@@ -29,7 +29,7 @@ public class getbitco : FaucetScript
         {
             return new FaucetSettings("https://get-bitco.in")
             {
-                new FaucetSetting(){Name="Email",Display="UserName",Type=EditorType.TextBox,Required=true},
+                new FaucetSetting(){Name="Email",Display="Email",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
 				
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim",Type=EditorType.CheckBox,Default=true},						
@@ -165,6 +165,16 @@ public class getbitco : FaucetScript
         if (IsVisible(ButtonLog))
         {
          Click(ButtonLog);
+        }
+
+		Wait(4);
+
+        var Owner_Bug_Password_Wrong = ElementByXPath("//div[@class='alert alert-danger' and contains(text(),'assword') ]");  
+        if (IsVisible(Owner_Bug_Password_Wrong))
+        {
+          Log("Owner_Bug_Password_Wrong - we disable the script for protection ");
+          Disable();
+          return 1;
         }
 		
 		Wait();		
@@ -328,14 +338,24 @@ public class getbitco : FaucetScript
          var TimeToWaitForBreak = DateTime.Now.AddSeconds(150);
          while (true)
          {
+			 
+     	   GoToUrl("https://get-bitco.in/dashboard/surf");
+           Wait(2);
 
            var SuccessCheck = ElementByXPath("//div[contains(@id,'ms-insert')]//span[contains(text(),'ongratulation')]");
            var FaucetCheck = ElementByXPath("//div[@id='tempo' and contains(text(),'00')]");
+           var NotAvailable = ElementByXPath("//a[contains(text(),'Back to dashboard') or contains(text(),'Back to')]");
+
+		   if (IsVisible(NotAvailable))
+		   {
+             Log("ADSurf - break - not available anymore");
+             break; //break the wait loop
+		   }
 		   
 		   if (IsVisible(FaucetCheck))
            { 
              Wait();
-			 Log("ADSurf - wait");
+			 Log("ADSurf - wait");	 
 		   } //end - FaucetCheck - visible  
 		   
 		   if (IsVisible(SuccessCheck))
