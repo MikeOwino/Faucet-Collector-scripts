@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 27/02/2021 23:46PM - Version 1
-//Last Update: 01/06/2021 23:00PM - Version 2
+//Last Update: 02/06/2021 17:00PM - Version 3
 //==================//
 
 using System;
@@ -282,6 +282,7 @@ public class getbitco : FaucetScript
 		GoToUrl("https://get-bitco.in/dashboard");
 	    Wait();
 	    Wait(3);
+        Log ("FaucetClaim");
 
         var ButtonClaimCheck = ElementByXPath("//button[contains(@onclick,'startRand') and @disabled ]");
         if (IsVisible(ButtonClaimCheck))
@@ -300,13 +301,21 @@ public class getbitco : FaucetScript
 		  }
 		  
 	      Wait(2);
+		  
+          var NotAvailable = ElementByXPath("//a[contains(text(),'Back to dashboard') or contains(text(),'Back to')]");
+		  if (IsVisible(NotAvailable))
+		  {
+			Click(NotAvailable);
+		  }
+		  
+		  Wait(2);
 
           invisible_Recaptcha_Function(); //call 
 	
-	      Wait(3);
+	      Wait(6);
 		  
           var Success_Claim = ElementByXPath("//button[contains(@onclick,'startRand') and @disabled ]"); //("//div[@class='alert alert-success']")
-          if (!IsVisible(Success_Claim))
+          if (IsVisible(Success_Claim))
 		  {
 		  Log("FaucetClaim - Success_Claim ");  
 		  ClaimSuccess(); //Marks the claim as a success
@@ -334,6 +343,7 @@ public class getbitco : FaucetScript
 		GoToUrl("https://get-bitco.in/dashboard/surf");
 	    Wait();
 	    Wait(4);
+        Log ("ADSurf");
 		
          var TimeToWaitForBreak = DateTime.Now.AddSeconds(150);
          while (true)
@@ -348,6 +358,7 @@ public class getbitco : FaucetScript
 
 		   if (IsVisible(NotAvailable))
 		   {
+			 Click(NotAvailable);
              Log("ADSurf - break - not available anymore");
              break; //break the wait loop
 		   }
@@ -441,7 +452,7 @@ public class getbitco : FaucetScript
 		   //site time with normal counter
            var TimeCheck = ElementByXPath("//button[contains(@onclick,'startRand') and @disabled ]");
 
-           if (!IsVisible(TimeCheck))
+           if (IsVisible(TimeCheck))
            {
 	         Log("Time_Function - WaitTimerText apper - return to site time"); 		   
              var Timer = ElementByXPath("//span[@id='spanRelogio']");			   
