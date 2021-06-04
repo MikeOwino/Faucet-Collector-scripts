@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 30/04/2019 21:09PM - Version 1
-//Last Update: 03/05/2021 00:30AM - Version 44
+//Last Update: 04/06/2021 15:00PM - Version 45
 //==================//
 
 using System;
@@ -170,7 +170,9 @@ public class bcgame : FaucetScript
 		GoToUrl("https://bc.game/");
 		Wait();		
 		Wait(2);
-		
+	
+        Refrash_Site_Function(); //call
+	
         var LoginLightBox = ElementByXPath("//p[contains(text(),'ign in')]");		 
         Click(LoginLightBox);
 		
@@ -307,6 +309,7 @@ public class bcgame : FaucetScript
 		Wait();		
 		Wait(5);
 		
+        Refrash_Site_Function(); //call
 
 		var Timer = ElementByXPath("//button[contains(@class,'bonus-item')]/div[contains(@class,'enter-animate active')]");
 
@@ -1073,7 +1076,6 @@ public class bcgame : FaucetScript
     }
 
 
- 
    //====================//	
    //CaptchaX2Function
    //====================//	
@@ -1128,6 +1130,26 @@ public class bcgame : FaucetScript
    }//end CaptchaX2Function
    //====================//	
 		
+
+   //====================//	
+   //Refrash_Site_Function
+   //====================//	
+   public int Refrash_Site_Function()
+   {
+
+      var Refrash_Site = ElementByXPath("//div[contains(@class,'button-inner') and contains(text(),'efrash') or contains(text(),'EFRASH') ]"); //Refrash Site
+      if (IsVisible(Refrash_Site))
+      {
+		Wait(3);
+        Log("click Refrash_Site");
+	    Click(Refrash_Site);
+		Wait(3);
+	  }
+	  
+   return 0;				 
+   }//end Refrash_Site_Function
+   //====================//	
+
 
    //====================//	
    //BonusTasksTab_Open_Function
