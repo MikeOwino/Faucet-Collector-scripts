@@ -1137,7 +1137,7 @@ public class bcgame : FaucetScript
    public int Refrash_Site_Function()
    {
 
-      var Refrash_Site = ElementByXPath("//button/div[contains(@class,'button-inner') and contains(text(),'efresh') or contains(text(),'EFRASH') ]"); //Refrash Site
+      var Refrash_Site = ElementByXPath("//button/div[contains(@class,'button-inner') and contains(text(),'efresh') or contains(text(),'EFRESH') ]"); //Refrash Site  
       if (IsVisible(Refrash_Site))
       {
 		Wait(3);
