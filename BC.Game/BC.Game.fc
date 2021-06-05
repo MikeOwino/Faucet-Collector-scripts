@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 30/04/2019 21:09PM - Version 1
-//Last Update: 04/06/2021 15:00PM - Version 45
+//Last Update: 06/06/2021 02:00AM - Version 46
 //==================//
 
 using System;
@@ -1137,7 +1137,7 @@ public class bcgame : FaucetScript
    public int Refrash_Site_Function()
    {
 
-      var Refrash_Site = ElementByXPath("//div[contains(@class,'button-inner') and contains(text(),'efrash') or contains(text(),'EFRASH') ]"); //Refrash Site
+      var Refrash_Site = ElementByXPath("//button/div[contains(@class,'button-inner') and contains(text(),'efresh') or contains(text(),'EFRASH') ]"); //Refrash Site
       if (IsVisible(Refrash_Site))
       {
 		Wait(3);
