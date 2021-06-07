@@ -124,9 +124,13 @@ namespace Adbtc
             var GotoLogin = ElementByXPath("//a[contains(@href,'/index/authorize')]");
             if (!IsVisible(GotoLogin))
             {
-                return Fail("Go to login is not visible");
+                GoToUrl("https://adbtc.top/index/enter");
             }
-            Click(GotoLogin);
+            else
+            {
+                Click(GotoLogin);
+            }
+
             Wait();
 
             return base.BeforeLogin();
