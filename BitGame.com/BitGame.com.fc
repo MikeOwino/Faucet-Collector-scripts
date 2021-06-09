@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 17/04/2021 21:00PM - Version 1
-//Last Update: 17/04/2021 22:00PM - Version 1
+//Last Update: 09/06/2021 22:00PM - Version 2
 //==================//
 
 using System;
@@ -37,12 +37,9 @@ public class BitGameCom : FaucetScript
                 new FaucetSetting(){Name="Email",Display="Email",Type=EditorType.TextBox,Required=false},
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=false},
                 new FaucetSetting() { Name = "GetActivityToken", Display = "GetActivityToken - on/off to play in casino games (it's recommended to set the time every 360 min '6 hours') ", Type = EditorType.CheckBox, Default = true},				
-
+                new FaucetSetting() { Name = "FaucetClaim", Display = "FaucetClaim", Type = EditorType.CheckBox, Default = true},
                 new FaucetSetting() { Name = "ExclusiveBonusDrop_Telegram", Display = "Exclusive Bonus Drop - ON/OFF - in Telegram - 'BitGame.com - Bitgame02' - Public Channel", Type = EditorType.CheckBox, Default =true},	
-				
-                //new FaucetSetting() { Name = "FaucetClaim", Display = "FaucetClaim", Type = EditorType.CheckBox, Default = true},	
- 
-				
+
             };
         }
     }
@@ -88,7 +85,7 @@ public class BitGameCom : FaucetScript
     public override bool IsLoggedIn()
     {
 	    //save Login Cookies - Check if the "Logout" exist
-        return ElementByXPath("//a[contains(text(),'Logout')]")!= null;
+        return ElementByXPath("//button[contains(text(),'Logout')] | //span[contains(@class,'user-menu')]")!= null;
 	 
         //return base.IsLoggedIn();
     }
@@ -124,13 +121,13 @@ public class BitGameCom : FaucetScript
     public override int DoLogin()
     {
 	
-      var ExitButton = ElementByXPath("//a[contains(text(),'Logout')]");
+      var ExitButton = ElementByXPath("//button[contains(text(),'Logout')] | //span[contains(@class,'user-menu')]");
 	
 	 //if i NOT Login - go to Login Page
 	 if (!IsVisible(ExitButton))
 	 {
 
-		GoToUrl("https://BitGame.com/Account/Login");
+		GoToUrl("https://BitGame.com/Login");
 		Wait();		
 		Wait(2);
 
@@ -142,7 +139,7 @@ public class BitGameCom : FaucetScript
 		
 		Wait(4);	
 		
-        var box_user = ElementByXPath("//input[@id='username']");
+        var box_user = ElementByXPath("//input[@name='username']");
 	    if (IsVisible(box_user))
 	    {
         SetText(box_user, GetSetting("Email"));
@@ -150,7 +147,7 @@ public class BitGameCom : FaucetScript
 		
 		Wait(2);
 		
-        var box_pass = ElementByXPath("//input[@id='password']");
+        var box_pass = ElementByXPath("//input[@name='password']");
 	    if (IsVisible(box_pass))
 	    {
         SetText(box_pass, GetPassword("Password"));
@@ -309,15 +306,47 @@ public class BitGameCom : FaucetScript
 		//==============//
         if (GetBoolSetting("GetActivityToken"))
         {
-
-        GoToUrl("https://bitgame.com/activityCenter");
-		Log("GetActivityToken - Go to promotions , we just waiting 20 seconds, to act normal and get the bounos daily");	
-		
-        Wait();
-        Wait(20);
+          GoToUrl("https://bitgame.com/activityCenter");
+		  Log("GetActivityToken - Go to promotions , we just waiting 20 seconds, to act normal and get the bounos daily");	
+		  
+          Wait();
+          Wait(20);
         }	
 		//==============//
 		
+
+		//==============//
+		//FaucetClaim//
+		//==============//
+        if (GetBoolSetting("FaucetClaim"))
+        {
+
+          GoToUrl("https://www.bitgame.com/");
+		  Log("FaucetClaim ");	
+          Wait();
+          Wait(3);
+		
+          var Start_Free_Btc = ElementByXPath("//span[@class='rouletteIcon']"); 
+          if (IsVisible(Start_Free_Btc))
+		  {
+		    Log("Start_Free_Btc");
+			Click(Start_Free_Btc);
+			
+            Wait(4);
+			
+            var Get_Free_Btc = ElementByXPath("//div[@class='startBtn__1UosS9Vb']"); 
+            if (IsVisible(Get_Free_Btc))
+		    {
+		      Log("Get_Free_Btc");
+			  Click(Get_Free_Btc);
+            }	
+			
+          }//end Start_Free_Btc
+		
+        }	
+		//==============//
+		
+
 		
         return Time_Function();	
 
