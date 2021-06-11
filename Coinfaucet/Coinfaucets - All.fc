@@ -4,26 +4,18 @@
 //last update by: AviramDayan 24/05/2021 21:00PM - Version: 19
 //============================================//
 
-using System;
-using System.IO;
 using FaucetCollector.Script;
-using System.Text.RegularExpressions;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Interactions;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Globalization;
 using FaucetCollector.Utilities;
 
-//css_ref FaucetCollector.FaucetTemplates
-//css_inc RecaptchaUtilities
-//css_ref FaucetCollector.Captcha
-/* css_inc ShortLinkUtilities */
-/* css_inc GetestCaptcha */
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-class Coinfaucets : FaucetScript
+//css_ref FaucetCollector.FaucetTemplates
+//css_ref FaucetCollector.Captcha
+
+
+class CoinfaucetsScript : FaucetScript
 {
 
     public override FaucetSettings Settings
@@ -37,11 +29,11 @@ class Coinfaucets : FaucetScript
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
                 new FaucetSetting(){Name="DoShortLink",Display="DoShortLink",Type=EditorType.CheckBox,Default=false},
                 new FaucetSetting(){Name="Twitter_PromoCode",Display="Twitter_PromoCode",Type=EditorType.CheckBox,Default=true},
-                
-				new FaucetSetting(){Name="Faucet",Display="Faucet Selected",Type=EditorType.ComboBox,Items=Faucets.Keys.ToList(),Default=Faucets.Keys.FirstOrDefault()},
+
+                new FaucetSetting(){Name="Faucet",Display="Faucet Selected",Type=EditorType.ComboBox,Items=Faucets.Keys.ToList(),Default=Faucets.Keys.FirstOrDefault()},
                 new FaucetSetting(){Name="WalletAddress",Display="WalletAddress - only to remmber (Not required)",Type=EditorType.TextBox,Required=false},
                 new FaucetSetting(){Name="AutoSetWithdraw",Display="AutoSetWithdraw - on/off",Type=EditorType.CheckBox,Default=false},
-				new FaucetSetting(){Name="AutoWithdraw",Display="AutoWithdraw",Type=EditorType.CheckBox,Default=false },				
+                new FaucetSetting(){Name="AutoWithdraw",Display="AutoWithdraw",Type=EditorType.CheckBox,Default=false },
                 new FaucetSetting(){Name="Retry", Display="Number of Retries without refresh" , Type=EditorType.Numeric , Default=1  }
             };
         }
@@ -135,7 +127,7 @@ class Coinfaucets : FaucetScript
             "LTC",new Coinfaucet{
                 Url="https://free-ltc.com/",
                 MinWithdraw=0.5
-        }  
+        }
         },
         {
             "DOGE",
@@ -181,8 +173,8 @@ class Coinfaucets : FaucetScript
             return GetIntSetting("Retry", 1);
         }
     }
-	
-	
+
+
     private string KeySelected
     {
         get
@@ -198,11 +190,11 @@ class Coinfaucets : FaucetScript
             return Faucets.Keys.FirstOrDefault();
         }
     }
-	
-	
+
+
     public override void Start()
     {
-        Title = KeySelected;
+        Title = KeySelected+ "|Twitter";
         SuccessXPath = "//div[@class='result']";
         FailXPath = "//div[@class='error']";
         base.Start();
@@ -245,18 +237,31 @@ class Coinfaucets : FaucetScript
         SetText(UserBox, GetSetting("User"));
         SetText(PasswordBox, GetPassword("Pass"));
 
+        var result = DoSolveCaptcha();
+        if (result > 0)
+        {
+            return result;
+        }
 
-        Click(Loginbtn);
+        var hCaptchaToken = Context.CaptchaResult.Result;
+
+        SendLoginUsingJs(hCaptchaToken);
+        Wait(2, 3);
+
 
         return base.DoLogin();
     }
-	
+
+    private void SendLoginUsingJs(string hcaptchaToken)
+    {
+        ExecuteScript("sendLogin('" + hcaptchaToken + "')");
+    }
 
     public override bool IsLoggedIn()
     {
         return ElementByXPath("//a[@href='/logout']") != null;
     }
-	
+
 
     private double Balance
     {
@@ -275,8 +280,8 @@ class Coinfaucets : FaucetScript
             return 0;
         }
     }
-	
-	
+
+
     private double MinWithdraw
     {
         get
@@ -284,13 +289,13 @@ class Coinfaucets : FaucetScript
             return Faucets[KeySelected].MinWithdraw;
         }
     }
-	
-	
-	
-	
-//==============//
-//BeforeSolveFaucet
-//==============//
+
+
+
+
+    //==============//
+    //BeforeSolveFaucet
+    //==============//
     public override int BeforeSolveFaucet()
     {
 
@@ -298,22 +303,22 @@ class Coinfaucets : FaucetScript
         //AutoSetWallet
         //=============//
         if (GetBoolSetting("AutoSetWithdraw") && !string.IsNullOrEmpty(GetSetting("WalletAddress")))
-        {			
+        {
 
-		   Log("AutoSetWithdraw");
-           GoToUrl(FaucetUrl+"/settings");	
-		   Wait();
-		
-           var setwallet = ElementByXPath("//input[@class='form-control wallet-address']");
+            Log("AutoSetWithdraw");
+            GoToUrl(FaucetUrl + "/settings");
+            Wait();
+
+            var setwallet = ElementByXPath("//input[@class='form-control wallet-address']");
             if (IsVisible(setwallet))
             {
                 SetText(setwallet, GetSetting("WalletAddress"));
-               
+
                 var passwordvar = ElementByXPath("//div[1]/div[2]/div[2]/div/div/div[2]/input[@class='form-control password']");
                 if (IsVisible(passwordvar))
                 {
                     SetText(passwordvar, GetPassword("Password"));
-              
+
                     var ChangeWallet = ElementByXPath("//button[@class='main-button-2 change-wallet bg-2' and contains(text(),'Withdrawal')]");
                     if (IsVisible(ChangeWallet))
                     {
@@ -321,8 +326,8 @@ class Coinfaucets : FaucetScript
                         Wait();
                     }
                 }
-            }		           	      
-		}
+            }
+        }
         //=============//
 
         //=============//
@@ -346,56 +351,49 @@ class Coinfaucets : FaucetScript
             }
         }
         //=============//
-		
+
         return base.BeforeSolveFaucet();
     }
-//==============//
-
-	
-
-//==============//
-//DoSolveFaucet
-//==============//
- public override int DoSolveFaucet()
- {
+    //==============//
 
 
-       //==============//
-       //Twitter_PromoCode
-       //==============//
-       if (GetBoolSetting("Twitter_PromoCode"))
-       {
-    	 Title = "Twitter";
-    
-         GoToUrl("https://twitter.com/cryptosfaucets");
-         Wait();
-         Wait(3);
-		 
-		 /*
-         ExecuteScript("window.scrollTo(0, document.body.scrollHeight)"); //scroll
-         Wait(3);
-         ExecuteScript("window.scrollTo(0, document.body.scrollHeight)"); //scroll
-         Wait(3);
-         */
 
-         var GetCode = ElementByXPath("//div[contains(@aria-label,'Free Cryptos')]//span[contains(text(),'Promo Code')]"); //
-         
-         SetSetting("StoreCode", GetCode.Text.Trim().Replace("Valid","").Split(' ')[10] ); //
-         Log( "the promo code is: " + GetSetting("StoreCode") );
+    //==============//
+    //DoSolveFaucet
+    //==============//
+    public override int DoSolveFaucet()
+    {
 
-		 Title = "Free";
-      
-         GoToUrl(FaucetUrl + "/promotion/" + GetSetting("StoreCode") );
-         Wait(5);
-		 
-       } //end Twitter_PromoCode
-        //=============//
-	
-	
-       //=========//
-       //Faucet
-       //========//
-        int retries = this.Retries;
+
+        //==============//
+        //Twitter_PromoCode
+        //==============//
+        if (GetBoolSetting("Twitter_PromoCode"))
+        {
+
+            GoToUrl("https://twitter.com/cryptosfaucets");
+            Wait();
+            Wait(3);
+
+          
+
+            var GetCode = ElementByXPath("//div[contains(@aria-label,'Free Cryptos')]//span[contains(text(),'Promo Code')]"); //
+
+            SetSetting("StoreCode", GetCode.Text.Trim().Replace("Valid", "").Split(' ')[10]); //
+            Log("the promo code is: " + GetSetting("StoreCode"));
+
+
+            GoToUrl(FaucetUrl + "/promotion/" + GetSetting("StoreCode"));
+            Wait(5);
+
+        } //end Twitter_PromoCode
+          //=============//
+
+
+        //=========//
+        //Faucet
+        //========//
+        int retries = Retries;
 
         int actualClaim = 0;
         while (actualClaim < retries)
@@ -411,9 +409,14 @@ class Coinfaucets : FaucetScript
                 return Fail("Claim btn is not visible");
             }
 
-            DoSolveCaptcha();
+            var result = DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+            var hcaptchaToken = Context.CaptchaResult.Result;
 
-            Click(ClaimBtn);
+            RollUsingJs(hcaptchaToken);
 
             DateTime timeout = DateTime.Now.AddSeconds(20);
             var successElem = ElementByXPath(SuccessXPath);
@@ -434,20 +437,20 @@ class Coinfaucets : FaucetScript
             actualClaim++;
 
         }
-       //========//
-	   
+        //========//
 
-    //==============//
-    //DoShortLink
-    //==============//
-     if (GetBoolSetting("DoShortLink"))
-     {
+
+        //==============//
+        //DoShortLink
+        //==============//
+        if (GetBoolSetting("DoShortLink"))
+        {
 
 
             Log("DoShortLink");
-            GoToUrl(FaucetUrl+"/free-rolls");
-	        Wait();	  
-			
+            GoToUrl(FaucetUrl + "/free-rolls");
+            Wait();
+
             int N = CheckIfShortLinkIsAvailable();
             if (N != -1)
             {
@@ -469,8 +472,8 @@ class Coinfaucets : FaucetScript
                             Driver.SwitchTo().Window(Driver.WindowHandles[1]);
 
                         }
-                      
-                
+
+
                         ShortLinkBypasser bypasser = new ShortLinkBypasser(this);
                         Wait(2, 3);
                         bool cs = bypasser.DoShortLink();
@@ -496,19 +499,22 @@ class Coinfaucets : FaucetScript
             {
                 Log("No shortlinks avaible");
             }
- 
-	 }//DoShortLink
+
+        }//DoShortLink
+         //==============//
+
+
+        return base.DoSolveFaucet();
+    }
     //==============//
-	
-
-     return base.DoSolveFaucet();
- }
-//==============//
 
 
-	
-	
-	
+
+    private void RollUsingJs(string hCaptchaToken)
+    {
+        ExecuteScript("rollClick('" + hCaptchaToken + "');");
+    }
+
     public override int GetFaucetWaitTime()
     {
         var Timers = ElementsByXPath("//div[@class='digits']").Where(x => IsVisible(x)).ToList();
@@ -525,33 +531,33 @@ class Coinfaucets : FaucetScript
 
         return base.GetFaucetWaitTime();
     }
-	
-	
-	
-	
- public override int DoSolveCaptcha()
- {
-     if (IsVisible(ElementByXPath("//div[@class='g-recaptcha']")) && IsVisible(ElementByXPath("//iframe[contains(@src,'recaptcha')]")))
-     {
-         var result = base.DoSolveCaptcha();
-         if (result > 0)
-         {
-             return result;
-         }
-         FaucetCollector.Captcha.RecaptchaUtility utility = new FaucetCollector.Captcha.RecaptchaUtility(this);
-         utility.DoSolve();
 
-         return result;
-     }
-	
-  return 0;
-		
- } 
-	
 
-//============================//
-//SET & Get - HCaptchaSiteKey
-//============================//
+
+
+    public override int DoSolveCaptcha()
+    {
+        if (IsVisible(ElementByXPath("//div[@class='g-recaptcha']")) && IsVisible(ElementByXPath("//iframe[contains(@src,'recaptcha')]")))
+        {
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+            FaucetCollector.Captcha.RecaptchaUtility utility = new FaucetCollector.Captcha.RecaptchaUtility(this);
+            utility.DoSolve();
+
+            return result;
+        }
+
+        return 0;
+
+    }
+
+
+    //============================//
+    //SET & Get - HCaptchaSiteKey
+    //============================//
     public override bool SetHCaptchaResponse(string response)
     {
 
@@ -605,120 +611,120 @@ class Coinfaucets : FaucetScript
 
         return base.GetHCaptchaSiteKey();
     }
-//============================//
+    //============================//
 
 
-        //=================//
-       //Captcha_All_Function
-        //=================//
+    //=================//
+    //Captcha_All_Function
+    //=================//
 
-        public int Captcha_All_Function()
+    public int Captcha_All_Function()
+    {
+
+        /*
+        //CaptchaChoose
+        var dropdown = ElementByXPath("//select[contains(@name,'captcha_type')]");
+        if ( GetBoolSetting("CaptchaChoose") )
         {
-			
-          /*
-          //CaptchaChoose
-          var dropdown = ElementByXPath("//select[contains(@name,'captcha_type')]");
-          if ( GetBoolSetting("CaptchaChoose") )
-          {
-              SelectOptionByValue(dropdown , "1"); //SolveMedia
-          }
-          if ( !GetBoolSetting("CaptchaChoose") )
-          {
-              SelectOptionByValue(dropdown , "0"); //ReCaptcha
-          }
-          */	
-		  
-          //DoSolveImageCaptcha
-          var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
-          if (IsVisible(SolveMedia))
-		  {  
-            Log("DO SolveMedia");	  
-	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']")); 
+            SelectOptionByValue(dropdown , "1"); //SolveMedia
+        }
+        if ( !GetBoolSetting("CaptchaChoose") )
+        {
+            SelectOptionByValue(dropdown , "0"); //ReCaptcha
+        }
+        */
+
+        //DoSolveImageCaptcha
+        var SolveMedia = ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]");
+        if (IsVisible(SolveMedia))
+        {
+            Log("DO SolveMedia");
+            var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"), ElementByXPath("//input[@name='adcopy_response']"));
             if (result_2 > 0)
             {
                 return Fail("SolveMedia - Fail solving captcha");
             }
-		  }
+        }
 
-          /*
-          var SolveMedia_Iframe_Animation_OR_Canvas = ElementByXPath ("//div[contains(@id,'adcopy-puzzle-image-image')] | //canvas[contains(@id,'slog')] ");
-          if (IsVisible(SolveMedia_Iframe_Animation_OR_Canvas))
-          {
-            Log("SolveMedia_Iframe_Animation_OR_Canvas - visible - we select ReCaptcha - for protection");
-		    SelectOptionByValue(dropdown , "0"); //Choose to slolve with ReCaptcha - select ReCaptcha
-		  }
-          */
-		  
-	     //for recaptcha popup after click on button - ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]")   
-          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
-          if (IsVisible(RecaptchaOpen_Iframe))
-		  {
+        /*
+        var SolveMedia_Iframe_Animation_OR_Canvas = ElementByXPath ("//div[contains(@id,'adcopy-puzzle-image-image')] | //canvas[contains(@id,'slog')] ");
+        if (IsVisible(SolveMedia_Iframe_Animation_OR_Canvas))
+        {
+          Log("SolveMedia_Iframe_Animation_OR_Canvas - visible - we select ReCaptcha - for protection");
+          SelectOptionByValue(dropdown , "0"); //Choose to slolve with ReCaptcha - select ReCaptcha
+        }
+        */
+
+        //for recaptcha popup after click on button - ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]")   
+        var RecaptchaOpen_Iframe = ElementByXPath("//iframe[contains(@src,'recaptcha/api2/anchor')]");
+        if (IsVisible(RecaptchaOpen_Iframe))
+        {
             //SolveCaptcha if apper
-            Log("DO Recaptcha");	  
+            Log("DO Recaptcha");
             var result = base.DoSolveCaptcha();
             if (result > 0)
             {
                 return Fail("Recaptcha - Fail solving captcha");
             }
-            RecaptchaUtility utility = new RecaptchaUtility(this);
+            FaucetCollector.Captcha.RecaptchaUtility utility = new FaucetCollector.Captcha.RecaptchaUtility(this);
             utility.DoSolve();
-		  }
+        }
 
-          //HCaptcha
-		  var HCaptcha_Check = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");	
-	      if (IsVisible(HCaptcha_Check))
-	      {	
-            var result=DoHCaptcha();
-            if ( result>0 )
+        //HCaptcha
+        var HCaptcha_Check = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+        if (IsVisible(HCaptcha_Check))
+        {
+            var result = DoHCaptcha();
+            if (result > 0)
             {
                 return result;
             }
-		  }
+        }
 
-          //IconCaptcha
-          FaucetCollector.Captcha.IconCaptchaSolver solver = new FaucetCollector.Captcha.IconCaptchaSolver(this); //call
-		  
-          if (solver.IsVisibleIconCaptcha())
-          {
-              Log("IconCaptcha - here");
-			  Wait(6);
-              bool success = solver.DoSolve();
-              if (success)
-              {
-                  var IconCaptcha_Success = ElementByXPath("//div[@class='captcha-modal__icons-title' and contains(text(),'Great')]");
-                  if (IsVisible(IconCaptcha_Success))
-                  {
-                      Log("IconCaptcha - Success_Claim ");
-                      //ClaimSuccess(); //Marks the claim as a success
-                  }
-              }
-          }
+        //IconCaptcha
+        FaucetCollector.Captcha.IconCaptchaSolver solver = new FaucetCollector.Captcha.IconCaptchaSolver(this); //call
 
-          //Geetest - Captcha	
-          /*		
-          var Geetest_OLD_OR_NEW = ElementByXPath("//script[contains(@src,'static.geetest.com/static/js/slide') or contains(@src,'static.geetest.com/static/js/fullpage')]"); // slide OLD or fullpage NEW
-          if (Geetest_OLD_OR_NEW != null) //visible
-          {
-            GetestCaptchaUtilities.GetestCaptcha getestCaptcha = new GetestCaptchaUtilities.GetestCaptcha(this); 
-            bool res2 = getestCaptcha.DoInitSolve(); //call
-          }
-          */
+        if (solver.IsVisibleIconCaptcha())
+        {
+            Log("IconCaptcha - here");
+            Wait(6);
+            bool success = solver.DoSolve();
+            if (success)
+            {
+                var IconCaptcha_Success = ElementByXPath("//div[@class='captcha-modal__icons-title' and contains(text(),'Great')]");
+                if (IsVisible(IconCaptcha_Success))
+                {
+                    Log("IconCaptcha - Success_Claim ");
+                    //ClaimSuccess(); //Marks the claim as a success
+                }
+            }
+        }
 
-		return 0;
-        }//end Captcha_All_Function
-        //=================//	
+        //Geetest - Captcha	
+        /*		
+        var Geetest_OLD_OR_NEW = ElementByXPath("//script[contains(@src,'static.geetest.com/static/js/slide') or contains(@src,'static.geetest.com/static/js/fullpage')]"); // slide OLD or fullpage NEW
+        if (Geetest_OLD_OR_NEW != null) //visible
+        {
+          GetestCaptchaUtilities.GetestCaptcha getestCaptcha = new GetestCaptchaUtilities.GetestCaptcha(this); 
+          bool res2 = getestCaptcha.DoInitSolve(); //call
+        }
+        */
+
+        return 0;
+    }//end Captcha_All_Function
+     //=================//	
 
 
     public int CheckIfShortLinkIsAvailable()
     {
         var ShortLinks = ElementsByXPath("//a[contains(text(),'Link')]");
         int NumberOf = -1;
-       for(int i = 0; i < ShortLinks.Count; i++)
+        for (int i = 0; i < ShortLinks.Count; i++)
         {
             string SettingLink = GetSetting("Link" + i.ToString());
             DateTime LastUsed;
-           
-            if(!string.IsNullOrEmpty(SettingLink) && DateTime.TryParse(SettingLink,out LastUsed))
+
+            if (!string.IsNullOrEmpty(SettingLink) && DateTime.TryParse(SettingLink, out LastUsed))
             {
                 if (LastUsed.AddHours(24) < DateTime.Now)
                 {
@@ -730,13 +736,13 @@ class Coinfaucets : FaucetScript
             {
                 return i;
             }
-           
+
         }
 
 
         return NumberOf;
     }
-	
-	
+
+
 } //end class
 
