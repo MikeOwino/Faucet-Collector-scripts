@@ -243,11 +243,29 @@ class CoinfaucetsScript : FaucetScript
             return result;
         }
 
-        var hCaptchaToken = Context.CaptchaResult.Result;
+        if (Context.CaptchaResult != null && !string.IsNullOrEmpty(Context.CaptchaResult.Result))
+        {
+            SendLoginUsingJs(Context.CaptchaResult.Result);
+            Wait(2, 3);
+        }
+        else 
+        {
+            Log("No captcha was found, try clicking first..");  
+            //try again with clicking on the login button first
+            Click(Loginbtn);
 
-        SendLoginUsingJs(hCaptchaToken);
-        Wait(2, 3);
+            result = DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
 
+            if (Context.CaptchaResult != null && !string.IsNullOrEmpty(Context.CaptchaResult.Result))
+            {
+                SendLoginUsingJs(Context.CaptchaResult.Result);
+                Wait(2, 3);
+            }
+        }
 
         return base.DoLogin();
     }
@@ -409,11 +427,31 @@ class CoinfaucetsScript : FaucetScript
                 return Fail("Claim btn is not visible");
             }
 
+            Context.CaptchaResult = null;
             var result = DoSolveCaptcha();
             if (result > 0)
             {
                 return result;
             }
+                    
+            if (Context.CaptchaResult == null || string.IsNullOrEmpty(Context.CaptchaResult.Result))
+            {
+                Log("No captcha found, trying manual click.");
+                Click(ClaimBtn);
+
+                result = DoSolveCaptcha();
+                if (result > 0)
+                {
+                    return result;
+                }
+
+                if (Context.CaptchaResult == null || string.IsNullOrEmpty(Context.CaptchaResult.Result))
+                {
+                   Log("No captcha found.");
+                   break;
+                }
+            }
+
             var hcaptchaToken = Context.CaptchaResult.Result;
 
             RollUsingJs(hcaptchaToken);
@@ -512,7 +550,7 @@ class CoinfaucetsScript : FaucetScript
 
     private void RollUsingJs(string hCaptchaToken)
     {
-        ExecuteScript("rollClick('" + hCaptchaToken + "');");
+        ExecuteScript("if (typeof rollClick == 'undefined') { window.hcaptcha.getResponse = function(id) { return '"+ hCaptchaToken +"'; } } else { rollClick('" + hCaptchaToken + "'); } ");
     }
 
     public override int GetFaucetWaitTime()
@@ -537,7 +575,7 @@ class CoinfaucetsScript : FaucetScript
 
     public override int DoSolveCaptcha()
     {
-        if (IsVisible(ElementByXPath("//div[@class='g-recaptcha']")) && IsVisible(ElementByXPath("//iframe[contains(@src,'recaptcha')]")))
+        if (IsVisible(ElementByXPath("//iframe[contains(@src,'recaptcha')]")) || IsVisible(ElementByXPath("//iframe[contains(@src,'hcaptcha')]")))
         {
             var result = base.DoSolveCaptcha();
             if (result > 0)
